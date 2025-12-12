@@ -25,30 +25,35 @@ export default function MobileSidebar({
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="md:hidden w-full shadow-md relative overflow-hidden" style={{ backgroundColor: primaryColor }}>
-      {fondoUrl && (
-        <div 
-          className="absolute inset-0 z-0 bg-cover bg-center opacity-30" 
-          style={{ backgroundImage: `url(${fondoUrl})` }} 
-        />
-      )}
-      <div className="flex items-center justify-between p-4 relative z-10">
-        <span className="text-white font-bold text-lg truncate drop-shadow-md">{nombreGimnasio}</span>
-        <button 
-          onClick={() => setIsOpen(!isOpen)}
-          className="text-white p-2 rounded-md hover:bg-white/10 focus:outline-none"
-          aria-label="Abrir menú"
-        >
-          {isOpen ? (
-            <XMarkIcon className="h-6 w-6" />
-          ) : (
-            <Bars3Icon className="h-6 w-6" />
-          )}
-        </button>
+    <div className="md:hidden w-full shadow-md relative" style={{ backgroundColor: primaryColor }}>
+      <div className="relative overflow-hidden">
+        {fondoUrl && (
+          <div 
+            className="absolute inset-0 z-0 bg-cover bg-center opacity-30" 
+            style={{ backgroundImage: `url(${fondoUrl})` }} 
+          />
+        )}
+        <div className="flex items-center justify-between p-4 relative z-10">
+          <span className="text-white font-bold text-lg truncate drop-shadow-md">{nombreGimnasio}</span>
+          <button 
+            onClick={() => setIsOpen(!isOpen)}
+            className="text-white p-2 rounded-md hover:bg-white/10 focus:outline-none"
+            aria-label="Abrir menú"
+          >
+            {isOpen ? (
+              <XMarkIcon className="h-6 w-6" />
+            ) : (
+              <Bars3Icon className="h-6 w-6" />
+            )}
+          </button>
+        </div>
       </div>
 
       {isOpen && (
-        <div className="px-4 pb-4 space-y-2 animate-in slide-in-from-top-2 duration-200">
+        <div 
+          className="absolute top-full left-0 w-full z-50 px-4 pb-4 space-y-2 animate-in slide-in-from-top-2 duration-200 shadow-xl max-h-[80vh] overflow-y-auto"
+          style={{ backgroundColor: primaryColor }}
+        >
            <NavLinks 
              permissions={permissions} 
              role={role} 
