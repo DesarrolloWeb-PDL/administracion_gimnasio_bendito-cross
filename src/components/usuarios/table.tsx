@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { fetchFilteredUsers } from '@/lib/data-usuarios';
-import { deleteUser } from '@/lib/actions-usuarios';
+import { fetchUsuarios } from '@/lib/data-usuarios';
+import { deleteUsuario } from '@/lib/actions-usuarios';
 
 export default async function UsersTable({
   query,
@@ -9,7 +9,7 @@ export default async function UsersTable({
   query: string;
   currentPage: number;
 }) {
-  const users = await fetchFilteredUsers(query, currentPage);
+  const users = await fetchUsuarios(query, currentPage);
 
   return (
     <div className="mt-6 flow-root">
@@ -24,12 +24,12 @@ export default async function UsersTable({
                 <div className="flex items-center justify-between border-b pb-4">
                   <div>
                     <div className="mb-2 flex items-center">
-                      <p>{user.name}</p>
+                      <p>{user.nombre}</p>
                     </div>
                     <p className="text-sm text-gray-500">{user.email}</p>
                   </div>
                   <div className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">
-                    {user.role}
+                    {user.rol}
                   </div>
                 </div>
                 <div className="flex w-full items-center justify-between pt-4">
@@ -37,7 +37,7 @@ export default async function UsersTable({
                     <Link href={`/admin/usuarios/${user.id}/edit`} className="rounded-md border p-2 hover:bg-gray-100">
                         ✏️
                     </Link>
-                    <form action={deleteUser.bind(null, user.id)}>
+                    <form action={deleteUsuario.bind(null, user.id)}>
                         <button className="rounded-md border p-2 hover:bg-gray-100 text-red-600">
                             🗑️
                         </button>
@@ -72,21 +72,21 @@ export default async function UsersTable({
                 >
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex items-center gap-3">
-                      <p>{user.name}</p>
+                      <p>{user.nombre}</p>
                     </div>
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
                     {user.email}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    {user.role}
+                    {user.rol}
                   </td>
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex justify-end gap-3">
                         <Link href={`/admin/usuarios/${user.id}/edit`} className="rounded-md border p-2 hover:bg-gray-100">
                             ✏️
                         </Link>
-                        <form action={deleteUser.bind(null, user.id)}>
+                        <form action={deleteUsuario.bind(null, user.id)}>
                             <button className="rounded-md border p-2 hover:bg-gray-100 text-red-600">
                                 🗑️
                             </button>

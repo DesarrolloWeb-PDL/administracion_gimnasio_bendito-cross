@@ -3,41 +3,46 @@
 import Link from 'next/link';
 import { useActionState } from 'react';
 import { createTransaccion } from '@/lib/actions-transacciones';
-import { Socio } from '@prisma/client';
 
-export default function Form({ socios }: { socios: Socio[] }) {
+type SuscripcionWithRelations = {
+  id: string;
+  socio: { nombre: string; apellido: string; dni: string };
+  plan: { nombre: string; precio: number };
+};
+
+export default function Form({ suscripciones }: { suscripciones: SuscripcionWithRelations[] }) {
   const initialState = { message: '', errors: {} };
   const [state, dispatch, isPending] = useActionState(createTransaccion, initialState);
 
   return (
     <form action={dispatch}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
-        {/* Socio */}
+        {/* Suscripción */}
         <div className="mb-4">
-          <label htmlFor="socioId" className="mb-2 block text-sm font-medium">
-            Seleccionar Socio
+          <label htmlFor="suscripcionId" className="mb-2 block text-sm font-medium">
+            Seleccionar Suscripción
           </label>
           <div className="relative">
             <select
-              id="socioId"
-              name="socioId"
+              id="suscripcionId"
+              name="suscripcionId"
               className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
               defaultValue=""
-              aria-describedby="socio-error"
+              aria-describedby="suscripcion-error"
             >
               <option value="" disabled>
-                Seleccione un socio
+                Seleccione una suscripción
               </option>
-              {socios.map((socio) => (
-                <option key={socio.id} value={socio.id}>
-                  {socio.nombre} {socio.apellido} - {socio.dni}
+              {suscripciones.map((suscripcion) => (
+                <option key={suscripcion.id} value={suscripcion.id}>
+                  {suscripcion.socio.nombre} {suscripcion.socio.apellido} - {suscripcion.plan.nombre}
                 </option>
               ))}
             </select>
           </div>
-          <div id="socio-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.socioId &&
-              state.errors.socioId.map((error: string) => (
+          <div id="suscripcion-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.suscripcionId &&
+              state.errors.suscripcionId.map((error: string) => (
                 <p className="mt-2 text-sm text-red-500" key={error}>
                   {error}
                 </p>
@@ -73,24 +78,24 @@ export default function Form({ socios }: { socios: Socio[] }) {
           </div>
         </div>
 
-        {/* Concepto */}
+        {/* Notas */}
         <div className="mb-4">
-          <label htmlFor="concepto" className="mb-2 block text-sm font-medium">
-            Concepto
+          <label htmlFor="notas" className="mb-2 block text-sm font-medium">
+            Notas
           </label>
           <div className="relative">
             <input
-              id="concepto"
-              name="concepto"
+              id="notas"
+              name="notas"
               type="text"
               placeholder="Ej: Pago mensualidad, Compra bebida"
               className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
-              aria-describedby="concepto-error"
+              aria-describedby="notas-error"
             />
           </div>
-          <div id="concepto-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.concepto &&
-              state.errors.concepto.map((error: string) => (
+          <div id="notas-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.notas &&
+              state.errors.notas.map((error: string) => (
                 <p className="mt-2 text-sm text-red-500" key={error}>
                   {error}
                 </p>

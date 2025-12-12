@@ -22,9 +22,9 @@ export default async function TransaccionesTable({
                 <div className="flex items-center justify-between border-b pb-4">
                   <div>
                     <div className="mb-2 flex items-center">
-                      <p>{transaccion.socio.nombre} {transaccion.socio.apellido}</p>
+                      <p>{transaccion.suscripcion.socio.nombre} {transaccion.suscripcion.socio.apellido}</p>
                     </div>
-                    <p className="text-sm text-gray-500">{transaccion.concepto}</p>
+                    <p className="text-sm text-gray-500">{transaccion.notas || transaccion.suscripcion.plan.nombre}</p>
                   </div>
                   <div className="text-xl font-medium">
                     ${Number(transaccion.monto).toFixed(2)}
@@ -69,11 +69,11 @@ export default async function TransaccionesTable({
                 >
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex items-center gap-3">
-                      <p>{transaccion.socio.nombre} {transaccion.socio.apellido}</p>
+                      <p>{transaccion.suscripcion.socio.nombre} {transaccion.suscripcion.socio.apellido}</p>
                     </div>
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    {transaccion.concepto}
+                    {transaccion.notas || transaccion.suscripcion.plan.nombre}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3 font-medium">
                     ${Number(transaccion.monto).toFixed(2)}

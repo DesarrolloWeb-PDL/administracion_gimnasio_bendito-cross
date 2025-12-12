@@ -2,24 +2,24 @@
 
 import Link from 'next/link';
 import { useActionState } from 'react';
-import { createUser } from '@/lib/actions-usuarios';
+import { createUsuario } from '@/lib/actions-usuarios';
 
 export default function Form() {
   const initialState = { message: '', errors: {} };
-  const [state, dispatch, isPending] = useActionState(createUser, initialState);
+  const [state, dispatch, isPending] = useActionState(createUsuario, initialState);
 
   return (
     <form action={dispatch}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Nombre */}
         <div className="mb-4">
-          <label htmlFor="name" className="mb-2 block text-sm font-medium">
+          <label htmlFor="nombre" className="mb-2 block text-sm font-medium">
             Nombre
           </label>
           <div className="relative">
             <input
-              id="name"
-              name="name"
+              id="nombre"
+              name="nombre"
               type="text"
               placeholder="Ingrese el nombre"
               className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
@@ -27,8 +27,8 @@ export default function Form() {
             />
           </div>
           <div id="name-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.name &&
-              state.errors.name.map((error: string) => (
+            {state.errors?.nombre &&
+              state.errors.nombre.map((error: string) => (
                 <p className="mt-2 text-sm text-red-500" key={error}>
                   {error}
                 </p>
@@ -88,13 +88,13 @@ export default function Form() {
 
         {/* Rol */}
         <div className="mb-4">
-          <label htmlFor="role" className="mb-2 block text-sm font-medium">
+          <label htmlFor="rol" className="mb-2 block text-sm font-medium">
             Rol
           </label>
           <div className="relative">
             <select
-              id="role"
-              name="role"
+              id="rol"
+              name="rol"
               className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
               defaultValue=""
               aria-describedby="role-error"
@@ -103,12 +103,12 @@ export default function Form() {
                 Seleccione un rol
               </option>
               <option value="ADMIN">Administrador</option>
-              <option value="USER">Usuario</option>
+              <option value="RECEPCIONISTA">Recepcionista</option>
             </select>
           </div>
           <div id="role-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.role &&
-              state.errors.role.map((error: string) => (
+            {state.errors?.rol &&
+              state.errors.rol.map((error: string) => (
                 <p className="mt-2 text-sm text-red-500" key={error}>
                   {error}
                 </p>
