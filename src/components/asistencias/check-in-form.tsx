@@ -49,7 +49,7 @@ export default function CheckInForm() {
               type="text"
               required
               ref={inputRef}
-              className="relative block w-full rounded-md border-0 py-3 text-gray-900 dark:text-white dark:bg-gray-800 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-lg sm:leading-6 text-center tracking-widest transition-colors"
+              className="relative block w-full rounded-md border-0 py-3 text-white bg-gray-800/50 ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-lg sm:leading-6 text-center tracking-widest transition-colors"
               placeholder="Ingrese DNI"
               autoComplete="off"
               autoFocus
@@ -61,9 +61,9 @@ export default function CheckInForm() {
           <button
             type="submit"
             disabled={isPending}
-            className="group relative flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:bg-blue-300"
+            className="group relative flex w-full justify-center px-3 py-3 text-sm font-semibold btn-bendito disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isPending ? '...' : 'Registrar'}
+            {isPending ? 'PROCESANDO...' : 'REGISTRAR'}
           </button>
         </div>
       </form>

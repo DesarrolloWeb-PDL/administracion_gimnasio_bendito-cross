@@ -23,13 +23,14 @@ export default async function KioscoPage() {
   }
 
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-center bg-gray-100 dark:bg-gray-950 p-4 transition-colors">
+    <main className="relative flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-gray-900 to-black p-4">
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
-      <div className="w-full max-w-sm rounded-lg bg-white dark:bg-gray-900 p-6 shadow-xl transition-colors">
-        <div className="mb-4 text-center">
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Control de Acceso</h1>
+      <div className="w-full max-w-sm p-8 shadow-2xl glass-card">
+        <div className="mb-6 text-center">
+          <h1 className="text-2xl font-bold text-white uppercase tracking-wider">Control de Acceso</h1>
+          <p className="text-gray-300 text-sm mt-2">Ingrese su DNI para registrar asistencia</p>
         </div>
         <CheckInForm />
       </div>
