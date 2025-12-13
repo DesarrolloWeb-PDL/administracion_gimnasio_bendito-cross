@@ -45,7 +45,11 @@ export async function createSocio(prevState: any, formData: FormData) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Faltan campos obligatorios. Error al crear socio.',
-      values: Object.fromEntries(formData.entries()),
+      values: Object.fromEntries(
+        Array.from(formData.entries()).map(([key, value]) => [
+          key, value.toString()
+        ])
+      ),
     };
   }
 
@@ -76,11 +80,16 @@ export async function createSocio(prevState: any, formData: FormData) {
     return {
       message: 'Error de base de datos: No se pudo crear el socio (posible DNI duplicado).',
       errors: {},
-      values: Object.fromEntries(formData.entries()),
+      values: validatedFields.data,
     };
   }
 
-  return { message: '', errors: {}, values: {} };
+  // En caso de éxito, redirigir
+  revalidatePath('/admin/socios');
+  redirect('/admin/socios');
+
+  // Esta parte no es alcanzable por el redirect, pero satisface a TypeScript
+  // return { message: 'Socio creado.', errors: {}, values: {} };
 }
 
 export async function updateSocio(id: string, prevState: unknown, formData: FormData) {
