@@ -254,7 +254,7 @@ export default function Form() {
 
         <hr className="my-6 border-gray-200" />
 
-        {/* Es Libre */}
+        {/* Es Libre (opcional) */}
         <div className="mb-4">
           <div className="flex items-center">
             <input

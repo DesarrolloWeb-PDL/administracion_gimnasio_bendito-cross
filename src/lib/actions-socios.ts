@@ -10,16 +10,16 @@ const FormSchema = z.object({
   nombre: z.string().min(1, 'El nombre es obligatorio'),
   apellido: z.string().min(1, 'El apellido es obligatorio'),
   dni: z.string().min(1, 'El DNI es obligatorio'),
+  contactoEmergencia: z.string().min(1, 'El contacto de emergencia es obligatorio'),
+  condicionesMedicas: z.string().min(1, 'Las condiciones médicas son obligatorias'),
   email: z.string().email('Email inválido').optional().or(z.literal('')),
   telefono: z.string().optional(),
   fechaNacimiento: z.string().optional(),
   genero: z.string().optional(),
   direccion: z.string().optional(),
-  contactoEmergencia: z.string().min(1, 'El contacto de emergencia es obligatorio'),
   telefonoEmergencia: z.string().optional(),
-  condicionesMedicas: z.string().min(1, 'Las condiciones médicas son obligatorias'),
   objetivo: z.string().optional(),
-  esLibre: z.string().optional(), // Checkbox returns "on" or undefined
+  esLibre: z.string().optional(), // Checkbox returns "on" o undefined
 });
 
 const CreateSocio = FormSchema.omit({ id: true });
