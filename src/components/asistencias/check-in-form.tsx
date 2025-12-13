@@ -61,7 +61,7 @@ export default function CheckInForm({ logoUrl, nombreGimnasio }: { logoUrl?: str
           <button
             type="submit"
             disabled={isPending}
-            className="group relative flex w-full justify-center px-3 py-3 text-sm font-semibold btn-bendito disabled:opacity-50 disabled:cursor-not-allowed"
+            className="group relative flex w-full justify-center px-3 py-3 text-sm font-semibold btn-bendito disabled:opacity-50 disabled:cursor-not-allowed bg-[var(--primary-color)] hover:brightness-110"
           >
             {isPending ? 'PROCESANDO...' : 'REGISTRAR'}
           </button>

@@ -11,8 +11,13 @@ export default async function Page() {
         <KioscoButton />
       </div>
       <div className="text-center mb-8">
+        {config?.logoUrl && (
+            <div className="mb-6 flex justify-center">
+                <img src={config.logoUrl} alt="Logo" className="h-32 object-contain" />
+            </div>
+        )}
         <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
-          Control de Acceso
+          {config?.nombreGimnasio || 'Control de Acceso'}
         </h1>
         <p className="mt-2 text-lg leading-8 text-gray-600 dark:text-gray-300">
           Ingrese el DNI del socio para registrar su asistencia.
