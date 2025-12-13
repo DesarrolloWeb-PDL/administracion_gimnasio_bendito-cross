@@ -45,7 +45,11 @@ export async function createSocio(prevState: any, formData: FormData) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Faltan campos obligatorios. Error al crear socio.',
-      values: Object.fromEntries(formData.entries()),
+      values: Object.fromEntries(
+        Array.from(formData.entries()).map(([key, value]) => [
+          key, value.toString()
+        ])
+      ),
     };
   }
 
@@ -76,7 +80,11 @@ export async function createSocio(prevState: any, formData: FormData) {
     return {
       message: 'Error de base de datos: No se pudo crear el socio (posible DNI duplicado).',
       errors: {},
-      values: validatedFields.data, // Usamos los datos validados que tienen el tipo correcto
+      values: Object.fromEntries(
+        Array.from(formData.entries()).map(([key, value]) => [
+          key, value.toString()
+        ])
+      ),
     };
   }
 
