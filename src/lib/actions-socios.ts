@@ -15,9 +15,9 @@ const FormSchema = z.object({
   fechaNacimiento: z.string().optional(),
   genero: z.string().optional(),
   direccion: z.string().optional(),
-  contactoEmergencia: z.string().optional(),
+  contactoEmergencia: z.string().min(1, 'El contacto de emergencia es obligatorio'),
   telefonoEmergencia: z.string().optional(),
-  condicionesMedicas: z.string().optional(),
+  condicionesMedicas: z.string().min(1, 'Las condiciones médicas son obligatorias'),
   objetivo: z.string().optional(),
   esLibre: z.string().optional(), // Checkbox returns "on" or undefined
 });

@@ -11,10 +11,10 @@ export default function Form() {
   return (
     <form action={dispatch}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
-        {/* Nombre */}
+        {/* Nombre (obligatorio) */}
         <div className="mb-4">
           <label htmlFor="nombre" className="mb-2 block text-sm font-medium text-gray-900">
-            Nombre
+            Nombre <span className="text-red-500">*</span>
           </label>
           <div className="relative">
             <input
@@ -24,6 +24,7 @@ export default function Form() {
               placeholder="Ingrese el nombre"
               className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
               aria-describedby="nombre-error"
+              required
             />
           </div>
           <div id="nombre-error" aria-live="polite" aria-atomic="true">
@@ -36,10 +37,10 @@ export default function Form() {
           </div>
         </div>
 
-        {/* Apellido */}
+        {/* Apellido (obligatorio) */}
         <div className="mb-4">
           <label htmlFor="apellido" className="mb-2 block text-sm font-medium text-gray-900">
-            Apellido
+            Apellido <span className="text-red-500">*</span>
           </label>
           <div className="relative">
             <input
@@ -49,6 +50,7 @@ export default function Form() {
               placeholder="Ingrese el apellido"
               className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
               aria-describedby="apellido-error"
+              required
             />
           </div>
           <div id="apellido-error" aria-live="polite" aria-atomic="true">
@@ -61,10 +63,10 @@ export default function Form() {
           </div>
         </div>
 
-        {/* DNI */}
+        {/* DNI (obligatorio) */}
         <div className="mb-4">
           <label htmlFor="dni" className="mb-2 block text-sm font-medium text-gray-900">
-            DNI
+            DNI <span className="text-red-500">*</span>
           </label>
           <div className="relative">
             <input
@@ -74,6 +76,7 @@ export default function Form() {
               placeholder="Ingrese el DNI"
               className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
               aria-describedby="dni-error"
+              required
             />
           </div>
           <div id="dni-error" aria-live="polite" aria-atomic="true">
@@ -180,10 +183,10 @@ export default function Form() {
         <hr className="my-6 border-gray-200" />
         <h3 className="mb-4 text-lg font-medium text-gray-900">Datos de Emergencia</h3>
 
-        {/* Contacto Emergencia */}
+        {/* Contacto Emergencia (obligatorio) */}
         <div className="mb-4">
           <label htmlFor="contactoEmergencia" className="mb-2 block text-sm font-medium text-gray-900">
-            Nombre Contacto Emergencia
+            Nombre Contacto Emergencia <span className="text-red-500">*</span>
           </label>
           <div className="relative">
             <input
@@ -192,6 +195,7 @@ export default function Form() {
               type="text"
               placeholder="Nombre de familiar o amigo"
               className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
+              required
             />
           </div>
         </div>
@@ -215,10 +219,10 @@ export default function Form() {
         <hr className="my-6 border-gray-200" />
         <h3 className="mb-4 text-lg font-medium text-gray-900">Salud y Objetivos</h3>
 
-        {/* Condiciones Médicas */}
+        {/* Condiciones Médicas (obligatorio) */}
         <div className="mb-4">
           <label htmlFor="condicionesMedicas" className="mb-2 block text-sm font-medium text-gray-900">
-            Condiciones Médicas / Alergias
+            Condiciones Médicas / Alergias <span className="text-red-500">*</span>
           </label>
           <div className="relative">
             <textarea
@@ -227,6 +231,7 @@ export default function Form() {
               placeholder="Describa condiciones médicas relevantes..."
               className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
               rows={3}
+              required
             />
           </div>
         </div>
