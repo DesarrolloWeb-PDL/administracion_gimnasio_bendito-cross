@@ -6,7 +6,6 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 const FormSchema = z.object({
-  id: z.string(),
   nombre: z.string().min(1, 'El nombre es obligatorio'),
   apellido: z.string().min(1, 'El apellido es obligatorio'),
   dni: z.string().min(1, 'El DNI es obligatorio'),
