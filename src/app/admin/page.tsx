@@ -1,3 +1,4 @@
+
 import { fetchCardData } from '@/lib/data-dashboard';
 import Link from 'next/link';
 import { auth } from '@/auth';
@@ -5,6 +6,7 @@ import prisma from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import ProfesorPanel from '@/components/asistencias/profesor-panel';
 
+export default async function Page() {
   const session = await auth();
   let userPermissions = null;
   if (session?.user?.email) {
@@ -13,52 +15,13 @@ import ProfesorPanel from '@/components/asistencias/profesor-panel';
     });
   }
 
-    let mainContent = null;
-    if (userPermissions?.rol === 'PROFESOR_MUSCULACION') {
-      mainContent = <ProfesorPanel discipline="musculacion" />;
-    } else if (userPermissions?.rol === 'PROFESOR_CROSSFIT') {
-      mainContent = <ProfesorPanel discipline="crossfit" />;
-    } else if (userPermissions?.rol === 'PROFESOR_FUNCIONAL') {
-      mainContent = <ProfesorPanel discipline="funcional" />;
-    } else {
-      const isAdmin = userPermissions?.rol === 'ADMIN' || userPermissions?.rol === 'admin';
-      if (!isAdmin) {
-        redirect('/admin/socios');
-      }
-      const {
-        numberOfSocios,
-        totalIncome,
-        expiringSubscriptions,
-        todaysAttendance,
-      } = await fetchCardData();
-      const formattedIncome = new Intl.NumberFormat('es-AR', {
-        style: 'currency',
-        currency: 'ARS',
-        minimumFractionDigits: 0,
-      }).format(totalIncome);
-      mainContent = (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Tarjetas de Resumen */}
-          <div className="rounded-xl bg-white dark:bg-gray-800 p-4 shadow-sm transition-colors">
-            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Socios Activos</h3>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white truncate">{numberOfSocios}</p>
-          </div>
-          <div className="rounded-xl bg-white dark:bg-gray-800 p-4 shadow-sm transition-colors">
-            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Ingresos del Mes</h3>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white truncate">{formattedIncome}</p>
-          </div>
-          <div className="rounded-xl bg-white dark:bg-gray-800 p-4 shadow-sm transition-colors">
-            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Vencimientos Próximos</h3>
-            <p className="text-2xl font-bold text-red-600 dark:text-red-400 truncate">{expiringSubscriptions}</p>
-          </div>
-          <div className="rounded-xl bg-white dark:bg-gray-800 p-4 shadow-sm transition-colors">
-            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Asistencias Hoy</h3>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white truncate">{todaysAttendance}</p>
-          </div>
-        </div>
-      );
-    }
-    return mainContent;
+  if (userPermissions?.rol === 'PROFESOR_MUSCULACION') {
+    return <ProfesorPanel discipline="musculacion" />;
+  } else if (userPermissions?.rol === 'PROFESOR_CROSSFIT') {
+    return <ProfesorPanel discipline="crossfit" />;
+  } else if (userPermissions?.rol === 'PROFESOR_FUNCIONAL') {
+    return <ProfesorPanel discipline="funcional" />;
+  }
 
   const isAdmin = userPermissions?.rol === 'ADMIN' || userPermissions?.rol === 'admin';
   if (!isAdmin) {
