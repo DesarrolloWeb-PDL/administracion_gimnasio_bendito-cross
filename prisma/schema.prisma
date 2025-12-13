@@ -61,6 +61,18 @@ model Socio {
   email           String?
   telefono        String?
   fechaNacimiento DateTime?
+  genero          String?       // "M", "F", "O"
+  direccion       String?
+  fotoUrl         String?
+  
+  // Datos de Emergencia
+  contactoEmergencia String?
+  telefonoEmergencia String?
+  
+  // Datos de Salud/Objetivos
+  condicionesMedicas String?
+  objetivo           String?
+
   activo          Boolean       @default(true)
   esLibre         Boolean       @default(false)
   createdAt       DateTime      @default(now())

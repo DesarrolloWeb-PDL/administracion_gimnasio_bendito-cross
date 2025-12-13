@@ -12,6 +12,13 @@ const FormSchema = z.object({
   dni: z.string().min(1, 'El DNI es obligatorio'),
   email: z.string().email('Email inválido').optional().or(z.literal('')),
   telefono: z.string().optional(),
+  fechaNacimiento: z.string().optional(),
+  genero: z.string().optional(),
+  direccion: z.string().optional(),
+  contactoEmergencia: z.string().optional(),
+  telefonoEmergencia: z.string().optional(),
+  condicionesMedicas: z.string().optional(),
+  objetivo: z.string().optional(),
   esLibre: z.string().optional(), // Checkbox returns "on" or undefined
 });
 
@@ -25,6 +32,13 @@ export async function createSocio(prevState: unknown, formData: FormData) {
     dni: formData.get('dni'),
     email: formData.get('email'),
     telefono: formData.get('telefono'),
+    fechaNacimiento: formData.get('fechaNacimiento'),
+    genero: formData.get('genero'),
+    direccion: formData.get('direccion'),
+    contactoEmergencia: formData.get('contactoEmergencia'),
+    telefonoEmergencia: formData.get('telefonoEmergencia'),
+    condicionesMedicas: formData.get('condicionesMedicas'),
+    objetivo: formData.get('objetivo'),
     esLibre: formData.get('esLibre'),
   });
 
@@ -35,7 +49,10 @@ export async function createSocio(prevState: unknown, formData: FormData) {
     };
   }
 
-  const { nombre, apellido, dni, email, telefono, esLibre } = validatedFields.data;
+  const { 
+    nombre, apellido, dni, email, telefono, esLibre,
+    fechaNacimiento, genero, direccion, contactoEmergencia, telefonoEmergencia, condicionesMedicas, objetivo
+  } = validatedFields.data;
 
   try {
     await prisma.socio.create({
@@ -45,6 +62,13 @@ export async function createSocio(prevState: unknown, formData: FormData) {
         dni,
         email: email || null,
         telefono: telefono || null,
+        fechaNacimiento: fechaNacimiento ? new Date(fechaNacimiento) : null,
+        genero: genero || null,
+        direccion: direccion || null,
+        contactoEmergencia: contactoEmergencia || null,
+        telefonoEmergencia: telefonoEmergencia || null,
+        condicionesMedicas: condicionesMedicas || null,
+        objetivo: objetivo || null,
         esLibre: esLibre === 'on',
       },
     });
@@ -65,6 +89,13 @@ export async function updateSocio(id: string, prevState: unknown, formData: Form
       dni: formData.get('dni'),
       email: formData.get('email'),
       telefono: formData.get('telefono'),
+      fechaNacimiento: formData.get('fechaNacimiento'),
+      genero: formData.get('genero'),
+      direccion: formData.get('direccion'),
+      contactoEmergencia: formData.get('contactoEmergencia'),
+      telefonoEmergencia: formData.get('telefonoEmergencia'),
+      condicionesMedicas: formData.get('condicionesMedicas'),
+      objetivo: formData.get('objetivo'),
       esLibre: formData.get('esLibre'),
     });
   
@@ -75,7 +106,10 @@ export async function updateSocio(id: string, prevState: unknown, formData: Form
       };
     }
   
-    const { nombre, apellido, dni, email, telefono, esLibre } = validatedFields.data;
+    const { 
+      nombre, apellido, dni, email, telefono, esLibre,
+      fechaNacimiento, genero, direccion, contactoEmergencia, telefonoEmergencia, condicionesMedicas, objetivo
+    } = validatedFields.data;
   
     try {
       await prisma.socio.update({
@@ -86,6 +120,13 @@ export async function updateSocio(id: string, prevState: unknown, formData: Form
           dni,
           email: email || null,
           telefono: telefono || null,
+          fechaNacimiento: fechaNacimiento ? new Date(fechaNacimiento) : null,
+          genero: genero || null,
+          direccion: direccion || null,
+          contactoEmergencia: contactoEmergencia || null,
+          telefonoEmergencia: telefonoEmergencia || null,
+          condicionesMedicas: condicionesMedicas || null,
+          objetivo: objetivo || null,
           esLibre: esLibre === 'on',
         },
       });
