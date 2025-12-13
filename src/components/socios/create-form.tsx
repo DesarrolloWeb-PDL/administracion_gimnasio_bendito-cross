@@ -9,17 +9,17 @@ import { useRef } from 'react';
 type StateType = {
   message: string;
   errors: Record<string, string[]>;
-  values?: Record<string, string>;
+  values: Record<string, string>;
 };
 
 export default function Form() {
   const initialState: StateType = { message: '', errors: {}, values: {} };
-  const [state, dispatch, isPending] = useActionState(createSocio, initialState);
+  const [state, dispatch, isPending] = useActionState<StateType, FormData>(createSocio, initialState);
   const formRef = useRef<HTMLFormElement>(null);
 
   // Mantener los valores ingresados si hay error
   const getValue = (name: string) => {
-    if ('values' in state && state.values && state.values[name] !== undefined) return state.values[name];
+    if (state.values && state.values[name] !== undefined) return state.values[name];
     return '';
   };
 
