@@ -25,6 +25,7 @@ const CreateSocio = FormSchema;
 const UpdateSocio = FormSchema;
 
 export async function createSocio(prevState: any, formData: FormData) {
+  const values = Object.fromEntries(formData.entries());
   const validatedFields = CreateSocio.safeParse({
     nombre: formData.get('nombre'),
     apellido: formData.get('apellido'),
@@ -50,6 +51,7 @@ export async function createSocio(prevState: any, formData: FormData) {
           key, value.toString()
         ])
       ),
+      values,
     };
   }
 
@@ -81,6 +83,7 @@ export async function createSocio(prevState: any, formData: FormData) {
       message: 'Error de base de datos: No se pudo crear el socio (posible DNI duplicado).',
       errors: {},
       values: validatedFields.data,
+      values,
     };
   }
 
