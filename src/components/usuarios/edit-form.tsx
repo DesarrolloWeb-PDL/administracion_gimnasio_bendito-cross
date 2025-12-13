@@ -80,6 +80,7 @@ export default function EditForm({ usuario }: { usuario: Usuario }) {
             >
               <option value="ADMIN">Administrador</option>
               <option value="RECEPCIONISTA">Recepcionista</option>
+              <option value="PROFESOR">Profesor</option>
             </select>
           </div>
           <div id="role-error" aria-live="polite" aria-atomic="true">
@@ -89,6 +90,111 @@ export default function EditForm({ usuario }: { usuario: Usuario }) {
                   {error}
                 </p>
               ))}
+          </div>
+        </div>
+
+        {/* Permisos */}
+        <div className="mb-4">
+          <span className="mb-2 block text-sm font-medium text-gray-900">
+            Permisos de Acceso
+          </span>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="flex items-center">
+              <input
+                id="permisoSocios"
+                name="permisoSocios"
+                type="checkbox"
+                defaultChecked={usuario.permisoSocios}
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <label htmlFor="permisoSocios" className="ml-2 block text-sm text-gray-900">
+                Gestión de Socios
+              </label>
+            </div>
+            <div className="flex items-center">
+              <input
+                id="permisoPlanes"
+                name="permisoPlanes"
+                type="checkbox"
+                defaultChecked={usuario.permisoPlanes}
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <label htmlFor="permisoPlanes" className="ml-2 block text-sm text-gray-900">
+                Gestión de Planes
+              </label>
+            </div>
+            <div className="flex items-center">
+              <input
+                id="permisoSuscripciones"
+                name="permisoSuscripciones"
+                type="checkbox"
+                defaultChecked={usuario.permisoSuscripciones}
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <label htmlFor="permisoSuscripciones" className="ml-2 block text-sm text-gray-900">
+                Gestión de Suscripciones
+              </label>
+            </div>
+            <div className="flex items-center">
+              <input
+                id="permisoAsistencias"
+                name="permisoAsistencias"
+                type="checkbox"
+                defaultChecked={usuario.permisoAsistencias}
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <label htmlFor="permisoAsistencias" className="ml-2 block text-sm text-gray-900">
+                Control de Asistencias
+              </label>
+            </div>
+            <div className="flex items-center">
+              <input
+                id="permisoTransacciones"
+                name="permisoTransacciones"
+                type="checkbox"
+                defaultChecked={usuario.permisoTransacciones}
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <label htmlFor="permisoTransacciones" className="ml-2 block text-sm text-gray-900">
+                Caja y Transacciones
+              </label>
+            </div>
+            <div className="flex items-center">
+              <input
+                id="permisoReportes"
+                name="permisoReportes"
+                type="checkbox"
+                defaultChecked={usuario.permisoReportes}
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <label htmlFor="permisoReportes" className="ml-2 block text-sm text-gray-900">
+                Ver Reportes
+              </label>
+            </div>
+            <div className="flex items-center">
+              <input
+                id="permisoConfiguracion"
+                name="permisoConfiguracion"
+                type="checkbox"
+                defaultChecked={usuario.permisoConfiguracion}
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <label htmlFor="permisoConfiguracion" className="ml-2 block text-sm text-gray-900">
+                Configuración del Sistema
+              </label>
+            </div>
+            <div className="flex items-center">
+              <input
+                id="permisoUsuarios"
+                name="permisoUsuarios"
+                type="checkbox"
+                defaultChecked={usuario.permisoUsuarios}
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <label htmlFor="permisoUsuarios" className="ml-2 block text-sm text-gray-900">
+                Gestión de Usuarios
+              </label>
+            </div>
           </div>
         </div>
 
