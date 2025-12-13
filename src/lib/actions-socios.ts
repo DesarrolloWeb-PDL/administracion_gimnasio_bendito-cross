@@ -21,8 +21,8 @@ const FormSchema = z.object({
   esLibre: z.string().optional(), // Checkbox returns "on" o undefined
 });
 
-const CreateSocio = FormSchema.omit({ id: true });
-const UpdateSocio = FormSchema.omit({ id: true });
+const CreateSocio = FormSchema;
+const UpdateSocio = FormSchema;
 
 export async function createSocio(prevState: unknown, formData: FormData) {
   const validatedFields = CreateSocio.safeParse({
