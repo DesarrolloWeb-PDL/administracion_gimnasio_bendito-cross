@@ -17,7 +17,7 @@ export default function EditForm({ plan }: { plan: PlanSerializable }) {
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Nombre */}
         <div className="mb-4">
-          <label htmlFor="nombre" className="mb-2 block text-sm font-medium">
+          <label htmlFor="nombre" className="mb-2 block text-sm font-medium text-gray-900">
             Nombre del Plan
           </label>
           <div className="relative">
@@ -43,7 +43,7 @@ export default function EditForm({ plan }: { plan: PlanSerializable }) {
 
         {/* Descripcion */}
         <div className="mb-4">
-          <label htmlFor="descripcion" className="mb-2 block text-sm font-medium">
+          <label htmlFor="descripcion" className="mb-2 block text-sm font-medium text-gray-900">
             Descripción
           </label>
           <div className="relative">
@@ -60,7 +60,7 @@ export default function EditForm({ plan }: { plan: PlanSerializable }) {
 
         {/* Precio */}
         <div className="mb-4">
-          <label htmlFor="precio" className="mb-2 block text-sm font-medium">
+          <label htmlFor="precio" className="mb-2 block text-sm font-medium text-gray-900">
             Precio
           </label>
           <div className="relative">
@@ -87,7 +87,7 @@ export default function EditForm({ plan }: { plan: PlanSerializable }) {
 
         {/* Duracion */}
         <div className="mb-4">
-          <label htmlFor="duracionMeses" className="mb-2 block text-sm font-medium">
+          <label htmlFor="duracionMeses" className="mb-2 block text-sm font-medium text-gray-900">
             Duración (Meses)
           </label>
           <div className="relative">
@@ -126,7 +126,7 @@ export default function EditForm({ plan }: { plan: PlanSerializable }) {
         >
           Cancelar
         </Link>
-        <button type="submit" aria-disabled={isPending} className="flex h-10 items-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+        <button type="submit" aria-disabled={isPending} className="flex h-10 items-center rounded-lg bg-[var(--primary-color)] px-4 text-sm font-medium text-white transition-colors hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
             {isPending ? 'Guardando...' : 'Guardar Cambios'}
         </button>
       </div>

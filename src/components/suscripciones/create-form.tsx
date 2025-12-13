@@ -17,7 +17,7 @@ export default function Form({ socios, planes }: { socios: Socio[], planes: Plan
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Socio */}
         <div className="mb-4">
-          <label htmlFor="socioId" className="mb-2 block text-sm font-medium">
+          <label htmlFor="socioId" className="mb-2 block text-sm font-medium text-gray-900">
             Seleccionar Socio
           </label>
           <div className="relative">
@@ -50,7 +50,7 @@ export default function Form({ socios, planes }: { socios: Socio[], planes: Plan
 
         {/* Plan */}
         <div className="mb-4">
-          <label htmlFor="planId" className="mb-2 block text-sm font-medium">
+          <label htmlFor="planId" className="mb-2 block text-sm font-medium text-gray-900">
             Seleccionar Plan
           </label>
           <div className="relative">
@@ -83,7 +83,7 @@ export default function Form({ socios, planes }: { socios: Socio[], planes: Plan
 
         {/* Fecha Inicio */}
         <div className="mb-4">
-          <label htmlFor="fechaInicio" className="mb-2 block text-sm font-medium">
+          <label htmlFor="fechaInicio" className="mb-2 block text-sm font-medium text-gray-900">
             Fecha de Inicio
           </label>
           <div className="relative">
@@ -121,7 +121,7 @@ export default function Form({ socios, planes }: { socios: Socio[], planes: Plan
         >
           Cancelar
         </Link>
-        <button type="submit" aria-disabled={isPending} className="flex h-10 items-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+        <button type="submit" aria-disabled={isPending} className="flex h-10 items-center rounded-lg bg-[var(--primary-color)] px-4 text-sm font-medium text-white transition-colors hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
             {isPending ? 'Creando...' : 'Crear Suscripción'}
         </button>
       </div>

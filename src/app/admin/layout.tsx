@@ -28,7 +28,13 @@ export default async function AdminLayout({
   const fondoUrl = config?.fondoUrl;
 
   return (
-    <div className="flex h-screen flex-col md:flex-row md:overflow-hidden">
+    <div 
+      className="flex h-screen flex-col md:flex-row md:overflow-hidden"
+      style={{ 
+        '--primary-color': primaryColor, 
+        '--secondary-color': secondaryColor 
+      } as React.CSSProperties}
+    >
       
       {/* Mobile Sidebar */}
       <MobileSidebar 
@@ -62,7 +68,7 @@ export default async function AdminLayout({
         >
           {fondoUrl && (
              <div 
-               className="absolute inset-0 z-0 bg-cover bg-center opacity-40 transition-transform duration-500 group-hover:scale-110" 
+               className="absolute inset-0 z-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" 
                style={{ backgroundImage: `url(${fondoUrl})` }} 
              />
           )}

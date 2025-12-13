@@ -44,7 +44,7 @@ export default function ConfigForm({ config }: { config: Configuracion | null })
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Nombre del Gimnasio */}
         <div className="mb-4">
-          <label htmlFor="nombreGimnasio" className="mb-2 block text-sm font-medium">
+          <label htmlFor="nombreGimnasio" className="mb-2 block text-sm font-medium text-gray-900">
             Nombre del Gimnasio
           </label>
           <div className="relative">
@@ -70,7 +70,7 @@ export default function ConfigForm({ config }: { config: Configuracion | null })
 
         {/* Color Primario */}
         <div className="mb-4">
-          <label htmlFor="colorPrimario" className="mb-2 block text-sm font-medium">
+          <label htmlFor="colorPrimario" className="mb-2 block text-sm font-medium text-gray-900">
             Color Primario (Sidebar)
           </label>
           <div className="flex items-center gap-4">
@@ -100,7 +100,7 @@ export default function ConfigForm({ config }: { config: Configuracion | null })
 
         {/* Color Secundario */}
         <div className="mb-4">
-          <label htmlFor="colorSecundario" className="mb-2 block text-sm font-medium">
+          <label htmlFor="colorSecundario" className="mb-2 block text-sm font-medium text-gray-900">
             Color Secundario (Logo/Acentos)
           </label>
           <div className="flex items-center gap-4">
@@ -193,7 +193,7 @@ export default function ConfigForm({ config }: { config: Configuracion | null })
         </div>
       </div>
       <div className="mt-6 flex justify-end gap-4">
-        <button type="submit" aria-disabled={isPending} className="flex h-10 items-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+        <button type="submit" aria-disabled={isPending} className="flex h-10 items-center rounded-lg bg-[var(--primary-color)] px-4 text-sm font-medium text-white transition-colors hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
             {isPending ? 'Guardando...' : 'Guardar Configuración'}
         </button>
       </div>
