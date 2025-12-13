@@ -254,23 +254,7 @@ export default function Form() {
 
         <hr className="my-6 border-gray-200" />
 
-        {/* Es Libre (opcional) */}
-        <div className="mb-4">
-          <div className="flex items-center">
-            <input
-              id="esLibre"
-              name="esLibre"
-              type="checkbox"
-              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-            <label htmlFor="esLibre" className="ml-2 block text-sm font-medium text-gray-900">
-              Socio Libre (Acceso gratuito/ilimitado)
-            </label>
-          </div>
-          <p className="mt-1 text-xs text-gray-500">
-            Si se marca, el socio tendrá acceso permitido siempre, sin necesidad de suscripción.
-          </p>
-        </div>
+        {/* ...eliminado el checkbox de socio libre... */}
 
         <div aria-live="polite" aria-atomic="true">
             {state.message && (
