@@ -128,7 +128,6 @@ export default function Form() {
                 id="permisoSocios"
                 name="permisoSocios"
                 type="checkbox"
-                defaultChecked={true}
                 className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
               <label htmlFor="permisoSocios" className="ml-2 block text-sm text-gray-900">
@@ -151,7 +150,6 @@ export default function Form() {
                 id="permisoSuscripciones"
                 name="permisoSuscripciones"
                 type="checkbox"
-                defaultChecked={true}
                 className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
               <label htmlFor="permisoSuscripciones" className="ml-2 block text-sm text-gray-900">
@@ -163,7 +161,6 @@ export default function Form() {
                 id="permisoAsistencias"
                 name="permisoAsistencias"
                 type="checkbox"
-                defaultChecked={true}
                 className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
               <label htmlFor="permisoAsistencias" className="ml-2 block text-sm text-gray-900">

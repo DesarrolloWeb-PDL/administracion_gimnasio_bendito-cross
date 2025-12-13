@@ -3,6 +3,7 @@ import UsuariosTable from '@/components/usuarios/table';
 import Pagination from '@/components/pagination';
 import { fetchUsuariosPages } from '@/lib/data-usuarios';
 import { Suspense } from 'react';
+import { auth } from '@/auth';
 
 export default async function Page({
   searchParams,
@@ -16,6 +17,8 @@ export default async function Page({
   const query = params?.query || '';
   const currentPage = Number(params?.page) || 1;
   const totalPages = await fetchUsuariosPages(query);
+  const session = await auth();
+  const isAdmin = session?.user?.rol === 'ADMIN';
 
   return (
     <div className="w-full">
@@ -35,13 +38,15 @@ export default async function Page({
             // Por ahora es visual o requiere implementación adicional como en el resto de la app
             />
         </div>
-        <Link
-          href="/admin/usuarios/create"
-          className="flex h-10 items-center rounded-lg bg-[var(--primary-color)] px-4 text-sm font-medium text-white transition-colors hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-        >
-          <span className="hidden md:block">Crear Usuario</span>
-          <span className="md:hidden">+</span>
-        </Link>
+        {isAdmin && (
+          <Link
+            href="/admin/usuarios/create"
+            className="flex h-10 items-center rounded-lg bg-[var(--primary-color)] px-4 text-sm font-medium text-white transition-colors hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+          >
+            <span className="hidden md:block">Crear Usuario</span>
+            <span className="md:hidden">+</span>
+          </Link>
+        )}
       </div>
       <Suspense fallback={<div>Cargando...</div>}>
         <UsuariosTable query={query} currentPage={currentPage} />
