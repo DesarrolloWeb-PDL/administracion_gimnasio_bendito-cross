@@ -19,7 +19,7 @@ export default function Form() {
 
   // Mantener los valores ingresados si hay error
   const getValue = (name: string) => {
-    if (state.values && state.values[name] !== undefined) return state.values[name];
+    if ('values' in state && state.values && state.values[name] !== undefined) return state.values[name];
     return '';
   };
 
