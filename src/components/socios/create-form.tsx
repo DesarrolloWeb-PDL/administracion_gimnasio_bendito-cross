@@ -6,8 +6,14 @@ import { createSocio } from '@/lib/actions-socios';
 
 import { useRef } from 'react';
 
+type StateType = {
+  message: string;
+  errors: Record<string, string[]>;
+  values?: Record<string, string>;
+};
+
 export default function Form() {
-  const initialState = { message: '', errors: {}, values: {} };
+  const initialState: StateType = { message: '', errors: {}, values: {} };
   const [state, dispatch, isPending] = useActionState(createSocio, initialState);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -19,14 +25,14 @@ export default function Form() {
 
   return (
     <form ref={formRef} action={async (formData) => {
-      // Guardar los valores actuales para repoblar el formulario si hay error
       const values: Record<string, string> = {};
       formData.forEach((value, key) => {
         values[key] = value.toString();
       });
       const result = await dispatch(formData);
       if (result && result.errors) {
-        state.values = values;
+        // Actualizar el estado con los valores ingresados
+        Object.assign(state, { values });
       }
     }}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
