@@ -24,7 +24,8 @@ const FormSchema = z.object({
 const CreateSocio = FormSchema;
 const UpdateSocio = FormSchema;
 
-export async function createSocio(prevState: unknown, formData: FormData) {
+export async function createSocio(prevState: any, formData: FormData) {
+  const values = Object.fromEntries(formData.entries());
   const validatedFields = CreateSocio.safeParse({
     nombre: formData.get('nombre'),
     apellido: formData.get('apellido'),
@@ -45,6 +46,7 @@ export async function createSocio(prevState: unknown, formData: FormData) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Faltan campos obligatorios. Error al crear socio.',
+      values,
     };
   }
 
@@ -74,11 +76,12 @@ export async function createSocio(prevState: unknown, formData: FormData) {
   } catch {
     return {
       message: 'Error de base de datos: No se pudo crear el socio (posible DNI duplicado).',
+      errors: {},
+      values,
     };
   }
 
-  revalidatePath('/admin/socios');
-  redirect('/admin/socios');
+  return { message: '', errors: {}, values: {} };
 }
 
 export async function updateSocio(id: string, prevState: unknown, formData: FormData) {
