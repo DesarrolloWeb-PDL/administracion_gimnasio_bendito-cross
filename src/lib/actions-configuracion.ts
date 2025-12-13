@@ -50,7 +50,6 @@ export async function updateConfiguracion(prevState: unknown, formData: FormData
           colorPrimario,
           colorSecundario,
           fondoUrl,
-          imagenFondoBody,
         },
       });
     }
