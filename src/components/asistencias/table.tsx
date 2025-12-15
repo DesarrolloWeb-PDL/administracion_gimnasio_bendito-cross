@@ -29,12 +29,12 @@ export default async function AsistenciasTable({
                     <p className="text-sm text-gray-500">{asistencia.socio.dni}</p>
                   </div>
                   <p className="text-sm text-gray-500">
-                    {new Date(asistencia.fecha).toLocaleDateString()}
+                    {new Date(asistencia.fecha).toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' })}
                   </p>
                 </div>
                 <div className="flex w-full items-center justify-between pt-4">
                   <p className="text-sm font-medium">
-                    {new Date(asistencia.fecha).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(asistencia.fecha).toLocaleTimeString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
               </div>
@@ -72,10 +72,10 @@ export default async function AsistenciasTable({
                     {asistencia.socio.dni}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    {new Date(asistencia.fecha).toLocaleDateString()}
+                    {new Date(asistencia.fecha).toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' })}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    {new Date(asistencia.fecha).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(asistencia.fecha).toLocaleTimeString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', hour: '2-digit', minute: '2-digit' })}
                   </td>
                 </tr>
               ))}
