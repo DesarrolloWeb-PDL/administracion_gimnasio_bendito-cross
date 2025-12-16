@@ -48,7 +48,13 @@ export async function fetchAsistencias(query: string, currentPage: number, disci
         fecha: 'desc',
       },
     });
-    return asistencias;
+    // Tipado explícito para TypeScript
+    return asistencias as Array<{
+      id: string;
+      fecha: Date | string;
+      socio: { id: string; nombre: string; apellido: string };
+      modalidad: any;
+    }>;
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch attendance records.');
