@@ -85,45 +85,22 @@ export default function EditForm({ plan }: { plan: PlanSerializable }) {
           </div>
         </div>
 
-        {/* Duración flexible */}
+        {/* Duración en meses */}
         <div className="mb-4">
-          <label className="mb-2 block text-sm font-medium text-gray-900">
-            Duración
+          <label htmlFor="duracionMeses" className="mb-2 block text-sm font-medium text-gray-900">
+            Duración (meses)
           </label>
-          <div className="flex gap-2">
+          <div className="relative">
             <input
-              id="duracionValor"
-              name="duracionValor"
+              id="duracionMeses"
+              name="duracionMeses"
               type="number"
               min="1"
-              defaultValue={plan.duracionValor}
+              defaultValue={plan.duracionMeses}
               placeholder="1"
-              className="peer block w-1/2 rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
-              aria-describedby="duracion-error"
+              className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
+              aria-describedby="duracionMeses-error"
             />
-            <select
-              id="duracionTipo"
-              name="duracionTipo"
-              className="peer block w-1/2 rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2"
-              defaultValue={plan.duracionTipo}
-            >
-              <option value="meses">Meses</option>
-              <option value="días">Días</option>
-            </select>
-          </div>
-          <div id="duracion-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.duracionValor &&
-              state.errors.duracionValor.map((error: string) => (
-                <p className="mt-2 text-sm text-red-500" key={error}>
-                  {error}
-                </p>
-              ))}
-            {state.errors?.duracionTipo &&
-              state.errors.duracionTipo.map((error: string) => (
-                <p className="mt-2 text-sm text-red-500" key={error}>
-                  {error}
-                </p>
-              ))}
           </div>
         </div>
 
