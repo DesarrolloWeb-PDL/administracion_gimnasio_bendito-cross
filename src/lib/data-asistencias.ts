@@ -41,14 +41,8 @@ export async function fetchAsistencias(query: string, currentPage: number, disci
       take: ITEMS_PER_PAGE,
       where: whereClause,
       include: {
-        socio: {
-          include: {
-            suscripciones: {
-              where: { activa: true },
-              include: { plan: true }
-            }
-          }
-        },
+        socio: true,
+        modalidad: true,
       },
       orderBy: {
         fecha: 'desc',
