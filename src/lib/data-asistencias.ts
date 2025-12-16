@@ -52,7 +52,7 @@ export async function fetchAsistencias(query: string, currentPage: number, disci
     return asistencias as Array<{
       id: string;
       fecha: Date | string;
-      socio: { id: string; nombre: string; apellido: string };
+      socio: { id: string; nombre: string; apellido: string; dni: string };
       modalidad: any;
     }>;
   } catch (error) {
