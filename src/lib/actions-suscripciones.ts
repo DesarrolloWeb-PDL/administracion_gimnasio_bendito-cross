@@ -15,6 +15,7 @@ const FormSchema = z.object({
 const CreateSuscripcion = FormSchema.omit({ id: true });
 
 export async function createSuscripcion(prevState: unknown, formData: FormData) {
+  // Cambio insignificante: comentario para forzar commit
   const validatedFields = CreateSuscripcion.safeParse({
     socioId: formData.get('socioId'),
     planId: formData.get('planId'),
