@@ -87,7 +87,8 @@ model Plan {
   nombre        String
   descripcion   String?
   precio        Decimal
-  duracionMeses Int
+  duracionValor Int
+  duracionTipo  String   // 'meses' o 'días'
   allowsMusculacion Boolean @default(false)
   allowsCrossfit    Boolean @default(false)
   activo        Boolean       @default(true)
