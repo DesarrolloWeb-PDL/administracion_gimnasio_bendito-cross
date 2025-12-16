@@ -169,21 +169,16 @@ export default function EditForm({ plan }: { plan: PlanSerializable }) {
         </div>
       </div>
       <div className="mt-6 flex justify-end gap-4">
-          {/* Duración en meses */}
-          <div className="mb-4">
-            <label htmlFor="duracionMeses" className="mb-2 block text-sm font-medium text-gray-900">
-              Duración (meses)
-            </label>
-            <div className="relative">
-              <input
-                id="duracionMeses"
-                name="duracionMeses"
-                type="number"
-                min="1"
-                defaultValue={plan.duracionMeses}
-                placeholder="1"
-                className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
-                aria-describedby="duracionMeses-error"
-              />
-            </div>
-          </div>
+        <Link
+          href="/admin/planes"
+          className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
+        >
+          Cancelar
+        </Link>
+        <button type="submit" aria-disabled={isPending} className="flex h-10 items-center rounded-lg bg-[var(--primary-color)] px-4 text-sm font-medium text-white transition-colors hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+            {isPending ? 'Guardando...' : 'Guardar Cambios'}
+        </button>
+      </div>
+    </form>
+  );
+}
