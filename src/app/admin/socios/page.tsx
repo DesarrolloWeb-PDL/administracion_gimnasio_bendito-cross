@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import SociosTable from '@/components/socios/table';
 import { Suspense } from 'react';
+import SearchInput from '@/components/ui/search-input';
 
 export default async function Page({
   searchParams,
@@ -20,16 +21,9 @@ export default async function Page({
         <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Socios</h1>
       </div>
       <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
-        {/* Search Component Placeholder */}
         <div className="relative flex flex-1 shrink-0">
-            <label htmlFor="search" className="sr-only">
-            Buscar
-            </label>
-            <input
-            className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500"
-            placeholder="Buscar socios..."
-            defaultValue={query}
-            />
+          <label htmlFor="search" className="sr-only">Buscar</label>
+          <SearchInput placeholder="Buscar socios..." />
         </div>
         <Link
           href="/admin/socios/create"
