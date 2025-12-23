@@ -10,7 +10,8 @@ const PlanSchema = z.object({
   nombre: z.string().min(1, 'El nombre es obligatorio'),
   descripcion: z.string().optional(),
   precio: z.coerce.number().min(0, 'El precio debe ser mayor o igual a 0'),
-  duracionMeses: z.coerce.number().int().min(1, 'La duración debe ser al menos 1'),
+  duracionValor: z.coerce.number().int().min(1, 'La duración debe ser al menos 1'),
+  duracionTipo: z.enum(['meses', 'días']),
   allowsMusculacion: z.coerce.boolean(),
   allowsCrossfit: z.coerce.boolean(),
 });
@@ -35,7 +36,7 @@ export async function createPlan(prevState: unknown, formData: FormData) {
     };
   }
 
-  const { nombre, descripcion, precio, duracionMeses, allowsMusculacion, allowsCrossfit } = validatedFields.data;
+  const { nombre, descripcion, precio, duracionValor, duracionTipo, allowsMusculacion, allowsCrossfit } = validatedFields.data;
 
   try {
     await prisma.plan.create({
@@ -43,7 +44,8 @@ export async function createPlan(prevState: unknown, formData: FormData) {
         nombre,
         descripcion: descripcion || null,
         precio,
-        duracionMeses,
+        duracionValor,
+        duracionTipo,
         allowsMusculacion,
         allowsCrossfit,
       },
@@ -75,7 +77,7 @@ export async function updatePlan(id: string, prevState: unknown, formData: FormD
     };
   }
 
-  const { nombre, descripcion, precio, duracionMeses, allowsMusculacion, allowsCrossfit } = validatedFields.data;
+  const { nombre, descripcion, precio, duracionValor, duracionTipo, allowsMusculacion, allowsCrossfit } = validatedFields.data;
 
   try {
     await prisma.plan.update({
@@ -84,7 +86,8 @@ export async function updatePlan(id: string, prevState: unknown, formData: FormD
         nombre,
         descripcion: descripcion || null,
         precio,
-        duracionMeses,
+        duracionValor,
+        duracionTipo,
         allowsMusculacion,
         allowsCrossfit,
       },
