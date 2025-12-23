@@ -22,7 +22,6 @@ export async function fetchAsistenciasHoy(modalidadId?: string) {
       where: whereClause,
       include: {
         socio: true,
-        modalidad: true,
       },
       orderBy: {
         fecha: 'asc',
