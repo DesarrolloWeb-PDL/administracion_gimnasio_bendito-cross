@@ -38,23 +38,13 @@ export default async function SuscripcionesTable({
                     <p className="text-sm">Fin: {formatFechaBuenosAires(suscripcion.fechaFin)}</p>
                   </div>
                   <div className="flex justify-end gap-2">
-                    <button
-                      className={`rounded-md border p-2 hover:bg-gray-100 ${suscripcion.activa ? 'text-red-600' : 'text-green-600'}`}
-                      title={suscripcion.activa ? 'Cancelar Suscripción' : 'Activar Suscripción'}
-                      onClick={async () => {
-                        const endpoint = suscripcion.activa
-                          ? '/api/suscripciones/cancel'
-                          : '/api/suscripciones/activate';
-                        await fetch(endpoint, {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ id: suscripcion.id }),
-                        });
-                        window.location.reload();
-                      }}
-                    >
-                      {suscripcion.activa ? '🚫' : '✔️'}
-                    </button>
+                    {suscripcion.activa && (
+                      <form action={cancelSuscripcion.bind(null, suscripcion.id)}>
+                        <button className="rounded-md border p-2 hover:bg-gray-100 text-red-600" title="Cancelar Suscripción">
+                          🚫
+                        </button>
+                      </form>
+                    )}
                   </div>
                 </div>
                 </div>
