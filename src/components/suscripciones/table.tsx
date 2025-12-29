@@ -84,15 +84,15 @@ export default async function SuscripcionesTable({
                       <p>{suscripcion.socio.nombre} {suscripcion.socio.apellido}</p>
                     </div>
                     <p className="text-xs text-gray-500">{suscripcion.socio.dni}</p>
-                      {formatFechaBuenosAires(suscripcion.fechaInicio)}
-                  <td className="whitespace-nowrap px-3 py-3">
-                    {suscripcion.plan.nombre}
-                      {formatFechaBuenosAires(suscripcion.fechaFin)}
-                  <td className="whitespace-nowrap px-3 py-3">
-                    {suscripcion.fechaInicio.toLocaleDateString()}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    {suscripcion.fechaFin.toLocaleDateString()}
+                    {suscripcion.plan.nombre}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    {formatFechaBuenosAires(suscripcion.fechaInicio)}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    {formatFechaBuenosAires(suscripcion.fechaFin)}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
                     <div className={`inline-flex px-2 py-1 text-xs rounded-full ${suscripcion.activa ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
