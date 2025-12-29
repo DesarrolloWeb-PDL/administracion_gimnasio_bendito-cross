@@ -38,13 +38,14 @@ export default async function SuscripcionesTable({
                     <p className="text-sm">Fin: {formatFechaBuenosAires(suscripcion.fechaFin)}</p>
                   </div>
                   <div className="flex justify-end gap-2">
-                    {suscripcion.activa && (
-                      <form action={cancelSuscripcion.bind(null, suscripcion.id)}>
-                        <button className="rounded-md border p-2 hover:bg-gray-100 text-red-600" title="Cancelar Suscripción">
-                          🚫
-                        </button>
-                      </form>
-                    )}
+                    <form action={suscripcion.activa ? cancelSuscripcion.bind(null, suscripcion.id) : activateSuscripcion.bind(null, suscripcion.id)}>
+                      <button
+                        className={`rounded-md border p-2 hover:bg-gray-100 ${suscripcion.activa ? 'text-red-600' : 'text-green-600'}`}
+                        title={suscripcion.activa ? 'Cancelar Suscripción' : 'Activar Suscripción'}
+                      >
+                        {suscripcion.activa ? '🚫' : '✔️'}
+                      </button>
+                    </form>
                   </div>
                 </div>
                 </div>
