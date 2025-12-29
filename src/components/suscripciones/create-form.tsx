@@ -76,10 +76,6 @@ function SocioAutocomplete({ socios }: { socios: Socio[] }) {
                 ))}
             </div>
           </div>
-              </div>
-            );
-          }
-        </div>
 
         {/* Plan */}
         <div className="mb-4">
