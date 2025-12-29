@@ -29,25 +29,25 @@ export default async function SuscripcionesTable({
                     <p className="text-sm text-gray-500">{suscripcion.plan.nombre}</p>
                   </div>
                   <div className={`px-2 py-1 text-xs rounded-full ${suscripcion.activa ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                      {suscripcion.activa ? 'Activa' : 'Inactiva'}
+                    {suscripcion.activa ? 'Activa' : 'Inactiva'}
                   </div>
-                <div className="flex w-full items-center justify-between pt-4">
-                  <div>
-                    <p className="text-sm">Inicio: {formatFechaBuenosAires(suscripcion.fechaInicio)}</p>
-                    <p className="text-sm">Fin: {formatFechaBuenosAires(suscripcion.fechaFin)}</p>
-                  </div>
-                  <div className="flex justify-end gap-2">
-                    {suscripcion.activa && (
+                  <div className="flex w-full items-center justify-between pt-4">
+                    <div>
+                      <p className="text-sm">Inicio: {formatFechaBuenosAires(suscripcion.fechaInicio)}</p>
+                      <p className="text-sm">Fin: {formatFechaBuenosAires(suscripcion.fechaFin)}</p>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      {suscripcion.activa && (
                         <form action={cancelSuscripcion.bind(null, suscripcion.id)}>
-                            <button className="rounded-md border p-2 hover:bg-gray-100 text-red-600" title="Cancelar Suscripción">
-                                🚫
-                            </button>
+                          <button className="rounded-md border p-2 hover:bg-gray-100 text-red-600" title="Cancelar Suscripción">
+                            🚫
+                          </button>
                         </form>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
           <table className="hidden min-w-full text-gray-900 md:table">
             <thead className="rounded-lg text-left text-sm font-normal">
