@@ -1,70 +1,56 @@
-'use client';
 
+'use client';
 import Link from 'next/link';
-import { useActionState } from 'react';
+import { useActionState, useState, useMemo } from 'react';
 import { createSuscripcion } from '@/lib/actions-suscripciones';
 import { Socio, Plan } from '@prisma/client';
 
 // Definir un tipo Plan serializable donde 'precio' es number en lugar de Decimal
 type PlanSerializable = Omit<Plan, 'precio'> & { precio: number };
 
-export default function Form({ socios, planes }: { socios: Socio[], planes: PlanSerializable[] }) {
-  const initialState = { message: '', errors: {} };
-  const [state, dispatch, isPending] = useActionState(createSuscripcion, initialState);
-
-  "use client";
-
-  import Link from 'next/link';
-  import { useActionState, useState, useMemo } from 'react';
-  import { createSuscripcion } from '@/lib/actions-suscripciones';
-  import { Socio, Plan } from '@prisma/client';
-
-  // Definir un tipo Plan serializable donde 'precio' es number en lugar de Decimal
-  type PlanSerializable = Omit<Plan, 'precio'> & { precio: number };
-
-  function SocioAutocomplete({ socios }: { socios: Socio[] }) {
-    const [input, setInput] = useState('');
-    const [selectedId, setSelectedId] = useState('');
-    const filtered = useMemo(() => {
-      if (!input) return socios;
-      return socios.filter(s =>
-        `${s.nombre} ${s.apellido} ${s.dni}`.toLowerCase().includes(input.toLowerCase())
-      );
-    }, [input, socios]);
-
-    return (
-      <div className="relative">
-        <input
-          type="text"
-          className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
-          placeholder="Buscar socio por nombre, apellido o DNI"
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          autoComplete="off"
-        />
-        <input type="hidden" name="socioId" value={selectedId} />
-        {input && (
-          <ul className="absolute z-10 w-full bg-white border border-gray-200 rounded-md mt-1 max-h-40 overflow-auto">
-            {filtered.length === 0 && (
-              <li className="p-2 text-gray-500">No se encontraron socios</li>
-            )}
-            {filtered.map(socio => (
-              <li
-                key={socio.id}
-                className={`p-2 cursor-pointer hover:bg-gray-100 ${selectedId === socio.id ? 'bg-gray-200' : ''}`}
-                onClick={() => {
-                  setInput(`${socio.nombre} ${socio.apellido} - ${socio.dni}`);
-                  setSelectedId(socio.id);
-                }}
-              >
-                {socio.nombre} {socio.apellido} - {socio.dni}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+function SocioAutocomplete({ socios }: { socios: Socio[] }) {
+  const [input, setInput] = useState('');
+  const [selectedId, setSelectedId] = useState('');
+  const filtered = useMemo(() => {
+    if (!input) return socios;
+    return socios.filter(s =>
+      `${s.nombre} ${s.apellido} ${s.dni}`.toLowerCase().includes(input.toLowerCase())
     );
-  }
+  }, [input, socios]);
+
+  return (
+    <div className="relative">
+      <input
+        type="text"
+        className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
+        placeholder="Buscar socio por nombre, apellido o DNI"
+        value={input}
+        onChange={e => setInput(e.target.value)}
+        autoComplete="off"
+      />
+      <input type="hidden" name="socioId" value={selectedId} />
+      {input && (
+        <ul className="absolute z-10 w-full bg-white border border-gray-200 rounded-md mt-1 max-h-40 overflow-auto">
+          {filtered.length === 0 && (
+            <li className="p-2 text-gray-500">No se encontraron socios</li>
+          )}
+          {filtered.map(socio => (
+            <li
+              key={socio.id}
+              className={`p-2 cursor-pointer hover:bg-gray-100 ${selectedId === socio.id ? 'bg-gray-200' : ''}`}
+              onClick={() => {
+                setInput(`${socio.nombre} ${socio.apellido} - ${socio.dni}`);
+                setSelectedId(socio.id);
+              }}
+            >
+              {socio.nombre} {socio.apellido} - {socio.dni}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
   export default function Form({ socios, planes }: { socios: Socio[], planes: PlanSerializable[] }) {
     const initialState = { message: '', errors: {} };
