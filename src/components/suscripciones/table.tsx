@@ -1,5 +1,5 @@
 import { fetchSuscripciones } from '@/lib/data-suscripciones';
-import { cancelSuscripcion } from '@/lib/actions-suscripciones';
+// import { cancelSuscripcion } from '@/lib/actions-suscripciones';
 import { formatFechaBuenosAires } from '@/lib/date-utils';
 
 export default async function SuscripcionesTable({
@@ -38,14 +38,23 @@ export default async function SuscripcionesTable({
                     <p className="text-sm">Fin: {formatFechaBuenosAires(suscripcion.fechaFin)}</p>
                   </div>
                   <div className="flex justify-end gap-2">
-                    <form action={suscripcion.activa ? cancelSuscripcion.bind(null, suscripcion.id) : activateSuscripcion.bind(null, suscripcion.id)}>
-                      <button
-                        className={`rounded-md border p-2 hover:bg-gray-100 ${suscripcion.activa ? 'text-red-600' : 'text-green-600'}`}
-                        title={suscripcion.activa ? 'Cancelar Suscripción' : 'Activar Suscripción'}
-                      >
-                        {suscripcion.activa ? '🚫' : '✔️'}
-                      </button>
-                    </form>
+                    <button
+                      className={`rounded-md border p-2 hover:bg-gray-100 ${suscripcion.activa ? 'text-red-600' : 'text-green-600'}`}
+                      title={suscripcion.activa ? 'Cancelar Suscripción' : 'Activar Suscripción'}
+                      onClick={async () => {
+                        const endpoint = suscripcion.activa
+                          ? '/api/suscripciones/cancel'
+                          : '/api/suscripciones/activate';
+                        await fetch(endpoint, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ id: suscripcion.id }),
+                        });
+                        window.location.reload();
+                      }}
+                    >
+                      {suscripcion.activa ? '🚫' : '✔️'}
+                    </button>
                   </div>
                 </div>
                 </div>
