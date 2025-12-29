@@ -99,14 +99,6 @@ function SocioAutocomplete({ socios }: { socios: Socio[] }) {
               </div>
             );
           }
-          <div id="socio-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.socioId &&
-              state.errors.socioId.map((error: string) => (
-                <p className="mt-2 text-sm text-red-500" key={error}>
-                  {error}
-                </p>
-              ))}
-          </div>
         </div>
 
         {/* Plan */}
