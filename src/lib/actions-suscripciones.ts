@@ -1,16 +1,4 @@
-// Acción para activar suscripción
-export async function activateSuscripcion(id: string) {
-  try {
-    await prisma.suscripcion.update({
-      where: { id },
-      data: { activa: true },
-    });
-    revalidatePath('/admin/suscripciones');
-  } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to activate subscription.');
-  }
-}
+
 'use server';
 
 import { z } from 'zod';
