@@ -47,7 +47,7 @@ export async function createSuscripcion(prevState: unknown, formData: FormData) 
     const fechaInicioDate = new Date(fechaInicio);
     // Ajustar a mediodía para evitar problemas de timezone al calcular meses
     fechaInicioDate.setHours(12, 0, 0, 0);
-    
+
     // Lógica de Fecha Exacta:
     // La suscripción dura exactamente X días, meses o años desde la fecha de inicio.
     // Ejemplo: Inicio 20 Dic, Duración 1 mes -> Fin 20 Ene.
@@ -57,21 +57,63 @@ export async function createSuscripcion(prevState: unknown, formData: FormData) 
     fechaFinDate.setMonth(fechaFinDate.getMonth() + plan.duracionMeses);
     // Ajuste por si el día destino no existe (ej: 31 Ene + 1 mes -> 2 Mar, queremos 28 Feb)
     if (fechaFinDate.getDate() !== fechaInicioDate.getDate()) {
-        fechaFinDate.setDate(0); // Volver al último día del mes anterior
+      fechaFinDate.setDate(0); // Volver al último día del mes anterior
     }
-    
+
     // Establecer al final del día
     fechaFinDate.setHours(23, 59, 59, 999);
 
-    await prisma.suscripcion.create({
-      data: {
+    // Buscar si existe una suscripción activa para el socio
+    const suscripcionActiva = await prisma.suscripcion.findFirst({
+      where: {
         socioId,
-        planId,
-        fechaInicio: fechaInicioDate,
-        fechaFin: fechaFinDate,
         activa: true,
       },
     });
+
+    if (suscripcionActiva) {
+      // Si existe, actualizar el plan y las fechas
+      await prisma.suscripcion.update({
+        where: { id: suscripcionActiva.id },
+        data: {
+          planId,
+          fechaInicio: fechaInicioDate,
+          fechaFin: fechaFinDate,
+          activa: true,
+        },
+      });
+    } else {
+      // Si no hay activa, buscar inactiva para ese plan
+      const suscripcionInactiva = await prisma.suscripcion.findFirst({
+        where: {
+          socioId,
+          planId,
+          activa: false,
+        },
+      });
+      if (suscripcionInactiva) {
+        // Reactivar y actualizar fechas
+        await prisma.suscripcion.update({
+          where: { id: suscripcionInactiva.id },
+          data: {
+            fechaInicio: fechaInicioDate,
+            fechaFin: fechaFinDate,
+            activa: true,
+          },
+        });
+      } else {
+        // Si no existe, crear nueva
+        await prisma.suscripcion.create({
+          data: {
+            socioId,
+            planId,
+            fechaInicio: fechaInicioDate,
+            fechaFin: fechaFinDate,
+            activa: true,
+          },
+        });
+      }
+    }
   } catch (error) {
     console.error(error);
     return {
