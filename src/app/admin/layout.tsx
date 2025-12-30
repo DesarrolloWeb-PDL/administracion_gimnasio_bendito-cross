@@ -109,9 +109,9 @@ export default async function AdminLayout({
             <h2 className="text-2xl font-bold text-white drop-shadow-sm">Panel de Administración</h2>
             <div className="flex items-center gap-4">
               <ThemeToggle />
-              <div className="text-sm text-white/90">
-                  Hola, <span className="font-semibold">{session?.user?.name || 'Usuario'}</span> ({session?.user?.rol})
-              </div>
+                <div className="text-sm text-white/90">
+                  Hola, <span className="font-semibold">{userPermissions?.nombre || session?.user?.name || 'Usuario'}</span> ({userPermissions?.rol || session?.user?.rol})
+                </div>
             </div>
         </header>
         {children}
