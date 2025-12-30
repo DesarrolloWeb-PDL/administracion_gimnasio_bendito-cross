@@ -1,3 +1,4 @@
+// Cambio insignificativo para forzar despliegue en Vercel
 generator client {
   provider = "prisma-client-js"
 }
