@@ -200,6 +200,39 @@ export default function ConfigForm({ config }: { config: Configuracion | null })
         >
           Exportar Base de Datos
         </a>
+        <div className="flex flex-col gap-2 max-w-xl">
+          <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 text-sm rounded">
+            <strong>¡Advertencia!</strong> Importar un backup sobrescribirá los datos actuales de la base de datos. <br />
+            <span className="font-semibold">Esta acción no se puede deshacer.</span> <br />
+            Asegúrate de tener un backup actualizado antes de continuar. <br />
+            <span className="text-red-600 font-bold">Se recomienda realizar esta acción solo si entiendes las consecuencias.</span>
+          </div>
+          <form
+            action="/admin/configuracion/import-db"
+            method="POST"
+            encType="multipart/form-data"
+            className="flex items-center gap-2"
+            onSubmit={(e) => {
+              if (!window.confirm('¿Estás seguro de que deseas importar un backup? Esto sobrescribirá todos los datos actuales.')) {
+                e.preventDefault();
+              }
+            }}
+          >
+            <input
+              type="file"
+              name="file"
+              accept="application/json"
+              required
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+            <button
+              type="submit"
+              className="flex h-10 items-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+            >
+              Importar Backup
+            </button>
+          </form>
+        </div>
         <button type="submit" aria-disabled={isPending} className="flex h-10 items-center rounded-lg bg-[var(--primary-color)] px-4 text-sm font-medium text-white transition-colors hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
             {isPending ? 'Guardando...' : 'Guardar Configuración'}
         </button>
