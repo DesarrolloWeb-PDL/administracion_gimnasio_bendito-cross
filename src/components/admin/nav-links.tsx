@@ -11,13 +11,13 @@ export default function NavLinks({ permissions, role, onLinkClick }: NavLinksPro
   const isAdmin = role === 'ADMIN' || role === 'admin';
   
   const links = [
-    { name: 'Dashboard', href: '/admin', show: isAdmin },
+    { name: 'Inicio', href: '/admin', show: isAdmin },
     { name: 'Usuarios', href: '/admin/usuarios', show: isAdmin || (permissions?.permisoUsuarios ?? false) },
     { name: 'Socios', href: '/admin/socios', show: isAdmin || (permissions?.permisoSocios ?? false) },
     { name: 'Planes', href: '/admin/planes', show: isAdmin || (permissions?.permisoPlanes ?? false) },
     { name: 'Suscripciones', href: '/admin/suscripciones', show: isAdmin || (permissions?.permisoSuscripciones ?? false) },
     { name: 'Asistencias', href: '/admin/asistencias', show: isAdmin || (permissions?.permisoAsistencias ?? false) },
-    { name: 'Transacciones', href: '/admin/transacciones', show: isAdmin || (permissions?.permisoTransacciones ?? false) },
+    { name: 'Pagos', href: '/admin/transacciones', show: isAdmin || (permissions?.permisoTransacciones ?? false) },
     { name: 'Reportes', href: '/admin/reportes', show: isAdmin || (permissions?.permisoReportes ?? false) },
     { name: 'Configuración', href: '/admin/configuracion', show: isAdmin || (permissions?.permisoConfiguracion ?? false) },
   ];
