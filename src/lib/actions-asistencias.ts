@@ -3,6 +3,7 @@
 import { z } from 'zod';
 import prisma from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { abrirPuertaMagnetica } from '@/lib/puerta-service';
 
 const CheckInSchema = z.object({
   dni: z.string().min(1, 'El DNI es obligatorio'),
@@ -128,6 +129,9 @@ export async function registrarAsistencia(prevState: CheckInState, formData: For
           fecha: new Date(), // Usamos fecha actual con hora
         },
       });
+
+      // Abrir puerta magnética vía relé USB
+      await abrirPuertaMagnetica();
 
       revalidatePath('/admin'); 
       revalidatePath('/admin/asistencias');
