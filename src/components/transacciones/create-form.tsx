@@ -78,6 +78,31 @@ export default function Form({ suscripciones }: { suscripciones: SuscripcionWith
           </div>
         </div>
 
+        {/* Fecha */}
+        <div className="mb-4">
+          <label htmlFor="fecha" className="mb-2 block text-sm font-medium text-gray-900">
+            Fecha de Pago (opcional)
+          </label>
+          <div className="relative">
+            <input
+              id="fecha"
+              name="fecha"
+              type="date"
+              className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
+              aria-describedby="fecha-error"
+            />
+          </div>
+          <div id="fecha-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.fecha &&
+              state.errors.fecha.map((error: string) => (
+                <p className="mt-2 text-sm text-red-500" key={error}>
+                  {error}
+                </p>
+              ))}
+          </div>
+          <p className="mt-1 text-xs text-gray-500">Si no se especifica, se usará la fecha actual</p>
+        </div>
+
         {/* Notas */}
         <div className="mb-4">
           <label htmlFor="notas" className="mb-2 block text-sm font-medium text-gray-900">

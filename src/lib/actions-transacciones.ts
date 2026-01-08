@@ -10,6 +10,7 @@ const FormSchema = z.object({
   suscripcionId: z.string().min(1, 'Debe seleccionar una suscripción'),
   monto: z.coerce.number().min(0.01, 'El monto debe ser mayor a 0'),
   metodoPago: z.string().min(1, 'Seleccione un método de pago'),
+  fecha: z.string().optional(),
   notas: z.string().optional(),
 });
 
@@ -20,6 +21,7 @@ export async function createTransaccion(prevState: unknown, formData: FormData) 
     suscripcionId: formData.get('suscripcionId'),
     monto: formData.get('monto'),
     metodoPago: formData.get('metodoPago'),
+    fecha: formData.get('fecha'),
     notas: formData.get('notas'),
   });
 
@@ -30,7 +32,7 @@ export async function createTransaccion(prevState: unknown, formData: FormData) 
     };
   }
 
-  const { suscripcionId, monto, metodoPago, notas } = validatedFields.data;
+  const { suscripcionId, monto, metodoPago, fecha, notas } = validatedFields.data;
 
   try {
     await prisma.transaccion.create({
@@ -38,6 +40,7 @@ export async function createTransaccion(prevState: unknown, formData: FormData) 
         suscripcionId,
         monto,
         metodoPago,
+        ...(fecha && { fecha: new Date(fecha) }),
         notas: notas || null,
       },
     });
