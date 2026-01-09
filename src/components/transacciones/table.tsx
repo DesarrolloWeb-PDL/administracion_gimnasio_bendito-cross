@@ -130,6 +130,7 @@ export default async function TransaccionesTable({
                       </form>
                     </div>
                   </td>
+                </tr>
               ))}
             </tbody>
           </table>
