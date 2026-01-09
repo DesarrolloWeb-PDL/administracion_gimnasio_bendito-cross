@@ -189,3 +189,53 @@ export async function fetchIngresosPorTipo() {
     throw new Error('Error al obtener ingresos por tipo.');
   }
 }
+
+export async function fetchIngresosPorDia(año: number, mes: number) {
+  noStore();
+  try {
+    // Crear fecha de inicio y fin del mes
+    const fechaInicio = new Date(año, mes - 1, 1);
+    const fechaFin = new Date(año, mes, 0, 23, 59, 59, 999);
+
+    const transacciones = await prisma.transaccion.findMany({
+      where: {
+        fecha: {
+          gte: fechaInicio,
+          lte: fechaFin,
+        },
+      },
+      select: {
+        fecha: true,
+        monto: true,
+      },
+      orderBy: {
+        fecha: 'asc',
+      },
+    });
+
+    // Agrupar por día
+    const ingresosPorDia: Record<number, number> = {};
+
+    transacciones.forEach((t) => {
+      const date = new Date(t.fecha);
+      const dia = date.getDate();
+      
+      if (!ingresosPorDia[dia]) {
+        ingresosPorDia[dia] = 0;
+      }
+      ingresosPorDia[dia] += Number(t.monto);
+    });
+
+    // Convertir a array ordenado por día
+    return Object.entries(ingresosPorDia)
+      .map(([dia, monto]) => ({
+        dia: parseInt(dia),
+        monto,
+      }))
+      .sort((a, b) => a.dia - b.dia);
+
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Error al obtener ingresos por día.');
+  }
+}

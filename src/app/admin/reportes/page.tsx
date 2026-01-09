@@ -1,4 +1,5 @@
 import { fetchIngresosPorMes, fetchNuevosSociosPorMes, fetchAsistenciasPorDia, fetchIngresosPorTipo } from '@/lib/data-reportes';
+import { IngresosPorDia } from '@/components/reportes/ingresos-por-dia';
 
 export default async function Page() {
   const ingresos = await fetchIngresosPorMes();
@@ -141,6 +142,11 @@ export default async function Page() {
             </table>
           </div>
         </div>
+      </div>
+
+      {/* Fila 3: Ingresos por Día */}
+      <div className="grid gap-6 mt-6">
+        <IngresosPorDia />
       </div>
     </main>
   );
