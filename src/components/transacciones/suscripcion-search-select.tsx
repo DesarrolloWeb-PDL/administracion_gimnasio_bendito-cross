@@ -38,10 +38,10 @@ export default function SuscripcionSearchSelect({
     <div className="relative">
       <input type="hidden" name="suscripcionId" value={selectedId} />
       <div
-        className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500 cursor-pointer flex items-center justify-between"
+        className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 pr-3 text-sm outline-2 placeholder:text-gray-500 cursor-pointer flex items-center justify-between hover:border-gray-300 transition-colors"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <span>{displayText}</span>
+        <span className="text-gray-900">{displayText}</span>
         <svg
           className={`w-4 h-4 transition-transform ${isOpen ? 'transform rotate-180' : ''}`}
           fill="none"
@@ -59,7 +59,7 @@ export default function SuscripcionSearchSelect({
             placeholder="Buscar socio, plan..."
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
-            className="w-full px-3 py-2 border-b border-gray-200 outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            className="w-full px-3 py-2 border-b border-gray-200 outline-none focus:ring-1 focus:ring-blue-500 text-sm rounded-t-md"
             autoFocus
           />
           <div className="max-h-60 overflow-y-auto">
@@ -72,10 +72,10 @@ export default function SuscripcionSearchSelect({
                     setIsOpen(false);
                     setSearchValue('');
                   }}
-                  className="px-3 py-2 cursor-pointer hover:bg-blue-50 text-sm flex items-center justify-between"
+                  className="px-3 py-2 cursor-pointer hover:bg-gray-100 text-sm flex items-center justify-between transition-colors"
                 >
                   <div>
-                    <div className="font-medium">
+                    <div className="font-medium text-gray-900">
                       {s.socio.nombre} {s.socio.apellido}
                     </div>
                     <div className="text-xs text-gray-500">
