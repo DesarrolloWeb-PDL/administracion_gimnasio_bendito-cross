@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useActionState } from 'react';
 import { createTransaccion } from '@/lib/actions-transacciones';
+import SuscripcionSearchSelect from './suscripcion-search-select';
 
 type SuscripcionWithRelations = {
   id: string;
@@ -22,24 +23,7 @@ export default function Form({ suscripciones }: { suscripciones: SuscripcionWith
           <label htmlFor="suscripcionId" className="mb-2 block text-sm font-medium text-gray-900">
             Seleccionar Suscripción
           </label>
-          <div className="relative">
-            <select
-              id="suscripcionId"
-              name="suscripcionId"
-              className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
-              defaultValue=""
-              aria-describedby="suscripcion-error"
-            >
-              <option value="" disabled>
-                Seleccione una suscripción
-              </option>
-              {suscripciones.map((suscripcion) => (
-                <option key={suscripcion.id} value={suscripcion.id}>
-                  {suscripcion.socio.nombre} {suscripcion.socio.apellido} - {suscripcion.plan.nombre}
-                </option>
-              ))}
-            </select>
-          </div>
+          <SuscripcionSearchSelect suscripciones={suscripciones} />
           <div id="suscripcion-error" aria-live="polite" aria-atomic="true">
             {state.errors?.suscripcionId &&
               state.errors.suscripcionId.map((error: string) => (

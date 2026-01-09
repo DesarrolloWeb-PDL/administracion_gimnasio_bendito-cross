@@ -3,6 +3,7 @@ import TransaccionesTable from '@/components/transacciones/table';
 import Pagination from '@/components/pagination';
 import { Suspense } from 'react';
 import { fetchTransaccionesPages } from '@/lib/data-transacciones';
+import SearchInput from '@/components/ui/search-input';
 
 export default async function Page({
   searchParams,
@@ -24,14 +25,10 @@ export default async function Page({
       </div>
       <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
         <div className="relative flex flex-1 shrink-0">
-            <label htmlFor="search" className="sr-only">
+          <label htmlFor="search" className="sr-only">
             Buscar
-            </label>
-            <input
-            className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500"
-            placeholder="Buscar por socio..."
-            defaultValue={query}
-            />
+          </label>
+          <SearchInput placeholder="Buscar por socio..." />
         </div>
         <Link
           href="/admin/transacciones/create"
