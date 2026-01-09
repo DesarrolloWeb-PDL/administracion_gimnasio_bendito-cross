@@ -94,3 +94,39 @@ export async function fetchActiveSuscripcionesForSelect() {
     throw new Error('Failed to fetch active subscriptions.');
   }
 }
+
+export async function fetchTransaccionById(id: string) {
+  noStore();
+  try {
+    const transaccion = await prisma.transaccion.findUnique({
+      where: { id },
+      include: {
+        suscripcion: {
+          include: {
+            socio: true,
+            plan: true,
+          },
+        },
+      },
+    });
+
+    if (!transaccion) {
+      throw new Error('Transacción no encontrada');
+    }
+
+    return {
+      ...transaccion,
+      monto: Number(transaccion.monto),
+      suscripcion: {
+        ...transaccion.suscripcion,
+        plan: {
+          ...transaccion.suscripcion.plan,
+          precio: Number(transaccion.suscripcion.plan.precio)
+        }
+      }
+    };
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch transaction.');
+  }
+}

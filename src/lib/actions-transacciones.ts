@@ -54,3 +54,59 @@ export async function createTransaccion(prevState: unknown, formData: FormData) 
   revalidatePath('/admin/transacciones');
   redirect('/admin/transacciones');
 }
+
+export async function updateTransaccion(prevState: unknown, formData: FormData) {
+  const validatedFields = FormSchema.safeParse({
+    id: formData.get('id'),
+    suscripcionId: formData.get('suscripcionId'),
+    monto: formData.get('monto'),
+    metodoPago: formData.get('metodoPago'),
+    fecha: formData.get('fecha'),
+    notas: formData.get('notas'),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Faltan campos obligatorios. Error al actualizar transacción.',
+    };
+  }
+
+  const { id, suscripcionId, monto, metodoPago, fecha, notas } = validatedFields.data;
+
+  try {
+    await prisma.transaccion.update({
+      where: { id },
+      data: {
+        suscripcionId,
+        monto,
+        metodoPago,
+        ...(fecha && { fecha: new Date(fecha) }),
+        notas: notas || null,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return {
+      message: 'Error de base de datos: No se pudo actualizar la transacción.',
+    };
+  }
+
+  revalidatePath('/admin/transacciones');
+  redirect('/admin/transacciones');
+}
+
+export async function deleteTransaccion(id: string) {
+  try {
+    await prisma.transaccion.delete({
+      where: { id },
+    });
+  } catch (error) {
+    console.error(error);
+    return {
+      message: 'Error de base de datos: No se pudo eliminar la transacción.',
+    };
+  }
+
+  revalidatePath('/admin/transacciones');
+}

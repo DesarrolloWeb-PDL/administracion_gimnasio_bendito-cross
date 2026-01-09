@@ -1,4 +1,6 @@
 import { fetchTransacciones } from '@/lib/data-transacciones';
+import Link from 'next/link';
+import { deleteTransaccion } from '@/lib/actions-transacciones';
 
 export default async function TransaccionesTable({
   query,
@@ -8,6 +10,11 @@ export default async function TransaccionesTable({
   currentPage: number;
 }) {
   const transacciones = await fetchTransacciones(query, currentPage);
+
+  async function handleDelete(id: string) {
+    'use server';
+    await deleteTransaccion(id);
+  }
 
   return (
     <div className="mt-6 flow-root">
@@ -34,8 +41,18 @@ export default async function TransaccionesTable({
                   <div>
                     <p className="text-sm text-gray-500">{transaccion.fecha.toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', year: 'numeric', month: '2-digit', day: '2-digit' })}</p>
                   </div>
-                  <div className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">
-                    {transaccion.metodoPago}
+                  <div className="flex gap-2 items-center">
+                    <div className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">
+                      {transaccion.metodoPago}
+                    </div>
+                    <div className="flex gap-1">
+                      <Link
+                        href={`/admin/transacciones/${transaccion.id}`}
+                        className="rounded-md bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700 hover:bg-blue-200"
+                      >
+                        Editar
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -58,6 +75,9 @@ export default async function TransaccionesTable({
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
                   Método
+                </th>
+                <th scope="col" className="px-3 py-5 font-medium">
+                  Acciones
                 </th>
               </tr>
             </thead>
@@ -84,7 +104,32 @@ export default async function TransaccionesTable({
                   <td className="whitespace-nowrap px-3 py-3">
                     {transaccion.metodoPago}
                   </td>
-                </tr>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    <div className="flex gap-2">
+                      <Link
+                        href={`/admin/transacciones/${transaccion.id}`}
+                        className="rounded-md bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 hover:bg-blue-200"
+                      >
+                        Editar
+                      </Link>
+                      <form action={async () => {
+                        'use server';
+                        await deleteTransaccion(transaccion.id);
+                      }}>
+                        <button
+                          type="submit"
+                          className="rounded-md bg-red-100 px-3 py-1 text-xs font-medium text-red-700 hover:bg-red-200"
+                          onClick={(e) => {
+                            if (!confirm('¿Estás seguro de que deseas eliminar esta transacción?')) {
+                              e.preventDefault();
+                            }
+                          }}
+                        >
+                          Eliminar
+                        </button>
+                      </form>
+                    </div>
+                  </td>
               ))}
             </tbody>
           </table>
