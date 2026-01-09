@@ -59,7 +59,7 @@ export default function SuscripcionSearchSelect({
             placeholder="Buscar socio, plan..."
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
-            className="w-full px-3 py-2 border-b border-gray-200 outline-none focus:ring-1 focus:ring-blue-500 text-sm rounded-t-md"
+            className="w-full px-3 py-2 border-b border-gray-200 bg-white text-gray-900 placeholder:text-gray-500 outline-none focus:ring-1 focus:ring-blue-500 text-sm rounded-t-md"
             autoFocus
           />
           <div className="max-h-60 overflow-y-auto">
