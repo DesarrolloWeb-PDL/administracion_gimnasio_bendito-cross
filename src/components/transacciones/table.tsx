@@ -1,6 +1,6 @@
 import { fetchTransacciones } from '@/lib/data-transacciones';
 import Link from 'next/link';
-import { deleteTransaccion } from '@/lib/actions-transacciones';
+import DeleteButton from './delete-button';
 
 export default async function TransaccionesTable({
   query,
@@ -10,11 +10,6 @@ export default async function TransaccionesTable({
   currentPage: number;
 }) {
   const transacciones = await fetchTransacciones(query, currentPage);
-
-  async function handleDelete(id: string) {
-    'use server';
-    await deleteTransaccion(id);
-  }
 
   return (
     <div className="mt-6 flow-root">
@@ -112,22 +107,7 @@ export default async function TransaccionesTable({
                       >
                         Editar
                       </Link>
-                      <form action={async () => {
-                        'use server';
-                        await deleteTransaccion(transaccion.id);
-                      }}>
-                        <button
-                          type="submit"
-                          className="rounded-md bg-red-100 px-3 py-1 text-xs font-medium text-red-700 hover:bg-red-200"
-                          onClick={(e) => {
-                            if (!confirm('¿Estás seguro de que deseas eliminar esta transacción?')) {
-                              e.preventDefault();
-                            }
-                          }}
-                        >
-                          Eliminar
-                        </button>
-                      </form>
+                      <DeleteButton id={transaccion.id} />
                     </div>
                   </td>
                 </tr>
