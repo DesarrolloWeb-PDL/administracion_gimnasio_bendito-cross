@@ -89,3 +89,103 @@ export async function fetchNuevosSociosPorMes() {
     throw new Error('Error al obtener reporte de socios.');
   }
 }
+
+export async function fetchAsistenciasPorDia() {
+  noStore();
+  try {
+    const treintaDiasAtras = new Date();
+    treintaDiasAtras.setDate(treintaDiasAtras.getDate() - 30);
+
+    const asistencias = await prisma.asistencia.findMany({
+      where: {
+        fecha: {
+          gte: treintaDiasAtras,
+        },
+      },
+      select: {
+        fecha: true,
+      },
+      orderBy: {
+        fecha: 'asc',
+      },
+    });
+
+    // Agrupar por día de la semana
+    const asistenciasPorDia: Record<string, number> = {
+      'Lunes': 0,
+      'Martes': 0,
+      'Miércoles': 0,
+      'Jueves': 0,
+      'Viernes': 0,
+      'Sábado': 0,
+      'Domingo': 0,
+    };
+
+    const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+
+    asistencias.forEach((a) => {
+      const date = new Date(a.fecha);
+      const diaSemana = diasSemana[date.getDay()];
+      asistenciasPorDia[diaSemana]++;
+    });
+
+    return Object.entries(asistenciasPorDia).map(([dia, cantidad]) => ({
+      dia,
+      cantidad,
+    }));
+
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Error al obtener asistencias por día.');
+  }
+}
+
+export async function fetchIngresosPorTipo() {
+  noStore();
+  try {
+    const treintaDiasAtras = new Date();
+    treintaDiasAtras.setDate(treintaDiasAtras.getDate() - 30);
+
+    const transacciones = await prisma.transaccion.findMany({
+      where: {
+        fecha: {
+          gte: treintaDiasAtras,
+        },
+      },
+      select: {
+        monto: true,
+        notas: true,
+      },
+      orderBy: {
+        fecha: 'asc',
+      },
+    });
+
+    let mensualidad = 0;
+    let ventas = 0;
+
+    transacciones.forEach((t) => {
+      const monto = Number(t.monto);
+      const notas = (t.notas || '').toLowerCase();
+
+      // Clasificar basado en las notas
+      if (notas.includes('mensualidad') || notas.includes('plan') || notas.includes('suscripción')) {
+        mensualidad += monto;
+      } else if (notas.includes('bebida') || notas.includes('venta') || notas.includes('producto')) {
+        ventas += monto;
+      } else {
+        // Si no tiene clasificación clara, asumir que es mensualidad
+        mensualidad += monto;
+      }
+    });
+
+    return [
+      { tipo: 'Mensualidades', monto: mensualidad },
+      { tipo: 'Ventas', monto: ventas },
+    ];
+
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Error al obtener ingresos por tipo.');
+  }
+}
