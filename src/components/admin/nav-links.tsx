@@ -9,14 +9,15 @@ interface NavLinksProps {
 
 export default function NavLinks({ permissions, role, onLinkClick }: NavLinksProps) {
   const isAdmin = role === 'ADMIN' || role === 'admin';
+  const isProfessor = role?.startsWith('PROFESOR_');
   
   const links = [
-    { name: 'Inicio', href: '/admin', show: isAdmin },
+    { name: 'Inicio', href: '/admin', show: isAdmin || isProfessor },
     { name: 'Usuarios', href: '/admin/usuarios', show: isAdmin || (permissions?.permisoUsuarios ?? false) },
     { name: 'Socios', href: '/admin/socios', show: isAdmin || (permissions?.permisoSocios ?? false) },
     { name: 'Planes', href: '/admin/planes', show: isAdmin || (permissions?.permisoPlanes ?? false) },
     { name: 'Suscripciones', href: '/admin/suscripciones', show: isAdmin || (permissions?.permisoSuscripciones ?? false) },
-    { name: 'Asistencias', href: '/admin/asistencias', show: isAdmin || (permissions?.permisoAsistencias ?? false) },
+    { name: 'Asistencias', href: '/admin/asistencias', show: !isProfessor && (isAdmin || (permissions?.permisoAsistencias ?? false)) },
     { name: 'Pagos', href: '/admin/transacciones', show: isAdmin || (permissions?.permisoTransacciones ?? false) },
     { name: 'Reportes', href: '/admin/reportes', show: isAdmin || (permissions?.permisoReportes ?? false) },
     { name: 'Configuración', href: '/admin/configuracion', show: isAdmin || (permissions?.permisoConfiguracion ?? false) },
