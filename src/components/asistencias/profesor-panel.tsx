@@ -22,7 +22,7 @@ export default async function ProfesorPanel({ discipline }: { discipline: string
               {asistencias.map((asistencia) => {
                 const planNombre = asistencia.socio.suscripciones[0]?.plan.nombre || 'Sin Plan Activo';
                 const fecha = new Date(asistencia.fecha);
-                const horaIngreso = fecha.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+                const horaIngreso = fecha.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' });
 
                 return (
                   <tr key={asistencia.id} className="bg-white border-b last:border-0 hover:bg-gray-50 transition-colors">

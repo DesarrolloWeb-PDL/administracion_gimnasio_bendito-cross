@@ -44,7 +44,7 @@ export default async function AsistenciaTable({
                         -
                       </p>
                       <p className="text-sm">
-                        {new Date(asistencia.fecha).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })} hs
+                        {new Date(asistencia.fecha).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' })} hs
                       </p>
                     </div>
                   </div>
@@ -84,7 +84,7 @@ export default async function AsistenciaTable({
                       -
                     </td>
                     <td className="whitespace-nowrap px-3 py-3">
-                      {new Date(asistencia.fecha).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })} hs
+                      {new Date(asistencia.fecha).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' })} hs
                     </td>
                   </tr>
                 ))}
