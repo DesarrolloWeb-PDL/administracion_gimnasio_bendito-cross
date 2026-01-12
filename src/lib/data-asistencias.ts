@@ -100,3 +100,62 @@ export async function fetchAsistenciasPages(query: string, discipline?: string) 
     throw new Error('Failed to fetch total number of attendance pages.');
   }
 }
+
+export async function fetchAsistenciasHoy(discipline?: string) {
+  noStore();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+
+  const whereClause: any = {
+    fecha: {
+      gte: today,
+      lt: tomorrow,
+    },
+  };
+
+  if (discipline === 'musculacion') {
+    whereClause.socio = {
+      suscripciones: {
+        some: {
+          activa: true,
+          plan: { allowsMusculacion: true },
+        },
+      },
+    };
+  } else if (discipline === 'crossfit') {
+    whereClause.socio = {
+      suscripciones: {
+        some: {
+          activa: true,
+          plan: { allowsCrossfit: true },
+        },
+      },
+    };
+  }
+
+  try {
+    const asistencias = await prisma.asistencia.findMany({
+      where: whereClause,
+      include: {
+        socio: {
+          include: {
+            suscripciones: {
+              where: { activa: true },
+              include: { plan: true },
+            },
+          },
+        },
+      },
+      orderBy: {
+        fecha: 'desc',
+      },
+    });
+    return asistencias;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch attendance records for today.');
+  }
+}
+
