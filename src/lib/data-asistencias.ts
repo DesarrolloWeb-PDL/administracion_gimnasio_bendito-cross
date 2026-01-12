@@ -3,7 +3,7 @@ import { unstable_noStore as noStore } from 'next/cache';
 
 const ITEMS_PER_PAGE = 10;
 
-export async function fetchAsistencias(query: string, currentPage: number, discipline?: string) {
+export async function fetchAsistencias(query: string, currentPage: number, discipline?: string, date?: string) {
   noStore();
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
@@ -14,6 +14,15 @@ export async function fetchAsistencias(query: string, currentPage: number, disci
       { socio: { dni: { contains: query, mode: 'insensitive' } } },
     ],
   };
+
+  if (date) {
+    const startDate = new Date(`${date}T00:00:00-03:00`);
+    const endDate = new Date(`${date}T23:59:59.999-03:00`);
+    whereClause.fecha = {
+      gte: startDate,
+      lte: endDate,
+    };
+  }
 
   if (discipline === 'musculacion') {
     whereClause.socio = {
@@ -59,7 +68,7 @@ export async function fetchAsistencias(query: string, currentPage: number, disci
   }
 }
 
-export async function fetchAsistenciasPages(query: string, discipline?: string) {
+export async function fetchAsistenciasPages(query: string, discipline?: string, date?: string) {
   noStore();
   
   const whereClause: any = {
@@ -69,6 +78,15 @@ export async function fetchAsistenciasPages(query: string, discipline?: string) 
       { socio: { dni: { contains: query, mode: 'insensitive' } } },
     ],
   };
+
+  if (date) {
+    const startDate = new Date(`${date}T00:00:00-03:00`);
+    const endDate = new Date(`${date}T23:59:59.999-03:00`);
+    whereClause.fecha = {
+      gte: startDate,
+      lte: endDate,
+    };
+  }
 
   if (discipline === 'musculacion') {
     whereClause.socio = {

@@ -4,12 +4,14 @@ export default async function AsistenciasTable({
   query,
   currentPage,
   discipline,
+  date,
 }: {
   query: string;
   currentPage: number;
   discipline?: string;
+  date?: string;
 }) {
-  const asistencias = await fetchAsistencias(query, currentPage, discipline);
+  const asistencias = await fetchAsistencias(query, currentPage, discipline, date);
 
   return (
     <div className="mt-6 flow-root">

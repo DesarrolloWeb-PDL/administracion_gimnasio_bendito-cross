@@ -2,6 +2,9 @@ import Link from 'next/link';
 import AsistenciasTable from '@/components/asistencias/table';
 import Pagination from '@/components/pagination';
 import DisciplineFilter from '@/components/asistencias/discipline-filter';
+import DateFilter from '@/components/asistencias/date-filter';
+import SearchInput from '@/components/ui/search-input';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { Suspense } from 'react';
 import { fetchAsistenciasPages } from '@/lib/data-asistencias';
 
@@ -12,13 +15,15 @@ export default async function Page({
     query?: string;
     page?: string;
     discipline?: string;
+    date?: string;
   }>;
 }) {
   const params = await searchParams;
   const query = params?.query || '';
   const discipline = params?.discipline || '';
+  const date = params?.date || '';
   const currentPage = Number(params?.page) || 1;
-  const totalPages = await fetchAsistenciasPages(query, discipline);
+  const totalPages = await fetchAsistenciasPages(query, discipline, date);
 
   return (
     <div className="w-full">
@@ -31,12 +36,14 @@ export default async function Page({
                 <label htmlFor="search" className="sr-only">
                 Buscar
                 </label>
-                <input
-                className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500"
-                placeholder="Buscar por socio..."
-                defaultValue={query}
-                />
+                <div className="relative w-full">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <MagnifyingGlassIcon className="h-5 w-5 text-gray-500" />
+                  </div>
+                  <SearchInput placeholder="Buscar por socio..." />
+                </div>
             </div>
+            <DateFilter />
             <DisciplineFilter />
         </div>
         <Link
@@ -48,7 +55,7 @@ export default async function Page({
         </Link>
       </div>
       <Suspense fallback={<div>Cargando...</div>}>
-        <AsistenciasTable query={query} currentPage={currentPage} discipline={discipline} />
+        <AsistenciasTable query={query} currentPage={currentPage} discipline={discipline} date={date} />
       </Suspense>
       <div className="mt-5 flex w-full justify-center">
         <Pagination totalPages={totalPages} />
