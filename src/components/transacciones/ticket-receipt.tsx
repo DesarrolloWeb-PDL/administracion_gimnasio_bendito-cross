@@ -50,37 +50,41 @@ export default function TicketReceipt({ data, onClose }: TicketReceiptProps) {
     if (!ticketRef.current) return;
     setIsCopying(true);
     try {
+      // Generar canvas
       const canvas = await html2canvas(ticketRef.current, {
-        scale: 2, // Mejor calidad
+        scale: 2, 
         backgroundColor: '#ffffff',
+        useCORS: true,
         logging: false,
       });
 
-      canvas.toBlob(async (blob) => {
-        if (!blob) {
-          console.error("No se pudo generar el blob del ticket");
-          return;
-        }
-        
-        try {
-          // Intentar usar la API de portapapeles moderna para imágenes
-          const item = new ClipboardItem({ 'image/png': blob });
-          await navigator.clipboard.write([item]);
-          alert('¡Ticket copiado al portapapeles! Ahora pégalo en WhatsApp (Ctrl+V).');
-        } catch (err) {
-          console.error('Error al copiar al portapapeles:', err);
-          // Fallback: Descargar la imagen si falla el portapapeles
-          const link = document.createElement('a');
-          link.download = `ticket-${data.id}.png`;
-          link.href = canvas.toDataURL('image/png');
-          link.click();
-          alert('No se pudo copiar automáticamente. Se ha descargado la imagen.');
-        }
-      });
+      // Convertir a Blob (Promisificado para mejor control de errores)
+      const blob = await new Promise<Blob | null>((resolve) => 
+        canvas.toBlob(resolve, 'image/png')
+      );
+
+      if (!blob) throw new Error("Falló la conversión a imagen");
+
+      try {
+        // Intentar copiar al portapapeles
+        const item = new ClipboardItem({ 'image/png': blob });
+        await navigator.clipboard.write([item]);
+        alert('¡Ticket copiado al portapapeles! 📋\n\nVe a WhatsApp y presiona Ctrl + V (Pegar).');
+      } catch (clipboardError) {
+        console.warn('Falló el portapapeles, usando descarga como fallback:', clipboardError);
+        // PLAN B: Descargar la imagen si falla el portapapeles
+        const link = document.createElement('a');
+        link.download = `comprobante-${data.socioNombre.replace(/\s+/g, '-')}.png`;
+        link.href = canvas.toDataURL('image/png');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        alert('No se pudo copiar automáticamente (el navegador lo bloqueó).\n\n📥 Se ha descargado la imagen en tu dispositivo.');
+      }
 
     } catch (error) {
       console.error('Error generando ticket:', error);
-      alert('Hubo un error al generar la imagen del ticket.');
+      alert('Error técnico al generar la imagen. Intenta tomar una captura de pantalla manual.');
     } finally {
       setIsCopying(false);
     }
