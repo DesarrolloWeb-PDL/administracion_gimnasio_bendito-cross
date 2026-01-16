@@ -35,7 +35,7 @@ export async function createTransaccion(prevState: unknown, formData: FormData) 
   const { suscripcionId, monto, metodoPago, fecha, notas } = validatedFields.data;
 
   try {
-    await prisma.transaccion.create({
+    const newTransaccion = await prisma.transaccion.create({
       data: {
         suscripcionId,
         monto,
@@ -43,16 +43,28 @@ export async function createTransaccion(prevState: unknown, formData: FormData) 
         ...(fecha && { fecha: new Date(fecha) }),
         notas: notas || null,
       },
+      include: {
+        suscripcion: {
+          include: {
+            socio: true,
+            plan: true,
+          },
+        },
+      },
     });
+    
+    revalidatePath('/admin/transacciones');
+    return {
+      success: true,
+      message: 'Transacción registrada correctamente',
+      transaccion: newTransaccion,
+    };
   } catch (error) {
     console.error(error);
     return {
       message: 'Error de base de datos: No se pudo registrar la transacción.',
     };
   }
-
-  revalidatePath('/admin/transacciones');
-  redirect('/admin/transacciones');
 }
 
 export async function updateTransaccion(prevState: unknown, formData: FormData) {
