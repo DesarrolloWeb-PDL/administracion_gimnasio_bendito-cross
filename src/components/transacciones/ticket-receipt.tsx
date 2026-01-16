@@ -2,8 +2,12 @@
 
 import React, {  useRef } from 'react';
 import html2canvas from 'html2canvas';
-import { Button } from '@/components/ui/button'; // Asumiendo que existe, si no usaré button normal
-import { Loader2, Copy, Send, Download, X } from 'lucide-react'; // Iconos
+import { 
+  ArrowPathIcon, 
+  ClipboardDocumentIcon, 
+  PaperAirplaneIcon, 
+  XMarkIcon 
+} from '@heroicons/react/24/outline';
 
 // Tipos requeridos para mostrar la info
 type TicketData = {
@@ -111,7 +115,7 @@ export default function TicketReceipt({ data, onClose }: TicketReceiptProps) {
         <div className="flex justify-between items-center p-4 border-b bg-gray-50">
           <h3 className="font-bold text-gray-700">Comprobante de Pago</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-            <X className="w-5 h-5" />
+            <XMarkIcon className="w-5 h-5" />
           </button>
         </div>
 
@@ -173,24 +177,23 @@ export default function TicketReceipt({ data, onClose }: TicketReceiptProps) {
         {/* Footer con Acciones */}
         <div className="p-4 border-t bg-gray-50 grid gap-3">
           <div className="grid grid-cols-2 gap-3">
-             <Button 
+             <button 
                 onClick={handleOpenWhatsApp} 
-                className="w-full bg-green-600 hover:bg-green-700 text-white flex items-center justify-center gap-2"
+                className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-green-600 px-4 text-sm font-medium text-white transition-colors hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={!data.telefonoSocio}
                 title={!data.telefonoSocio ? "El socio no tiene teléfono" : "Abrir WhatsApp"}
              >
-                <Send className="w-4 h-4" /> 
-                1. Abrir WhatsApp
-             </Button>
-             <Button 
+                <PaperAirplaneIcon className="w-4 h-4 -rotate-45" /> 
+                1. WhatsApp
+             </button>
+             <button 
                 onClick={handleCopyToClipboard} 
-                className="w-full flex items-center justify-center gap-2" 
-                variant="outline"
+                className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-white border border-gray-200 px-4 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 cursor-pointer disabled:opacity-50" 
                 disabled={isCopying}
              >
-                {isCopying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Copy className="w-4 h-4" />}
-                2. Copiar Ticket
-             </Button>
+                {isCopying ? <ArrowPathIcon className="w-4 h-4 animate-spin" /> : <ClipboardDocumentIcon className="w-4 h-4" />}
+                2. Copiar
+             </button>
           </div>
           <p className="text-xs text-center text-gray-500">
              Pasos: Toca "Abrir WhatsApp" y luego pega (Ctrl+V) la imagen en el chat.
