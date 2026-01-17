@@ -133,7 +133,7 @@ export default function TicketReceipt({ data, onClose, logoUrl }: TicketReceiptP
             */}
             <div 
               ref={ticketRef} 
-              className="w-[340px] p-5 shadow-sm border text-center relative bg-white"
+              className="w-[340px] p-5 border text-center relative"
               style={{ 
                 fontFamily: 'monospace',
                 backgroundColor: '#ffffff',
@@ -182,7 +182,7 @@ export default function TicketReceipt({ data, onClose, logoUrl }: TicketReceiptP
                 {/* CONCEPTO */}
                 <div className="pt-1">
                    <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: '#9ca3af' }}>Concepto</p>
-                   <p className="font-bold text-base bg-gray-50 p-2 rounded border border-gray-100 block w-full" style={{ color: '#1f2937' }}>{data.planNombre}</p>
+                   <p className="font-bold text-base p-2 rounded border block w-full" style={{ color: '#1f2937', backgroundColor: '#f9fafb', borderColor: '#f3f4f6' }}>{data.planNombre}</p>
                    {data.notas && <p className="text-xs italic mt-2 text-center" style={{ color: '#6b7280' }}>"{data.notas}"</p>}
                 </div>
               </div>
