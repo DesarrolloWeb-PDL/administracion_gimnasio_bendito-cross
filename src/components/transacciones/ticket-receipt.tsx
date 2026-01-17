@@ -24,9 +24,10 @@ type TicketData = {
 interface TicketReceiptProps {
   data: TicketData;
   onClose: () => void;
+  logoUrl?: string | null;
 }
 
-export default function TicketReceipt({ data, onClose }: TicketReceiptProps) {
+export default function TicketReceipt({ data, onClose, logoUrl }: TicketReceiptProps) {
   const ticketRef = useRef<HTMLDivElement>(null);
   const [isCopying, setIsCopying] = React.useState(false);
 
@@ -143,13 +144,24 @@ export default function TicketReceipt({ data, onClose }: TicketReceiptProps) {
               {/* Decoración superior */}
               <div className="mb-4 pb-4 border-b-2 border-dashed" style={{ borderColor: '#d1d5db' }}>
                 <div 
-                  className="w-16 h-16 rounded-full mx-auto flex items-center justify-center mb-2"
-                  style={{ backgroundColor: '#111827' }}
+                  className="w-20 h-20 rounded-full mx-auto flex items-center justify-center mb-2 overflow-hidden relative"
+                  style={{ backgroundColor: logoUrl ? 'transparent' : '#111827' }}
                 >
-                   <span className="font-bold text-xl" style={{ color: '#ffffff' }}>BC</span>
+                   {logoUrl ? (
+                     /* eslint-disable-next-line @next/next/no-img-element */
+                     <img 
+                        src={logoUrl} 
+                        alt="Logo" 
+                        crossOrigin="anonymous"
+                        className="w-full h-full object-contain"
+                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                     />
+                   ) : (
+                     <span className="font-bold text-xl" style={{ color: '#ffffff' }}>BC</span>
+                   )}
                 </div>
                 <h2 className="text-xl font-bold uppercase tracking-wider" style={{ color: '#1f2937' }}>Bendito Cross</h2>
-                <p className="text-xs" style={{ color: '#6b7280' }}>Gimnasio & Fitness</p>
+                <p className="text-xs font-medium" style={{ color: '#4b5563' }}>Funcional Cross y Musculación</p>
               </div>
 
               <div className="space-y-4 text-left">
@@ -167,7 +179,7 @@ export default function TicketReceipt({ data, onClose }: TicketReceiptProps) {
                    <div className="text-right">
                       <p className="text-xs uppercase" style={{ color: '#9ca3af' }}>Método</p>
                       <p className="text-sm font-medium uppercase" style={{ color: '#1f2937' }}>{data.metodoPago}</p>
-                   </div>
+                   </div>4xl font-black
                 </div>
 
                 <div className="py-2 border-t border-b my-2" style={{ borderColor: '#f3f4f6' }}>

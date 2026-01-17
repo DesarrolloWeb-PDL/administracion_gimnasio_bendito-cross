@@ -27,7 +27,7 @@ interface ActionState {
   transaccion?: any; 
 }
 
-export default function Form({ suscripciones }: { suscripciones: SuscripcionWithRelations[] }) {
+export default function Form({ suscripciones, logoUrl }: { suscripciones: SuscripcionWithRelations[], logoUrl?: string | null }) {
   const initialState: ActionState = { message: '', errors: {} };
   const [state, dispatch, isPending] = useActionState(createTransaccion, initialState);
   const router = useRouter();
@@ -62,7 +62,7 @@ export default function Form({ suscripciones }: { suscripciones: SuscripcionWith
   return (
     <>
       {showTicket && ticketData && (
-        <TicketReceipt data={ticketData} onClose={handleCloseTicket} />
+        <TicketReceipt data={ticketData} onClose={handleCloseTicket} logoUrl={logoUrl} />
       )}
 
       <form action={dispatch}>
