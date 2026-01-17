@@ -133,7 +133,7 @@ export default function TicketReceipt({ data, onClose, logoUrl }: TicketReceiptP
             */}
             <div 
               ref={ticketRef} 
-              className="w-[320px] p-6 shadow-sm border text-center relative"
+              className="w-[340px] p-5 shadow-sm border text-center relative bg-white"
               style={{ 
                 fontFamily: 'monospace',
                 backgroundColor: '#ffffff',
@@ -143,60 +143,53 @@ export default function TicketReceipt({ data, onClose, logoUrl }: TicketReceiptP
             >
               {/* Decoración superior */}
               <div className="mb-4 pb-4 border-b-2 border-dashed" style={{ borderColor: '#d1d5db' }}>
-                <div 
-                  className="w-20 h-20 rounded-full mx-auto flex items-center justify-center mb-2 overflow-hidden relative"
-                  style={{ backgroundColor: logoUrl ? 'transparent' : '#111827' }}
-                >
-                   {logoUrl ? (
-                     /* eslint-disable-next-line @next/next/no-img-element */
-                     <img 
-                        src={logoUrl} 
-                        alt="Logo" 
-                        crossOrigin="anonymous"
-                        className="w-full h-full object-contain"
-                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                     />
-                   ) : (
-                     <span className="font-bold text-xl" style={{ color: '#ffffff' }}>BC</span>
-                   )}
-                </div>
-                <h2 className="text-xl font-bold uppercase tracking-wider" style={{ color: '#1f2937' }}>Bendito Cross</h2>
-                <p className="text-xs font-medium" style={{ color: '#4b5563' }}>Funcional Cross y Musculación</p>
+                <h2 className="text-2xl font-bold uppercase tracking-wider mb-1" style={{ color: '#1f2937' }}>Bendito Cross</h2>
+                <p className="text-sm font-medium" style={{ color: '#4b5563' }}>Funcional Cross y Musculación</p>
               </div>
 
               <div className="space-y-4 text-left">
-                <div>
-                  <p className="text-xs uppercase" style={{ color: '#9ca3af' }}>Socio</p>
-                  <p className="font-bold text-lg truncate" style={{ color: '#1f2937' }}>{data.socioNombre}</p>
+                {/* SOCIO + FECHA */}
+                <div className="flex justify-between items-start">
+                    <div className="w-2/3">
+                        <p className="text-[10px] uppercase tracking-wider" style={{ color: '#9ca3af' }}>Socio</p>
+                        <p className="font-bold text-lg leading-snug break-words" style={{ color: '#1f2937' }}>{data.socioNombre}</p>
+                    </div>
+                    <div className="w-1/3 text-right pt-1">
+                        <p className="text-[10px] uppercase tracking-wider" style={{ color: '#9ca3af' }}>Fecha</p>
+                        <p className="text-xs font-medium" style={{ color: '#4b5563' }}>{new Date(data.fecha).toLocaleDateString()}</p>
+                        <p className="text-[10px]" style={{ color: '#9ca3af' }}>{new Date(data.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                    </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
-                   <div>
-                      <p className="text-xs uppercase" style={{ color: '#9ca3af' }}>Fecha</p>
-                      <p className="text-sm font-medium" style={{ color: '#1f2937' }}>{new Date(data.fecha).toLocaleDateString()}</p>
-                      <p className="text-xs" style={{ color: '#9ca3af' }}>{new Date(data.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
-                   </div>
-                   <div className="text-right">
-                      <p className="text-xs uppercase" style={{ color: '#9ca3af' }}>Método</p>
-                      <p className="text-sm font-medium uppercase" style={{ color: '#1f2937' }}>{data.metodoPago}</p>
-                   </div>4xl font-black
+                <div className="border-t border-dashed my-2" style={{ borderColor: '#e5e7eb' }}></div>
+
+                {/* MÉTODO + MONTO */}
+                <div className="flex justify-between items-center py-2">
+                    <div>
+                        <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: '#9ca3af' }}>Método</p>
+                        <p className="font-bold uppercase text-sm px-2 py-1 rounded border inline-block" style={{ color: '#374151', borderColor: '#d1d5db', backgroundColor: '#f9fafb' }}>
+                            {data.metodoPago}
+                        </p>
+                    </div>
+                    <div className="text-right">
+                         <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: '#9ca3af' }}>Total</p>
+                         <p className="text-3xl font-black" style={{ color: '#000000' }}>{formatCurrency(data.monto)}</p>
+                    </div>
                 </div>
 
-                <div className="py-2 border-t border-b my-2" style={{ borderColor: '#f3f4f6' }}>
-                   <p className="text-xs uppercase" style={{ color: '#9ca3af' }}>Concepto</p>
-                   <p className="font-bold" style={{ color: '#1f2937' }}>{data.planNombre}</p>
-                   {data.notas && <p className="text-xs italic mt-1" style={{ color: '#6b7280' }}>"{data.notas}"</p>}
-                </div>
+                <div className="border-t border-dashed my-2" style={{ borderColor: '#e5e7eb' }}></div>
 
-                <div className="pt-2 text-center">
-                   <p className="text-xs uppercase mb-1" style={{ color: '#9ca3af' }}>Total Pagado</p>
-                   <p className="text-3xl font-bold" style={{ color: '#000000' }}>{formatCurrency(data.monto)}</p>
+                {/* CONCEPTO */}
+                <div className="pt-1">
+                   <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: '#9ca3af' }}>Concepto</p>
+                   <p className="font-bold text-base bg-gray-50 p-2 rounded border border-gray-100 block w-full" style={{ color: '#1f2937' }}>{data.planNombre}</p>
+                   {data.notas && <p className="text-xs italic mt-2 text-center" style={{ color: '#6b7280' }}>"{data.notas}"</p>}
                 </div>
               </div>
 
-              <div className="mt-8 pt-4 border-t-2 border-dashed" style={{ borderColor: '#d1d5db' }}>
-                <p className="text-xs mb-2" style={{ color: '#9ca3af' }}>¡Gracias por tu pago!</p>
-                <p className="text-[10px]" style={{ color: '#d1d5db' }}>{data.id.slice(-8).toUpperCase()}</p>
+              <div className="mt-6 pt-3 border-t-2 border-dashed" style={{ borderColor: '#d1d5db' }}>
+                <p className="text-[10px] mb-1" style={{ color: '#9ca3af' }}>¡Gracias por entrenar con nosotros!</p>
+                <p className="text-[9px]" style={{ color: '#d1d5db' }}>ID: {data.id.slice(-8).toUpperCase()}</p>
               </div>
             </div>
         </div>
