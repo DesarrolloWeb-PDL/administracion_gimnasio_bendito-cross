@@ -82,9 +82,9 @@ export default function TicketReceipt({ data, onClose }: TicketReceiptProps) {
         alert('No se pudo copiar automáticamente (el navegador lo bloqueó).\n\n📥 Se ha descargado la imagen en tu dispositivo.');
       }
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generando ticket:', error);
-      alert('Error técnico al generar la imagen. Intenta tomar una captura de pantalla manual.');
+      alert(`Error técnico: ${error?.message || 'Error desconocido'}. \n\nPor favor intenta tomar una foto manual.`);
     } finally {
       setIsCopying(false);
     }
