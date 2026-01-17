@@ -30,6 +30,8 @@ interface TicketReceiptProps {
 export default function TicketReceipt({ data, onClose, logoUrl }: TicketReceiptProps) {
   const ticketRef = useRef<HTMLDivElement>(null);
   const [isCopying, setIsCopying] = React.useState(false);
+  // Fecha actual para mostrar en el ticket (hora de impresión/generación)
+  const [currentDateTime] = React.useState(new Date());
 
   // Formatear moneda
   const formatCurrency = (amount: number) => {
@@ -39,12 +41,18 @@ export default function TicketReceipt({ data, onClose, logoUrl }: TicketReceiptP
     }).format(amount);
   };
 
-  // Formatear fecha
-  const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('es-AR', {
+  // Formatear fecha para el mensaje (Fecha del pago en UTC + Hora actual)
+  const formatMessageDate = (paymentDate: Date) => {
+    const dateStr = new Intl.DateTimeFormat('es-AR', {
       dateStyle: 'long',
+      timeZone: 'UTC', // Evitamos el offset de zona horaria
+    }).format(new Date(paymentDate));
+
+    const timeStr = new Intl.DateTimeFormat('es-AR', {
       timeStyle: 'short',
-    }).format(new Date(date));
+    }).format(currentDateTime); // Usamos la hora actual
+
+    return `${dateStr} a las ${timeStr}`;
   };
 
   const handleCopyToClipboard = async () => {
@@ -106,7 +114,7 @@ export default function TicketReceipt({ data, onClose, logoUrl }: TicketReceiptP
     // const finalPhone = cleanPhone.startsWith('54') ? cleanPhone : `549${cleanPhone}`;
     const finalPhone = cleanPhone; // Usamos directo lo que venga por ahora
 
-    const message = `Hola ${data.socioNombre}! 👋\n\nAdjunto te envío el comprobante de pago.\n\nFecha: ${formatDate(data.fecha)}\nMonto: ${formatCurrency(data.monto)}\n\n¡Gracias por entrenar con nosotros! 💪`;
+    const message = `Hola ${data.socioNombre}! 👋\n\nAdjunto te envío el comprobante de pago.\n\nFecha: ${formatMessageDate(data.fecha)}\nMonto: ${formatCurrency(data.monto)}\n\n¡Gracias por entrenar con nosotros! 💪`;
 
     const url = `https://wa.me/${finalPhone}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
@@ -159,8 +167,12 @@ export default function TicketReceipt({ data, onClose, logoUrl }: TicketReceiptP
                     </div>
                     <div className="w-1/3 text-right pt-1">
                         <p className="text-[10px] uppercase tracking-wider" style={{ color: '#9ca3af' }}>Fecha</p>
-                        <p className="text-xs font-medium" style={{ color: '#4b5563' }}>{new Date(data.fecha).toLocaleDateString()}</p>
-                        <p className="text-[10px]" style={{ color: '#9ca3af' }}>{new Date(data.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                        <p className="text-xs font-medium" style={{ color: '#4b5563' }}>
+                          {new Date(data.fecha).toLocaleDateString('es-AR', { timeZone: 'UTC' })}
+                        </p>
+                        <p className="text-[10px]" style={{ color: '#9ca3af' }}>
+                          {currentDateTime.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
+                        </p>
                     </div>
                 </div>
 
