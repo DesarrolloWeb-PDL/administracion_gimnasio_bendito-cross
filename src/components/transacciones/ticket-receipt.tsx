@@ -148,11 +148,14 @@ export default function TicketReceipt({ data, onClose, logoUrl }: TicketReceiptP
               </div>
 
               <div className="space-y-4 text-left">
-                {/* SOCIO + FECHA */}
+                {/* SOCIO + PLAN (Ex Concepto) */}
                 <div className="flex justify-between items-start">
                     <div className="w-2/3">
                         <p className="text-[10px] uppercase tracking-wider" style={{ color: '#9ca3af' }}>Socio</p>
                         <p className="font-bold text-lg leading-snug break-words" style={{ color: '#1f2937' }}>{data.socioNombre}</p>
+                        <p className="text-xs font-medium uppercase mt-1" style={{ color: '#6b7280' }}>
+                           {data.planNombre}
+                        </p>
                     </div>
                     <div className="w-1/3 text-right pt-1">
                         <p className="text-[10px] uppercase tracking-wider" style={{ color: '#9ca3af' }}>Fecha</p>
@@ -177,14 +180,16 @@ export default function TicketReceipt({ data, onClose, logoUrl }: TicketReceiptP
                     </div>
                 </div>
 
-                <div className="border-t border-dashed my-2" style={{ borderColor: '#e5e7eb' }}></div>
-
-                {/* CONCEPTO */}
-                <div className="pt-1">
-                   <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: '#9ca3af' }}>Concepto</p>
-                   <p className="font-bold text-base p-2 rounded border block w-full" style={{ color: '#1f2937', backgroundColor: '#f9fafb', borderColor: '#f3f4f6' }}>{data.planNombre}</p>
-                   {data.notas && <p className="text-xs italic mt-2 text-center" style={{ color: '#6b7280' }}>"{data.notas}"</p>}
-                </div>
+                {/* CONCEPTO (Ex Notas) */}
+                {data.notas && (
+                  <>
+                    <div className="border-t border-dashed my-2" style={{ borderColor: '#e5e7eb' }}></div>
+                    <div className="pt-1">
+                       <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: '#9ca3af' }}>Concepto</p>
+                       <p className="font-bold text-sm italic" style={{ color: '#4b5563' }}>"{data.notas}"</p>
+                    </div>
+                  </>
+                )}
               </div>
 
               <div className="mt-6 pt-3 border-t-2 border-dashed" style={{ borderColor: '#d1d5db' }}>
