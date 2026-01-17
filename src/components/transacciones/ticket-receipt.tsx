@@ -106,7 +106,7 @@ export default function TicketReceipt({ data, onClose, logoUrl }: TicketReceiptP
     // const finalPhone = cleanPhone.startsWith('54') ? cleanPhone : `549${cleanPhone}`;
     const finalPhone = cleanPhone; // Usamos directo lo que venga por ahora
 
-    const message = `Hola ${data.socioNombre}! 👋\n\nAdjunto te envío el comprobante de pago de tu suscripción *${data.planNombre}*.\n\nFecha: ${formatDate(data.fecha)}\nMonto: ${formatCurrency(data.monto)}\n\n¡Gracias por entrenar con nosotros! 💪`;
+    const message = `Hola ${data.socioNombre}! 👋\n\nAdjunto te envío el comprobante de pago.\n\nFecha: ${formatDate(data.fecha)}\nMonto: ${formatCurrency(data.monto)}\n\n¡Gracias por entrenar con nosotros! 💪`;
 
     const url = `https://wa.me/${finalPhone}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
