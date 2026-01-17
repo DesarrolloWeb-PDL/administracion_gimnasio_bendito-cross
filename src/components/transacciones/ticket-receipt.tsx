@@ -125,55 +125,66 @@ export default function TicketReceipt({ data, onClose }: TicketReceiptProps) {
 
         {/* Cuerpo Scrollable */}
         <div className="p-6 overflow-y-auto bg-gray-100 flex justify-center">
-            {/* TICKET VISUAL - Este es el div que se convierte en imagen */}
+            {/* TICKET VISUAL - Este es el div que se convierte en imagen 
+                IMPORTANTE: Usamos estilos inline con códigos HEX para asegurar
+                que html2canvas pueda leer los colores correctamente, ya que
+                a veces falla con las variables CSS modernas de Tailwind.
+            */}
             <div 
               ref={ticketRef} 
-              className="w-[320px] bg-white p-6 shadow-sm border border-gray-200 text-center relative"
-              style={{ fontFamily: 'monospace' }} // Look tipo ticket
+              className="w-[320px] p-6 shadow-sm border text-center relative"
+              style={{ 
+                fontFamily: 'monospace',
+                backgroundColor: '#ffffff',
+                borderColor: '#e5e7eb',
+                color: '#1f2937'
+              }}
             >
-              {/* Decoración superior (Dientes de sierra o similar - simulado con css border) */}
-              <div className="mb-4 pb-4 border-b-2 border-dashed border-gray-300">
-                <div className="w-16 h-16 bg-gray-900 rounded-full mx-auto flex items-center justify-center mb-2">
-                   {/* Logo Placeholder - Podrías poner <img /> aquí */}
-                   <span className="text-white font-bold text-xl">BC</span>
+              {/* Decoración superior */}
+              <div className="mb-4 pb-4 border-b-2 border-dashed" style={{ borderColor: '#d1d5db' }}>
+                <div 
+                  className="w-16 h-16 rounded-full mx-auto flex items-center justify-center mb-2"
+                  style={{ backgroundColor: '#111827' }}
+                >
+                   <span className="font-bold text-xl" style={{ color: '#ffffff' }}>BC</span>
                 </div>
-                <h2 className="text-xl font-bold uppercase tracking-wider text-gray-800">Bendito Cross</h2>
-                <p className="text-xs text-gray-500">Gimnasio & Fitness</p>
+                <h2 className="text-xl font-bold uppercase tracking-wider" style={{ color: '#1f2937' }}>Bendito Cross</h2>
+                <p className="text-xs" style={{ color: '#6b7280' }}>Gimnasio & Fitness</p>
               </div>
 
               <div className="space-y-4 text-left">
                 <div>
-                  <p className="text-xs text-gray-400 uppercase">Socio</p>
-                  <p className="font-bold text-gray-800 text-lg truncate">{data.socioNombre}</p>
+                  <p className="text-xs uppercase" style={{ color: '#9ca3af' }}>Socio</p>
+                  <p className="font-bold text-lg truncate" style={{ color: '#1f2937' }}>{data.socioNombre}</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
                    <div>
-                      <p className="text-xs text-gray-400 uppercase">Fecha</p>
-                      <p className="text-sm font-medium">{new Date(data.fecha).toLocaleDateString()}</p>
-                      <p className="text-xs text-gray-400">{new Date(data.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                      <p className="text-xs uppercase" style={{ color: '#9ca3af' }}>Fecha</p>
+                      <p className="text-sm font-medium" style={{ color: '#1f2937' }}>{new Date(data.fecha).toLocaleDateString()}</p>
+                      <p className="text-xs" style={{ color: '#9ca3af' }}>{new Date(data.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
                    </div>
                    <div className="text-right">
-                      <p className="text-xs text-gray-400 uppercase">Método</p>
-                      <p className="text-sm font-medium uppercase">{data.metodoPago}</p>
+                      <p className="text-xs uppercase" style={{ color: '#9ca3af' }}>Método</p>
+                      <p className="text-sm font-medium uppercase" style={{ color: '#1f2937' }}>{data.metodoPago}</p>
                    </div>
                 </div>
 
-                <div className="py-2 border-t border-b border-gray-100 my-2">
-                   <p className="text-xs text-gray-400 uppercase">Concepto</p>
-                   <p className="font-bold text-gray-800">{data.planNombre}</p>
-                   {data.notas && <p className="text-xs text-gray-500 italic mt-1">"{data.notas}"</p>}
+                <div className="py-2 border-t border-b my-2" style={{ borderColor: '#f3f4f6' }}>
+                   <p className="text-xs uppercase" style={{ color: '#9ca3af' }}>Concepto</p>
+                   <p className="font-bold" style={{ color: '#1f2937' }}>{data.planNombre}</p>
+                   {data.notas && <p className="text-xs italic mt-1" style={{ color: '#6b7280' }}>"{data.notas}"</p>}
                 </div>
 
                 <div className="pt-2 text-center">
-                   <p className="text-xs text-gray-400 uppercase mb-1">Total Pagado</p>
-                   <p className="text-3xl font-bold text-black">{formatCurrency(data.monto)}</p>
+                   <p className="text-xs uppercase mb-1" style={{ color: '#9ca3af' }}>Total Pagado</p>
+                   <p className="text-3xl font-bold" style={{ color: '#000000' }}>{formatCurrency(data.monto)}</p>
                 </div>
               </div>
 
-              <div className="mt-8 pt-4 border-t-2 border-dashed border-gray-300">
-                <p className="text-xs text-gray-400 mb-2">¡Gracias por tu pago!</p>
-                <p className="text-[10px] text-gray-300">{data.id.slice(-8).toUpperCase()}</p>
+              <div className="mt-8 pt-4 border-t-2 border-dashed" style={{ borderColor: '#d1d5db' }}>
+                <p className="text-xs mb-2" style={{ color: '#9ca3af' }}>¡Gracias por tu pago!</p>
+                <p className="text-[10px]" style={{ color: '#d1d5db' }}>{data.id.slice(-8).toUpperCase()}</p>
               </div>
             </div>
         </div>
