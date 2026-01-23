@@ -57,7 +57,13 @@ export async function createTransaccion(prevState: unknown, formData: FormData) 
     let notasCompletas = notas || '';
     
     if (incluirCuentaCorriente && montoCuentaCorriente && montoCuentaCorriente > 0) {
-      notasCompletas = `Cuota: $${monto.toFixed(2)} + Cuenta Corriente: $${montoCuentaCorriente.toFixed(2)} = Total: $${montoTotal.toFixed(2)}${notas ? ' | ' + notas : ''}`;
+      // Si hay cuota Y cuenta corriente
+      if (monto > 0) {
+        notasCompletas = `Cuota: $${monto.toFixed(2)} + Cuenta Corriente: $${montoCuentaCorriente.toFixed(2)} = Total: $${montoTotal.toFixed(2)}${notas ? ' | ' + notas : ''}`;
+      } else {
+        // Solo cuenta corriente
+        notasCompletas = `Cuenta Corriente: $${montoCuentaCorriente.toFixed(2)}${notas ? ' | ' + notas : ''}`;
+      }
     }
 
     // Crear transacción principal con monto total

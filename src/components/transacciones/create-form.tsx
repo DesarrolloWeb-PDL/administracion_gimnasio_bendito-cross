@@ -100,9 +100,7 @@ export default function Form({ suscripciones, logoUrl }: { suscripciones: Suscri
               suscripciones={suscripciones}
               onSuscripcionChange={(susc) => {
                 setSelectedSuscripcion(susc);
-                if (susc) {
-                  setMontoCuota(susc.plan.precio);
-                }
+                // No seteamos montoCuota automáticamente
               }}
             />
             <div id="suscripcion-error" aria-live="polite" aria-atomic="true">
@@ -215,18 +213,22 @@ export default function Form({ suscripciones, logoUrl }: { suscripciones: Suscri
           </div>
 
           {/* Total a Cobrar */}
-          {incluirCuentaCorriente && (
+          {(incluirCuentaCorriente || montoCuota > 0) && (
             <div className="mb-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
               <h4 className="text-sm font-semibold mb-3 text-gray-900 dark:text-gray-100">Desglose del Pago</h4>
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between text-gray-700 dark:text-gray-300">
-                  <span>Monto:</span>
-                  <span className="font-medium">${montoCuota.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-gray-700 dark:text-gray-300">
-                  <span>Pago Cuenta Corriente:</span>
-                  <span className="font-medium">${montoCuentaCorriente.toFixed(2)}</span>
-                </div>
+                {montoCuota > 0 && (
+                  <div className="flex justify-between text-gray-700 dark:text-gray-300">
+                    <span>Cuota:</span>
+                    <span className="font-medium">${montoCuota.toFixed(2)}</span>
+                  </div>
+                )}
+                {incluirCuentaCorriente && montoCuentaCorriente > 0 && (
+                  <div className="flex justify-between text-gray-700 dark:text-gray-300">
+                    <span>Cuenta Corriente:</span>
+                    <span className="font-medium">${montoCuentaCorriente.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="border-t border-blue-300 dark:border-blue-700 pt-2 mt-2">
                   <div className="flex justify-between text-base">
                     <span className="font-bold text-gray-900 dark:text-gray-100">Total a Cobrar:</span>

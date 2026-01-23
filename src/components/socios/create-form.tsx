@@ -19,10 +19,10 @@ export default function Form() {
   
   return (
     <form ref={formRef} action={dispatch}>
-      <div className="rounded-md bg-gray-50 p-4 md:p-6">
+      <div className="rounded-md bg-gray-50 dark:bg-gray-800 p-4 md:p-6">
         {/* Mostrar errores generales y de campos */}
         {state.message && (
-          <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
+          <div className="mb-4 p-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded">
             {state.message}
             {state.errors && (
               <ul className="mt-2 list-disc list-inside text-sm">
@@ -35,7 +35,7 @@ export default function Form() {
         )}
         {/* Nombre (obligatorio) */}
         <div className="mb-4">
-          <label htmlFor="nombre" className="mb-2 block text-sm font-medium text-gray-900">
+          <label htmlFor="nombre" className="mb-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
             Nombre <span className="text-red-500">*</span>
           </label>
           <div className="relative">
@@ -44,7 +44,7 @@ export default function Form() {
               name="nombre"
               type="text"
               placeholder="Ingrese el nombre"
-              className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
+              className="peer block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500 dark:placeholder:text-gray-400"
               aria-describedby="nombre-error"
               autoComplete="given-name"
               defaultValue={state.values?.nombre}
@@ -63,7 +63,7 @@ export default function Form() {
 
         {/* Apellido (obligatorio) */}
         <div className="mb-4">
-          <label htmlFor="apellido" className="mb-2 block text-sm font-medium text-gray-900">
+          <label htmlFor="apellido" className="mb-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
             Apellido <span className="text-red-500">*</span>
           </label>
           <div className="relative">
@@ -72,7 +72,7 @@ export default function Form() {
               name="apellido"
               type="text"
               placeholder="Ingrese el apellido"
-              className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
+              className="peer block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500 dark:placeholder:text-gray-400"
               aria-describedby="apellido-error"
               autoComplete="family-name"
               defaultValue={state.values?.apellido}
@@ -91,7 +91,7 @@ export default function Form() {
 
         {/* DNI (obligatorio) */}
         <div className="mb-4">
-          <label htmlFor="dni" className="mb-2 block text-sm font-medium text-gray-900">
+          <label htmlFor="dni" className="mb-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
             DNI <span className="text-red-500">*</span>
           </label>
           <div className="relative">
@@ -100,7 +100,7 @@ export default function Form() {
               name="dni"
               type="text"
               placeholder="Ingrese el DNI"
-              className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
+              className="peer block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500 dark:placeholder:text-gray-400"
               aria-describedby="dni-error"
               autoComplete="off"
               defaultValue={state.values?.dni}
@@ -119,7 +119,7 @@ export default function Form() {
 
         {/* Fecha Nacimiento */}
         <div className="mb-4">
-          <label htmlFor="fechaNacimiento" className="mb-2 block text-sm font-medium text-gray-900">
+          <label htmlFor="fechaNacimiento" className="mb-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
             Fecha de Nacimiento
           </label>
           <div className="relative">
@@ -129,14 +129,14 @@ export default function Form() {
               type="date"
               autoComplete="bday"
               defaultValue={state.values?.fechaNacimiento}
-              className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
+              className="peer block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500 dark:placeholder:text-gray-400"
             />
           </div>
         </div>
 
         {/* Género */}
         <div className="mb-4">
-          <label htmlFor="genero" className="mb-2 block text-sm font-medium text-gray-900">
+          <label htmlFor="genero" className="mb-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
             Género
           </label>
           <div className="relative">
@@ -145,7 +145,7 @@ export default function Form() {
               name="genero"
               autoComplete="sex"
               defaultValue={state.values?.genero}
-              className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
+              className="peer block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500 dark:placeholder:text-gray-400"
             >
               <option value="">Seleccione...</option>
               <option value="M">Masculino</option>
@@ -157,7 +157,7 @@ export default function Form() {
 
         {/* Email */}
         <div className="mb-4">
-          <label htmlFor="email" className="mb-2 block text-sm font-medium text-gray-900">
+          <label htmlFor="email" className="mb-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
             Email
           </label>
           <div className="relative">
@@ -166,7 +166,7 @@ export default function Form() {
               name="email"
               type="email"
               placeholder="Ingrese el email"
-              className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
+              className="peer block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500 dark:placeholder:text-gray-400"
               autoComplete="email"
               defaultValue={state.values?.email}
               aria-describedby="email-error"
@@ -184,7 +184,7 @@ export default function Form() {
 
         {/* Telefono */}
         <div className="mb-4">
-          <label htmlFor="telefono" className="mb-2 block text-sm font-medium text-gray-900">
+          <label htmlFor="telefono" className="mb-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
             Teléfono
           </label>
           <div className="relative">
@@ -195,14 +195,14 @@ export default function Form() {
               placeholder="Ingrese el teléfono"
               autoComplete="tel"
               defaultValue={state.values?.telefono}
-              className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
+              className="peer block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500 dark:placeholder:text-gray-400"
             />
           </div>
         </div>
 
         {/* Dirección */}
         <div className="mb-4">
-          <label htmlFor="direccion" className="mb-2 block text-sm font-medium text-gray-900">
+          <label htmlFor="direccion" className="mb-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
             Dirección
           </label>
           <div className="relative">
@@ -213,17 +213,17 @@ export default function Form() {
               placeholder="Ingrese la dirección"
               autoComplete="street-address"
               defaultValue={state.values?.direccion}
-              className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
+              className="peer block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500 dark:placeholder:text-gray-400"
             />
           </div>
         </div>
 
-        <hr className="my-6 border-gray-200" />
-        <h3 className="mb-4 text-lg font-medium text-gray-900">Datos de Emergencia</h3>
+        <hr className="my-6 border-gray-300 dark:border-gray-600" />
+        <h3 className="mb-4 text-lg font-medium text-gray-900 dark:text-gray-100">Datos de Emergencia</h3>
 
         {/* Contacto Emergencia (obligatorio) */}
         <div className="mb-4">
-          <label htmlFor="contactoEmergencia" className="mb-2 block text-sm font-medium text-gray-900">
+          <label htmlFor="contactoEmergencia" className="mb-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
             Nombre Contacto Emergencia <span className="text-red-500">*</span>
           </label>
           <div className="relative">
@@ -234,7 +234,7 @@ export default function Form() {
               placeholder="Nombre de familiar o amigo"
               autoComplete="off"
               defaultValue={state.values?.contactoEmergencia}
-              className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
+              className="peer block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500 dark:placeholder:text-gray-400"
               required
             />
           </div>
@@ -242,7 +242,7 @@ export default function Form() {
 
         {/* Teléfono Emergencia */}
         <div className="mb-4">
-          <label htmlFor="telefonoEmergencia" className="mb-2 block text-sm font-medium text-gray-900">
+          <label htmlFor="telefonoEmergencia" className="mb-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
             Teléfono Emergencia
           </label>
           <div className="relative">
@@ -253,17 +253,17 @@ export default function Form() {
               placeholder="Teléfono de emergencia"
               autoComplete="off"
               defaultValue={state.values?.telefonoEmergencia}
-              className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
+              className="peer block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500 dark:placeholder:text-gray-400"
             />
           </div>
         </div>
 
-        <hr className="my-6 border-gray-200" />
-        <h3 className="mb-4 text-lg font-medium text-gray-900">Salud y Objetivos</h3>
+        <hr className="my-6 border-gray-300 dark:border-gray-600" />
+        <h3 className="mb-4 text-lg font-medium text-gray-900 dark:text-gray-100">Salud y Objetivos</h3>
 
         {/* Condiciones Médicas (obligatorio) */}
         <div className="mb-4">
-          <label htmlFor="condicionesMedicas" className="mb-2 block text-sm font-medium text-gray-900">
+          <label htmlFor="condicionesMedicas" className="mb-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
             Condiciones Médicas / Alergias <span className="text-red-500">*</span>
           </label>
           <div className="relative">
@@ -272,7 +272,7 @@ export default function Form() {
               name="condicionesMedicas"
               placeholder="Describa condiciones médicas relevantes..."
               defaultValue={state.values?.condicionesMedicas}
-              className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
+              className="peer block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500 dark:placeholder:text-gray-400"
               rows={3}
               required
             />
@@ -281,7 +281,7 @@ export default function Form() {
 
         {/* Objetivo */}
         <div className="mb-4">
-          <label htmlFor="objetivo" className="mb-2 block text-sm font-medium text-gray-900">
+          <label htmlFor="objetivo" className="mb-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
             Objetivo Principal
           </label>
           <div className="relative">
@@ -291,12 +291,12 @@ export default function Form() {
               type="text"
               placeholder="Ej: Bajar de peso, Ganar masa muscular..."
               defaultValue={state.values?.objetivo}
-              className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
+              className="peer block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500 dark:placeholder:text-gray-400"
             />
           </div>
         </div>
 
-        <hr className="my-6 border-gray-200" />
+        <hr className="my-6 border-gray-300 dark:border-gray-600" />
 
         {/* ...eliminado el checkbox de socio libre... */}
 
@@ -311,7 +311,7 @@ export default function Form() {
       <div className="mt-6 flex justify-end gap-4">
         <Link
           href="/admin/socios"
-          className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
+          className="flex h-10 items-center rounded-lg bg-gray-100 dark:bg-gray-700 px-4 text-sm font-medium text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-600"
         >
           Cancelar
         </Link>
