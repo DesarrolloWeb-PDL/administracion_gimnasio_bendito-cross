@@ -16,8 +16,8 @@ const RegistrarMovimientoSchema = z.object({
   cuentaCorrienteId: z.string().min(1, 'La cuenta corriente es requerida'),
   tipo: z.enum(['DEUDA', 'CREDITO', 'PAGO', 'AJUSTE']),
   monto: z.coerce.number().positive('El monto debe ser mayor a 0'),
-  descripcion: z.string().min(1, 'La descripción es requerida'),
-  transaccionId: z.string().optional(),
+  descripcion: z.string().min(1, 'La descripción es requerida').or(z.literal('')).transform(val => val || 'Sin descripción'),
+  transaccionId: z.string().optional().nullable(),
 });
 
 const CerrarCuentaCorrienteSchema = z.object({
