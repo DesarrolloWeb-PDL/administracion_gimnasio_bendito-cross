@@ -32,7 +32,16 @@ export default function NavLinks({ permissions, role, onLinkClick }: NavLinksPro
             key={link.name}
             href={link.href}
             onClick={onLinkClick}
-            className="flex h-12 grow items-center justify-center gap-2 rounded-md bg-white/10 p-3 text-sm font-medium text-white hover:bg-white/20 md:flex-none md:justify-start md:p-2 md:px-3"
+            className="flex h-12 grow items-center justify-center gap-2 rounded-md p-3 text-sm font-medium text-white transition-all duration-200 md:flex-none md:justify-start md:p-2 md:px-3"
+            style={{
+              backgroundColor: 'rgba(var(--secondary-color-rgb), 0.3)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(var(--secondary-color-rgb), 0.5)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(var(--secondary-color-rgb), 0.3)';
+            }}
           >
             <p className="block">{link.name}</p>
           </Link>

@@ -10,6 +10,7 @@ interface MobileSidebarProps {
   role?: string;
   nombreGimnasio: string;
   primaryColor: string;
+  secondaryColor: string;
   fondoUrl?: string | null;
   children?: React.ReactNode; // Para el botón de salir
 }
@@ -19,6 +20,7 @@ export default function MobileSidebar({
   role, 
   nombreGimnasio, 
   primaryColor,
+  secondaryColor,
   fondoUrl,
   children
 }: MobileSidebarProps) {

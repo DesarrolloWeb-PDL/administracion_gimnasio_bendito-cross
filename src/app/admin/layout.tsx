@@ -27,12 +27,22 @@ export default async function AdminLayout({
   const nombreGimnasio = config?.nombreGimnasio || 'GMS White-Label';
   const fondoUrl = config?.fondoUrl;
 
+  // Convertir colores hex a RGB para usar con opacity
+  const hexToRgb = (hex: string) => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result
+      ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
+      : '37, 99, 235'; // fallback blue
+  };
+
   return (
     <div 
       className="flex h-screen flex-col md:flex-row md:overflow-hidden"
       style={{ 
         '--primary-color': primaryColor, 
-        '--secondary-color': secondaryColor 
+        '--secondary-color': secondaryColor,
+        '--primary-color-rgb': hexToRgb(primaryColor),
+        '--secondary-color-rgb': hexToRgb(secondaryColor)
       } as React.CSSProperties}
     >
       
@@ -42,6 +52,7 @@ export default async function AdminLayout({
         role={userPermissions?.rol}
         nombreGimnasio={nombreGimnasio}
         primaryColor={primaryColor}
+        secondaryColor={secondaryColor}
         fondoUrl={fondoUrl}
       >
         <form
@@ -50,7 +61,18 @@ export default async function AdminLayout({
             await signOut();
           }}
         >
-          <button className="flex w-full items-center justify-start gap-2 rounded-md bg-white/10 p-3 text-sm font-medium text-white hover:bg-white/20">
+          <button 
+            className="flex w-full items-center justify-start gap-2 rounded-md p-3 text-sm font-medium text-white transition-all duration-200"
+            style={{
+              backgroundColor: 'rgba(var(--secondary-color-rgb), 0.3)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(var(--secondary-color-rgb), 0.5)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(var(--secondary-color-rgb), 0.3)';
+            }}
+          >
             Cerrar Sesión
           </button>
         </form>
@@ -92,7 +114,18 @@ export default async function AdminLayout({
                 await signOut();
               }}
             >
-              <button className="flex h-12 w-full items-center justify-start gap-2 rounded-md bg-white/10 p-2 px-3 text-sm font-medium text-white hover:bg-white/20">
+              <button 
+                className="flex h-12 w-full items-center justify-start gap-2 rounded-md p-2 px-3 text-sm font-medium text-white transition-all duration-200"
+                style={{
+                  backgroundColor: 'rgba(var(--secondary-color-rgb), 0.3)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(var(--secondary-color-rgb), 0.5)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(var(--secondary-color-rgb), 0.3)';
+                }}
+              >
                 <div>Cerrar Sesión</div>
               </button>
             </form>
@@ -103,13 +136,15 @@ export default async function AdminLayout({
       {/* Contenido Principal */}
       <div 
         className="grow p-6 md:overflow-y-auto md:p-12 transition-colors"
-        style={{ backgroundColor: secondaryColor }}
+        style={{ 
+          background: `linear-gradient(135deg, rgba(var(--secondary-color-rgb), 0.05), rgba(var(--primary-color-rgb), 0.05))`
+        }}
       >
         <header className="mb-8 flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-white drop-shadow-sm">Panel de Administración</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white drop-shadow-sm">Panel de Administración</h2>
             <div className="flex items-center gap-4">
               <ThemeToggle />
-                <div className="text-sm text-white/90">
+                <div className="text-sm text-gray-700 dark:text-white/90">
                   Hola, <span className="font-semibold">{userPermissions?.nombre || session?.user?.name || 'Usuario'}</span> ({userPermissions?.rol || session?.user?.rol})
                 </div>
             </div>
