@@ -156,75 +156,75 @@ export function IngresosPorDia() {
             </tr>
           </thead>
           <tbody className="bg-white dark:bg-gray-700">
-              {loading ? (
-                <tr>
-                  <td colSpan={2} className="px-4 py-4 text-center text-gray-500 dark:text-gray-400">
-                    Cargando...
-                  </td>
-                </tr>
-              ) : ingresos.length === 0 ? (
-                <tr>
-                  <td colSpan={2} className="px-4 py-4 text-center text-gray-500 dark:text-gray-400">
-                    No hay datos disponibles
-                  </td>
-                </tr>
-              ) : (
-                ingresos.map((item) => (
-                  <tbody key={item.dia}>
-                    <tr 
-                      onClick={() => handleSelectDia(item.dia)}
-                      className={`border-b border-gray-200 dark:border-gray-600 cursor-pointer transition-all duration-200 ${
-                        diaSeleccionado === item.dia 
-                          ? 'bg-white dark:bg-gray-700 shadow-inner' 
-                          : 'bg-blue-500 dark:bg-blue-600 hover:bg-white dark:hover:bg-gray-700'
-                      }`}
+            {loading ? (
+              <tr>
+                <td colSpan={2} className="px-4 py-4 text-center text-gray-500 dark:text-gray-400">
+                  Cargando...
+                </td>
+              </tr>
+            ) : ingresos.length === 0 ? (
+              <tr>
+                <td colSpan={2} className="px-4 py-4 text-center text-gray-500 dark:text-gray-400">
+                  No hay datos disponibles
+                </td>
+              </tr>
+            ) : (
+              ingresos.map((item) => (
+                <React.Fragment key={item.dia}>
+                  <tr 
+                    onClick={() => handleSelectDia(item.dia)}
+                    className={`border-b border-gray-200 dark:border-gray-600 cursor-pointer transition-all duration-200 ${
+                      diaSeleccionado === item.dia 
+                        ? 'bg-white dark:bg-gray-700 shadow-inner' 
+                        : 'bg-blue-500 dark:bg-blue-600 hover:bg-white dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <td className={`px-8 py-4 text-center font-semibold text-base transition-colors duration-200 ${
+                      diaSeleccionado === item.dia
+                        ? 'text-gray-900 dark:text-gray-100'
+                        : 'text-white group-hover:text-gray-900'
+                    }`}
+                    style={{
+                      color: diaSeleccionado === item.dia ? undefined : 'white'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (diaSeleccionado !== item.dia) {
+                        e.currentTarget.style.color = '#111827'; // gray-900
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (diaSeleccionado !== item.dia) {
+                        e.currentTarget.style.color = 'white';
+                      }
+                    }}
                     >
-                      <td className={`px-8 py-4 text-center font-semibold text-base transition-colors duration-200 ${
-                        diaSeleccionado === item.dia
-                          ? 'text-gray-900 dark:text-gray-100'
-                          : 'text-white group-hover:text-gray-900'
-                      }`}
-                      style={{
-                        color: diaSeleccionado === item.dia ? undefined : 'white'
-                      }}
-                      onMouseEnter={(e) => {
-                        if (diaSeleccionado !== item.dia) {
-                          e.currentTarget.style.color = '#111827'; // gray-900
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (diaSeleccionado !== item.dia) {
-                          e.currentTarget.style.color = 'white';
-                        }
-                      }}
-                      >
-                        {item.dia}
-                      </td>
-                      <td className={`px-12 py-4 text-center font-bold text-lg transition-colors duration-200 ${
-                        diaSeleccionado === item.dia
-                          ? 'text-green-600 dark:text-green-400'
-                          : 'text-white'
-                      }`}
-                      style={{
-                        color: diaSeleccionado === item.dia ? undefined : 'white'
-                      }}
-                      onMouseEnter={(e) => {
-                        if (diaSeleccionado !== item.dia) {
-                          e.currentTarget.style.color = '#059669'; // green-600
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (diaSeleccionado !== item.dia) {
-                          e.currentTarget.style.color = 'white';
-                        }
-                      }}
-                      >
-                        {new Intl.NumberFormat('es-AR', {
-                          style: 'currency',
-                          currency: 'ARS',
-                        }).format(item.monto)}
-                      </td>
-                    </tr>
+                      {item.dia}
+                    </td>
+                    <td className={`px-12 py-4 text-center font-bold text-lg transition-colors duration-200 ${
+                      diaSeleccionado === item.dia
+                        ? 'text-green-600 dark:text-green-400'
+                        : 'text-white'
+                    }`}
+                    style={{
+                      color: diaSeleccionado === item.dia ? undefined : 'white'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (diaSeleccionado !== item.dia) {
+                        e.currentTarget.style.color = '#059669'; // green-600
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (diaSeleccionado !== item.dia) {
+                        e.currentTarget.style.color = 'white';
+                      }
+                    }}
+                    >
+                      {new Intl.NumberFormat('es-AR', {
+                        style: 'currency',
+                        currency: 'ARS',
+                      }).format(item.monto)}
+                    </td>
+                  </tr>
 
                   {/* Detalle del día seleccionado */}
                   {diaSeleccionado === item.dia && (
@@ -295,7 +295,7 @@ export function IngresosPorDia() {
                       </td>
                     </tr>
                   )}
-                </tbody>
+                </React.Fragment>
               ))
             )}
           </tbody>
