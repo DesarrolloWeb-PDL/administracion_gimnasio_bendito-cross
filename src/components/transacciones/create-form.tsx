@@ -9,7 +9,19 @@ import TicketReceipt from './ticket-receipt';
 
 type SuscripcionWithRelations = {
   id: string;
-  socio: { nombre: string; apellido: string; dni: string; telefono?: string | null };
+  socio: {
+    id: string;
+    nombre: string;
+    apellido: string;
+    dni: string;
+    telefono?: string | null;
+    cuentaCorriente?: {
+      id: string;
+      saldoDeuda: number;
+      saldoCredito: number;
+      estado: string;
+    } | null;
+  };
   plan: { nombre: string; precio: number };
 };
 
@@ -32,6 +44,10 @@ export default function Form({ suscripciones, logoUrl }: { suscripciones: Suscri
   const [state, dispatch, isPending] = useActionState(createTransaccion, initialState);
   const router = useRouter();
   const [showTicket, setShowTicket] = useState(false);
+  const [selectedSuscripcion, setSelectedSuscripcion] = useState<SuscripcionWithRelations | null>(null);
+  const [incluirCuentaCorriente, setIncluirCuentaCorriente] = useState(false);
+  const [montoCuota, setMontoCuota] = useState<number>(0);
+  const [montoCuentaCorriente, setMontoCuentaCorriente] = useState<number>(0);
 
   // Detectar éxito y mostrar ticket
   useEffect(() => {
@@ -59,6 +75,12 @@ export default function Form({ suscripciones, logoUrl }: { suscripciones: Suscri
     telefonoSocio: state.transaccion.suscripcion.socio.telefono
   } : null;
 
+  const cuentaCorriente = selectedSuscripcion?.socio?.cuentaCorriente;
+  const tieneCuentaCorriente = cuentaCorriente && cuentaCorriente.estado === 'ACTIVO';
+  const saldoDeuda = tieneCuentaCorriente ? cuentaCorriente.saldoDeuda : 0;
+  const saldoCredito = tieneCuentaCorriente ? cuentaCorriente.saldoCredito : 0;
+  const saldoNeto = saldoDeuda - saldoCredito;
+
   return (
     <>
       {showTicket && ticketData && (
@@ -72,7 +94,15 @@ export default function Form({ suscripciones, logoUrl }: { suscripciones: Suscri
             <label htmlFor="suscripcionId" className="mb-2 block text-sm font-medium text-gray-900">
               Seleccionar Suscripción
             </label>
-            <SuscripcionSearchSelect suscripciones={suscripciones} />
+            <SuscripcionSearchSelect 
+              suscripciones={suscripciones}
+              onSuscripcionChange={(susc) => {
+                setSelectedSuscripcion(susc);
+                if (susc) {
+                  setMontoCuota(susc.plan.precio);
+                }
+              }}
+            />
             <div id="suscripcion-error" aria-live="polite" aria-atomic="true">
               {state.errors?.suscripcionId &&
                 state.errors.suscripcionId.map((error: string) => (
@@ -82,6 +112,74 @@ export default function Form({ suscripciones, logoUrl }: { suscripciones: Suscri
                 ))}
             </div>
           </div>
+
+          {/* Alerta de Cuenta Corriente */}
+          {selectedSuscripcion && tieneCuentaCorriente && saldoNeto > 0 && (
+            <div className="mb-4 rounded-lg border-2 border-orange-300 bg-orange-50 dark:bg-orange-900/20 p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-orange-600 dark:text-orange-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-sm font-medium text-orange-800 dark:text-orange-200">
+                    Este socio tiene deuda en cuenta corriente
+                  </h3>
+                  <div className="mt-2 text-sm text-orange-700 dark:text-orange-300">
+                    <p className="mb-1">Saldo pendiente: <strong>${saldoNeto.toFixed(2)}</strong></p>
+                    <div className="mt-3 flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="incluirCuentaCorriente"
+                        checked={incluirCuentaCorriente}
+                        onChange={(e) => {
+                          setIncluirCuentaCorriente(e.target.checked);
+                          if (!e.target.checked) {
+                            setMontoCuentaCorriente(0);
+                          }
+                        }}
+                        className="h-4 w-4 rounded border-orange-300 text-orange-600 focus:ring-orange-500"
+                      />
+                      <label htmlFor="incluirCuentaCorriente" className="font-medium">
+                        Incluir pago de cuenta corriente
+                      </label>
+                    </div>
+                    {incluirCuentaCorriente && (
+                      <div className="mt-3">
+                        <label htmlFor="montoCuentaCorriente" className="block text-xs font-medium mb-1">
+                          Monto para cuenta corriente:
+                        </label>
+                        <input
+                          type="number"
+                          id="montoCuentaCorriente"
+                          value={montoCuentaCorriente}
+                          onChange={(e) => setMontoCuentaCorriente(Number(e.target.value))}
+                          step="0.01"
+                          min="0"
+                          max={saldoNeto}
+                          placeholder="0.00"
+                          className="w-full rounded-md border border-orange-300 bg-white px-3 py-2 text-sm text-gray-900"
+                        />
+                        <p className="mt-1 text-xs">
+                          Máximo: ${saldoNeto.toFixed(2)}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Hidden inputs para cuenta corriente */}
+          {incluirCuentaCorriente && (
+            <>
+              <input type="hidden" name="incluirCuentaCorriente" value="true" />
+              <input type="hidden" name="montoCuentaCorriente" value={montoCuentaCorriente} />
+              <input type="hidden" name="cuentaCorrienteId" value={cuentaCorriente?.id || ''} />
+            </>
+          )}
 
           {/* Monto */}
           <div className="mb-4">

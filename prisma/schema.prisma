@@ -40,10 +40,10 @@ model Configuracion {
 }
 
 model Socio {
-  id                 String        @id @default(cuid())
+  id                 String           @id @default(cuid())
   nombre             String
   apellido           String
-  dni                String        @unique
+  dni                String           @unique
   email              String?
   telefono           String?
   fechaNacimiento    DateTime?
@@ -54,12 +54,13 @@ model Socio {
   telefonoEmergencia String?
   condicionesMedicas String?
   objetivo           String?
-  activo             Boolean       @default(true)
-  esLibre            Boolean       @default(false)
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
+  activo             Boolean          @default(true)
+  esLibre            Boolean          @default(false)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
   asistencias        Asistencia[]
   suscripciones      Suscripcion[]
+  cuentaCorriente    CuentaCorriente?
 }
 
 model Plan {
@@ -91,13 +92,14 @@ model Suscripcion {
 }
 
 model Transaccion {
-  id            String      @id @default(cuid())
-  suscripcionId String
-  monto         Decimal
-  fecha         DateTime    @default(now())
-  metodoPago    String
-  notas         String?
-  suscripcion   Suscripcion @relation(fields: [suscripcionId], references: [id])
+  id                         String                      @id @default(cuid())
+  suscripcionId              String
+  monto                      Decimal
+  fecha                      DateTime                    @default(now())
+  metodoPago                 String
+  notas                      String?
+  suscripcion                Suscripcion                 @relation(fields: [suscripcionId], references: [id])
+  movimientosCuentaCorriente MovimientoCuentaCorriente[]
 }
 
 model Asistencia {
@@ -105,4 +107,31 @@ model Asistencia {
   socioId String
   fecha   DateTime @default(now())
   socio   Socio    @relation(fields: [socioId], references: [id])
+}
+
+model CuentaCorriente {
+  id           String                      @id @default(cuid())
+  socioId      String                      @unique
+  socio        Socio                       @relation(fields: [socioId], references: [id], onDelete: Cascade)
+  saldoDeuda   Decimal                     @default(0) @db.Decimal(10, 2)
+  saldoCredito Decimal                     @default(0) @db.Decimal(10, 2)
+  descripcion  String?
+  estado       String                      @default("ACTIVO")
+  movimientos  MovimientoCuentaCorriente[]
+  createdAt    DateTime                    @default(now())
+  updatedAt    DateTime                    @updatedAt
+}
+
+model MovimientoCuentaCorriente {
+  id                String          @id @default(cuid())
+  cuentaCorrienteId String
+  cuentaCorriente   CuentaCorriente @relation(fields: [cuentaCorrienteId], references: [id], onDelete: Cascade)
+  tipo              String
+  monto             Decimal         @db.Decimal(10, 2)
+  descripcion       String
+  transaccionId     String?
+  transaccion       Transaccion?    @relation(fields: [transaccionId], references: [id])
+  createdAt         DateTime        @default(now())
+
+  @@index([cuentaCorrienteId])
 }

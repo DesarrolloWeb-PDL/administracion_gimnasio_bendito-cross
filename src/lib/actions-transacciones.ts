@@ -4,6 +4,7 @@ import { z } from 'zod';
 import prisma from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { Decimal } from '@prisma/client/runtime/library';
 
 const FormSchema = z.object({
   id: z.string(),
@@ -12,6 +13,9 @@ const FormSchema = z.object({
   metodoPago: z.string().min(1, 'Seleccione un método de pago'),
   fecha: z.string().optional(),
   notas: z.string().optional(),
+  incluirCuentaCorriente: z.boolean().optional(),
+  montoCuentaCorriente: z.coerce.number().optional(),
+  cuentaCorrienteId: z.string().optional(),
 });
 
 const CreateTransaccion = FormSchema.omit({ id: true });
@@ -23,6 +27,9 @@ export async function createTransaccion(prevState: unknown, formData: FormData) 
     metodoPago: formData.get('metodoPago'),
     fecha: formData.get('fecha'),
     notas: formData.get('notas'),
+    incluirCuentaCorriente: formData.get('incluirCuentaCorriente') === 'true',
+    montoCuentaCorriente: formData.get('montoCuentaCorriente'),
+    cuentaCorrienteId: formData.get('cuentaCorrienteId'),
   });
 
   if (!validatedFields.success) {
@@ -32,16 +39,25 @@ export async function createTransaccion(prevState: unknown, formData: FormData) 
     };
   }
 
-  const { suscripcionId, monto, metodoPago, fecha, notas } = validatedFields.data;
+  const { suscripcionId, monto, metodoPago, fecha, notas, incluirCuentaCorriente, montoCuentaCorriente, cuentaCorrienteId } = validatedFields.data;
 
   try {
+    // Calcular monto total
+    const montoTotal = monto + (incluirCuentaCorriente && montoCuentaCorriente ? montoCuentaCorriente : 0);
+    let notasCompletas = notas || '';
+    
+    if (incluirCuentaCorriente && montoCuentaCorriente && montoCuentaCorriente > 0) {
+      notasCompletas = `Cuota: $${monto.toFixed(2)} + Cuenta Corriente: $${montoCuentaCorriente.toFixed(2)} = Total: $${montoTotal.toFixed(2)}${notas ? ' | ' + notas : ''}`;
+    }
+
+    // Crear transacción principal con monto total
     const newTransaccion = await prisma.transaccion.create({
       data: {
         suscripcionId,
-        monto,
+        monto: montoTotal,
         metodoPago,
         ...(fecha && { fecha: new Date(fecha) }),
-        notas: notas || null,
+        notas: notasCompletas,
       },
       include: {
         suscripcion: {
@@ -52,8 +68,72 @@ export async function createTransaccion(prevState: unknown, formData: FormData) 
         },
       },
     });
+
+    // Si se incluye pago de cuenta corriente, registrar el movimiento
+    if (incluirCuentaCorriente && cuentaCorrienteId && montoCuentaCorriente && montoCuentaCorriente > 0) {
+      const cuentaCorriente = await prisma.cuentaCorriente.findUnique({
+        where: { id: cuentaCorrienteId },
+      });
+
+      if (cuentaCorriente && cuentaCorriente.estado === 'ACTIVO') {
+        let nuevoSaldoDeuda = cuentaCorriente.saldoDeuda;
+        let nuevoSaldoCredito = cuentaCorriente.saldoCredito;
+        let montoPendiente = new Decimal(montoCuentaCorriente);
+
+        // Primero, aplicar al saldo de deuda
+        if (nuevoSaldoDeuda.greaterThan(0)) {
+          if (montoPendiente.greaterThanOrEqualTo(nuevoSaldoDeuda)) {
+            montoPendiente = montoPendiente.minus(nuevoSaldoDeuda);
+            nuevoSaldoDeuda = new Decimal(0);
+          } else {
+            nuevoSaldoDeuda = nuevoSaldoDeuda.minus(montoPendiente);
+            montoPendiente = new Decimal(0);
+          }
+        }
+
+        // Si queda dinero, aplicar al crédito
+        if (montoPendiente.greaterThan(0)) {
+          if (nuevoSaldoCredito.greaterThan(0)) {
+            if (montoPendiente.greaterThanOrEqualTo(nuevoSaldoCredito)) {
+              montoPendiente = montoPendiente.minus(nuevoSaldoCredito);
+              nuevoSaldoCredito = new Decimal(0);
+            } else {
+              nuevoSaldoCredito = nuevoSaldoCredito.minus(montoPendiente);
+              montoPendiente = new Decimal(0);
+            }
+          } else {
+            nuevoSaldoCredito = montoPendiente;
+          }
+        }
+
+        const nuevoEstado = nuevoSaldoDeuda.equals(0) && nuevoSaldoCredito.equals(0)
+          ? 'SALDADO'
+          : 'ACTIVO';
+
+        await prisma.$transaction([
+          prisma.movimientoCuentaCorriente.create({
+            data: {
+              cuentaCorrienteId,
+              tipo: 'PAGO',
+              monto: new Decimal(montoCuentaCorriente),
+              descripcion: `Pago de cuota + cuenta corriente (Transacción #${newTransaccion.id})`,
+              transaccionId: newTransaccion.id,
+            },
+          }),
+          prisma.cuentaCorriente.update({
+            where: { id: cuentaCorrienteId },
+            data: {
+              saldoDeuda: nuevoSaldoDeuda,
+              saldoCredito: nuevoSaldoCredito,
+              estado: nuevoEstado,
+            },
+          }),
+        ]);
+      }
+    }
     
     revalidatePath('/admin/transacciones');
+    revalidatePath('/admin/cuenta-corriente');
     return {
       success: true,
       message: 'Transacción registrada correctamente',

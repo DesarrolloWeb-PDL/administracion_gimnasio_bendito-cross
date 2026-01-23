@@ -4,16 +4,29 @@ import { useState } from 'react';
 
 type SuscripcionWithRelations = {
   id: string;
-  socio: { nombre: string; apellido: string; dni: string };
+  socio: {
+    id: string;
+    nombre: string;
+    apellido: string;
+    dni: string;
+    cuentaCorriente?: {
+      id: string;
+      saldoDeuda: number;
+      saldoCredito: number;
+      estado: string;
+    } | null;
+  };
   plan: { nombre: string; precio: number };
 };
 
 export default function SuscripcionSearchSelect({
   suscripciones,
   defaultValue = '',
+  onSuscripcionChange,
 }: {
   suscripciones: SuscripcionWithRelations[];
   defaultValue?: string;
+  onSuscripcionChange?: (suscripcion: SuscripcionWithRelations | null) => void;
 }) {
   const [searchValue, setSearchValue] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -71,6 +84,7 @@ export default function SuscripcionSearchSelect({
                     setSelectedId(s.id);
                     setIsOpen(false);
                     setSearchValue('');
+                    onSuscripcionChange?.(s);
                   }}
                   className="px-3 py-2 cursor-pointer hover:bg-gray-100 text-sm flex items-center justify-between transition-colors"
                 >

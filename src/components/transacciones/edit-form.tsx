@@ -16,7 +16,18 @@ type Transaccion = {
 
 type SuscripcionWithRelations = {
   id: string;
-  socio: { nombre: string; apellido: string; dni: string };
+  socio: {
+    id: string;
+    nombre: string;
+    apellido: string;
+    dni: string;
+    cuentaCorriente?: {
+      id: string;
+      saldoDeuda: number;
+      saldoCredito: number;
+      estado: string;
+    } | null;
+  };
   plan: { nombre: string; precio: number };
 };
 

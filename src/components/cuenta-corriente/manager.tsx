@@ -1,0 +1,278 @@
+'use client';
+
+import { useState } from 'react';
+import { registrarMovimiento, cerrarCuentaCorriente } from '@/lib/actions-cuenta-corriente';
+import { useFormState } from 'react-dom';
+import { useRouter } from 'next/navigation';
+
+type Socio = {
+  id: string;
+  nombre: string;
+  apellido: string;
+  dni: string;
+  cuentaCorriente: {
+    id: string;
+    saldoDeuda: number;
+    saldoCredito: number;
+    estado: string;
+    movimientos: {
+      id: string;
+      tipo: string;
+      monto: number;
+      descripcion: string;
+      createdAt: Date;
+    }[];
+  } | null;
+};
+
+export default function CuentaCorrienteManager({ socio }: { socio: Socio }) {
+  const router = useRouter();
+  const [tipo, setTipo] = useState<string>('DEUDA');
+  
+  const initialState = { message: '', errors: {}, success: false };
+  const [stateMovimiento, formActionMovimiento] = useFormState(registrarMovimiento, initialState);
+  const [stateCerrar, formActionCerrar] = useFormState(cerrarCuentaCorriente, initialState);
+
+  const cuentaCorriente = socio.cuentaCorriente;
+  if (!cuentaCorriente) {
+    return (
+      <div className="rounded-lg bg-yellow-50 dark:bg-yellow-900 p-4">
+        <p className="text-yellow-800 dark:text-yellow-200">
+          Este socio no tiene una cuenta corriente activa.
+        </p>
+      </div>
+    );
+  }
+
+  const saldoNeto = cuentaCorriente.saldoDeuda - cuentaCorriente.saldoCredito;
+  const puedeRegistrarMovimientos = cuentaCorriente.estado === 'ACTIVO';
+  const puedeCerrar = cuentaCorriente.estado === 'ACTIVO' && saldoNeto === 0;
+
+  return (
+    <div className="space-y-6">
+      {/* Header con info del socio */}
+      <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm">
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              {socio.apellido}, {socio.nombre}
+            </h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">DNI: {socio.dni}</p>
+          </div>
+          <span className={`inline-flex rounded-full px-3 py-1 text-sm font-medium ${
+            cuentaCorriente.estado === 'ACTIVO'
+              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+              : cuentaCorriente.estado === 'SALDADO'
+              ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+              : 'bg-gray-100 text-gray-800 dark:bg-gray-600 dark:text-gray-200'
+          }`}>
+            {cuentaCorriente.estado}
+          </span>
+        </div>
+      </div>
+
+      {/* Resumen de saldos */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="rounded-lg bg-red-50 dark:bg-red-900/20 p-4">
+          <p className="text-sm font-medium text-red-600 dark:text-red-400">Deuda</p>
+          <p className="text-2xl font-bold text-red-700 dark:text-red-300">
+            ${cuentaCorriente.saldoDeuda.toFixed(2)}
+          </p>
+        </div>
+        <div className="rounded-lg bg-green-50 dark:bg-green-900/20 p-4">
+          <p className="text-sm font-medium text-green-600 dark:text-green-400">Crédito</p>
+          <p className="text-2xl font-bold text-green-700 dark:text-green-300">
+            ${cuentaCorriente.saldoCredito.toFixed(2)}
+          </p>
+        </div>
+        <div className={`rounded-lg p-4 ${
+          saldoNeto > 0
+            ? 'bg-orange-50 dark:bg-orange-900/20'
+            : saldoNeto < 0
+            ? 'bg-blue-50 dark:bg-blue-900/20'
+            : 'bg-gray-50 dark:bg-gray-700'
+        }`}>
+          <p className={`text-sm font-medium ${
+            saldoNeto > 0
+              ? 'text-orange-600 dark:text-orange-400'
+              : saldoNeto < 0
+              ? 'text-blue-600 dark:text-blue-400'
+              : 'text-gray-600 dark:text-gray-400'
+          }`}>
+            Saldo Neto
+          </p>
+          <p className={`text-2xl font-bold ${
+            saldoNeto > 0
+              ? 'text-orange-700 dark:text-orange-300'
+              : saldoNeto < 0
+              ? 'text-blue-700 dark:text-blue-300'
+              : 'text-gray-700 dark:text-gray-300'
+          }`}>
+            ${Math.abs(saldoNeto).toFixed(2)}
+          </p>
+        </div>
+      </div>
+
+      {/* Formulario para registrar movimiento */}
+      {puedeRegistrarMovimientos && (
+        <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            Registrar Movimiento
+          </h2>
+          
+          {stateMovimiento?.message && (
+            <div className={`mb-4 rounded-lg p-4 ${
+              stateMovimiento.success
+                ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200'
+                : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200'
+            }`}>
+              {stateMovimiento.message}
+            </div>
+          )}
+
+          <form action={formActionMovimiento} className="space-y-4">
+            <input type="hidden" name="cuentaCorrienteId" value={cuentaCorriente.id} />
+            
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <label htmlFor="tipo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Tipo de Movimiento
+                </label>
+                <select
+                  id="tipo"
+                  name="tipo"
+                  value={tipo}
+                  onChange={(e) => setTipo(e.target.value)}
+                  className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white"
+                >
+                  <option value="DEUDA">Registrar Deuda</option>
+                  <option value="CREDITO">Registrar Crédito</option>
+                  <option value="PAGO">Aplicar Pago</option>
+                  <option value="AJUSTE">Ajuste</option>
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="monto" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Monto
+                </label>
+                <input
+                  type="number"
+                  id="monto"
+                  name="monto"
+                  step="0.01"
+                  min="0"
+                  placeholder="0.00"
+                  required
+                  className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Descripción
+              </label>
+              <textarea
+                id="descripcion"
+                name="descripcion"
+                rows={3}
+                placeholder="Describe el motivo del movimiento..."
+                required
+                className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500"
+            >
+              Registrar Movimiento
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* Botón para cerrar cuenta */}
+      {puedeCerrar && (
+        <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm">
+          <form action={formActionCerrar}>
+            <input type="hidden" name="cuentaCorrienteId" value={cuentaCorriente.id} />
+            <button
+              type="submit"
+              className="w-full rounded-md bg-gray-600 px-4 py-2 text-sm font-medium text-white hover:bg-gray-500"
+              onClick={(e) => {
+                if (!confirm('¿Está seguro de cerrar esta cuenta corriente? Esta acción no se puede deshacer.')) {
+                  e.preventDefault();
+                }
+              }}
+            >
+              Cerrar Cuenta Corriente
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* Historial de movimientos */}
+      <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Historial de Movimientos
+        </h2>
+
+        {cuentaCorriente.movimientos.length === 0 ? (
+          <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">
+            No hay movimientos registrados.
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {cuentaCorriente.movimientos.map((mov) => (
+              <div
+                key={mov.id}
+                className="flex items-start justify-between border-b border-gray-200 dark:border-gray-700 pb-3 last:border-0"
+              >
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                      mov.tipo === 'DEUDA'
+                        ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300'
+                        : mov.tipo === 'CREDITO'
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
+                        : mov.tipo === 'PAGO'
+                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300'
+                        : 'bg-gray-100 text-gray-800 dark:bg-gray-600 dark:text-gray-200'
+                    }`}>
+                      {mov.tipo}
+                    </span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      {new Date(mov.createdAt).toLocaleString('es-AR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">{mov.descripcion}</p>
+                </div>
+                <div className="ml-4 text-right">
+                  <p className={`text-lg font-bold ${
+                    mov.tipo === 'DEUDA'
+                      ? 'text-red-600 dark:text-red-400'
+                      : mov.tipo === 'CREDITO'
+                      ? 'text-green-600 dark:text-green-400'
+                      : mov.tipo === 'PAGO'
+                      ? 'text-blue-600 dark:text-blue-400'
+                      : 'text-gray-600 dark:text-gray-400'
+                  }`}>
+                    {mov.tipo === 'DEUDA' || mov.tipo === 'CREDITO' ? '+' : '-'}${mov.monto.toFixed(2)}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
