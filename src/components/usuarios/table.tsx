@@ -14,31 +14,31 @@ export default async function UsersTable({
   return (
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">
-        <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
+        <div className="rounded-lg bg-gray-50 dark:bg-gray-800 p-2 md:pt-0">
           <div className="md:hidden">
             {users?.map((user) => (
               <div
                 key={user.id}
-                className="mb-2 w-full rounded-md bg-white p-4"
+                className="mb-2 w-full rounded-md bg-white dark:bg-gray-700 p-4"
               >
-                <div className="flex items-center justify-between border-b pb-4">
+                <div className="flex items-center justify-between border-b dark:border-gray-600 pb-4">
                   <div>
                     <div className="mb-2 flex items-center">
-                      <p>{user.nombre}</p>
+                      <p className="text-gray-900 dark:text-gray-100">{user.nombre}</p>
                     </div>
-                    <p className="text-sm text-gray-500">{user.email}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
                   </div>
-                  <div className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">
+                  <div className="px-2 py-1 text-xs rounded-full bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-gray-200">
                     {user.rol}
                   </div>
                 </div>
                 <div className="flex w-full items-center justify-between pt-4">
                   <div className="flex justify-end gap-2">
-                    <Link href={`/admin/usuarios/${user.id}/edit`} className="rounded-md border p-2 hover:bg-gray-100">
+                    <Link href={`/admin/usuarios/${user.id}/edit`} className="rounded-md border border-gray-300 dark:border-gray-600 p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
                         ✏️
                     </Link>
                     <form action={deleteUsuario.bind(null, user.id)}>
-                        <button className="rounded-md border p-2 hover:bg-gray-100 text-red-600">
+                        <button className="rounded-md border border-gray-300 dark:border-gray-600 p-2 hover:bg-gray-100 dark:hover:bg-gray-600 text-red-600 dark:text-red-400">
                             🗑️
                         </button>
                     </form>
@@ -47,10 +47,10 @@ export default async function UsersTable({
               </div>
             ))}
           </div>
-          <table className="hidden min-w-full text-gray-900 md:table">
+          <table className="hidden min-w-full text-gray-900 dark:text-gray-100 md:table">
             <thead className="rounded-lg text-left text-sm font-normal">
               <tr>
-                <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
+                <th scope="col" className="px-4 py-5 font-medium sm:pl-6 text-gray-900 dark:text-gray-100">
                   Nombre
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
@@ -64,11 +64,11 @@ export default async function UsersTable({
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white">
+            <tbody className="bg-white dark:bg-gray-700">
               {users?.map((user) => (
                 <tr
                   key={user.id}
-                  className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
+                  className="w-full border-b border-gray-200 dark:border-gray-600 py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
                 >
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex items-center gap-3">

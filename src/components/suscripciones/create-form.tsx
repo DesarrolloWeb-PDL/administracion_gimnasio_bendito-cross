@@ -16,17 +16,17 @@ type PlanSerializable = Omit<Plan, 'precio'> & { precio: number };
 
     return (
       <form action={dispatch}>
-        <div className="rounded-md bg-gray-50 p-4 md:p-6">
+        <div className="rounded-md bg-gray-50 dark:bg-gray-800 p-4 md:p-6">
           {/* Socio */}
           <div className="mb-4">
-            <label htmlFor="socioId" className="mb-2 block text-sm font-medium text-gray-900">
+            <label htmlFor="socioId" className="mb-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
               Seleccionar Socio
             </label>
             <div className="relative">
               <select
                 id="socioId"
                 name="socioId"
-                className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
+                className="peer block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 defaultValue=""
                 aria-describedby="socio-error"
               >
@@ -52,14 +52,14 @@ type PlanSerializable = Omit<Plan, 'precio'> & { precio: number };
 
         {/* Plan */}
         <div className="mb-4">
-          <label htmlFor="planId" className="mb-2 block text-sm font-medium text-gray-900">
+          <label htmlFor="planId" className="mb-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
             Seleccionar Plan
           </label>
           <div className="relative">
             <select
               id="planId"
               name="planId"
-              className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
+              className="peer block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500 dark:placeholder:text-gray-400"
               defaultValue=""
               aria-describedby="plan-error"
             >
@@ -85,7 +85,7 @@ type PlanSerializable = Omit<Plan, 'precio'> & { precio: number };
 
         {/* Fecha Inicio */}
         <div className="mb-4">
-          <label htmlFor="fechaInicio" className="mb-2 block text-sm font-medium text-gray-900">
+          <label htmlFor="fechaInicio" className="mb-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
             Fecha de Inicio
           </label>
           <div className="relative">
@@ -94,7 +94,7 @@ type PlanSerializable = Omit<Plan, 'precio'> & { precio: number };
               name="fechaInicio"
               type="date"
               defaultValue={new Date().toISOString().split('T')[0]}
-              className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
+              className="peer block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500 dark:placeholder:text-gray-400"
               aria-describedby="fecha-error"
             />
           </div>
