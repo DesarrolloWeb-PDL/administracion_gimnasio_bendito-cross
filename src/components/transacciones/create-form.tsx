@@ -48,6 +48,8 @@ export default function Form({ suscripciones, logoUrl }: { suscripciones: Suscri
   const [incluirCuentaCorriente, setIncluirCuentaCorriente] = useState(false);
   const [montoCuota, setMontoCuota] = useState<number>(0);
   const [montoCuentaCorriente, setMontoCuentaCorriente] = useState<number>(0);
+  
+  const totalACobrar = montoCuota + montoCuentaCorriente;
 
   // Detectar éxito y mostrar ticket
   useEffect(() => {
@@ -184,7 +186,7 @@ export default function Form({ suscripciones, logoUrl }: { suscripciones: Suscri
           {/* Monto */}
           <div className="mb-4">
             <label htmlFor="monto" className="mb-2 block text-sm font-medium text-gray-900">
-              Monto
+              Monto de Cuota {incluirCuentaCorriente && <span className="text-xs text-gray-500">(puede ser 0 si solo paga cuenta corriente)</span>}
             </label>
             <div className="relative mt-2 rounded-md">
               <div className="relative">
@@ -193,6 +195,9 @@ export default function Form({ suscripciones, logoUrl }: { suscripciones: Suscri
                   name="monto"
                   type="number"
                   step="0.01"
+                  min="0"
+                  defaultValue="0"
+                  onChange={(e) => setMontoCuota(parseFloat(e.target.value) || 0)}
                   placeholder="Ingrese el monto"
                   className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
                   aria-describedby="monto-error"
@@ -208,6 +213,29 @@ export default function Form({ suscripciones, logoUrl }: { suscripciones: Suscri
                 ))}
             </div>
           </div>
+
+          {/* Total a Cobrar */}
+          {incluirCuentaCorriente && (
+            <div className="mb-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+              <h4 className="text-sm font-semibold mb-3 text-gray-900 dark:text-gray-100">Desglose del Pago</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between text-gray-700 dark:text-gray-300">
+                  <span>Monto de Cuota:</span>
+                  <span className="font-medium">${montoCuota.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-gray-700 dark:text-gray-300">
+                  <span>Pago Cuenta Corriente:</span>
+                  <span className="font-medium">${montoCuentaCorriente.toFixed(2)}</span>
+                </div>
+                <div className="border-t border-blue-300 dark:border-blue-700 pt-2 mt-2">
+                  <div className="flex justify-between text-base">
+                    <span className="font-bold text-gray-900 dark:text-gray-100">Total a Cobrar:</span>
+                    <span className="font-bold text-blue-600 dark:text-blue-400 text-lg">${totalACobrar.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Fecha */}
           <div className="mb-4">
