@@ -93,19 +93,19 @@ export function IngresosPorDia() {
   const totalDiaSeleccionado = transacciones.reduce((sum, t) => sum + t.monto, 0);
 
   return (
-    <div className="rounded-xl bg-white p-6 shadow-sm">
-      <h2 className="mb-4 text-lg font-semibold text-gray-700">Ingresos por Día</h2>
+    <div className="rounded-xl bg-white dark:bg-gray-800 p-6 shadow-sm">
+      <h2 className="mb-4 text-lg font-semibold text-gray-700 dark:text-gray-200">Ingresos por Día</h2>
       
       {/* Selectores */}
       <div className="mb-6 flex gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-600 mb-2">
+          <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
             Año
           </label>
           <select
             value={año}
             onChange={(e) => setAño(parseInt(e.target.value))}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             {[2024, 2025, 2026].map((y) => (
               <option key={y} value={y}>
@@ -116,13 +116,13 @@ export function IngresosPorDia() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-600 mb-2">
+          <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
             Mes
           </label>
           <select
             value={mes}
             onChange={(e) => setMes(parseInt(e.target.value))}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             {meses.map((m) => (
               <option key={m.num} value={m.num}>
@@ -135,9 +135,9 @@ export function IngresosPorDia() {
 
       {/* Total del mes */}
       {ingresos.length > 0 && (
-        <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <p className="text-sm text-gray-600 mb-1">Total del mes</p>
-          <p className="text-2xl font-bold text-blue-600">
+        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total del mes</p>
+          <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
             {new Intl.NumberFormat('es-AR', {
               style: 'currency',
               currency: 'ARS',
