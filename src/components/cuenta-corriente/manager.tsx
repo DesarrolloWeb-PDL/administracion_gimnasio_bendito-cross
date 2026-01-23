@@ -65,8 +65,8 @@ export default function CuentaCorrienteManager({ socio }: { socio: Socio }) {
   }
 
   const saldoNeto = cuentaCorriente.saldoDeuda - cuentaCorriente.saldoCredito;
-  const puedeRegistrarMovimientos = cuentaCorriente.estado === 'ACTIVO';
-  const puedeCerrar = cuentaCorriente.estado === 'ACTIVO' && saldoNeto === 0;
+  const puedeRegistrarMovimientos = cuentaCorriente.estado !== 'CERRADO'; // Permite movimientos en ACTIVO y SALDADO
+  const puedeCerrar = cuentaCorriente.estado !== 'CERRADO' && saldoNeto === 0; // Solo si el saldo es 0
   const puedeReabrir = cuentaCorriente.estado === 'CERRADO';
 
   return (

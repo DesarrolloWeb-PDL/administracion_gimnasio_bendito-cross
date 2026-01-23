@@ -217,6 +217,14 @@ export async function registrarMovimiento(
       };
     }
 
+    // Solo impedir movimientos si la cuenta está CERRADA
+    if (cuentaCorriente.estado === 'CERRADO') {
+      return {
+        message: 'No se pueden registrar movimientos en una cuenta cerrada. Debe reabrirla primero.',
+        success: false,
+      };
+    }
+
     let nuevoSaldoDeuda = cuentaCorriente.saldoDeuda;
     let nuevoSaldoCredito = cuentaCorriente.saldoCredito;
 
@@ -257,9 +265,9 @@ export async function registrarMovimiento(
         break;
     }
 
-    const nuevoEstado = nuevoSaldoDeuda.equals(0) && nuevoSaldoCredito.equals(0)
-      ? 'SALDADO'
-      : 'ACTIVO';
+    // El estado SALDADO es informativo, la cuenta sigue ACTIVA para nuevos movimientos
+    // Solo se cierra manualmente con el botón "Cerrar Cuenta"
+    const nuevoEstado = cuentaCorriente.estado === 'CERRADO' ? 'CERRADO' : 'ACTIVO';
 
     console.log('Registrando movimiento:', { tipo, monto, descripcion, nuevoSaldoDeuda: nuevoSaldoDeuda.toNumber(), nuevoSaldoCredito: nuevoSaldoCredito.toNumber() });
 
