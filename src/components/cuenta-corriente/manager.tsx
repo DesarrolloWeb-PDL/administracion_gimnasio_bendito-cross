@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { registrarMovimiento, cerrarCuentaCorriente, reabrirCuentaCorriente } from '@/lib/actions-cuenta-corriente';
 import { useFormState } from 'react-dom';
 import { useRouter } from 'next/navigation';
@@ -28,11 +28,30 @@ type Socio = {
 export default function CuentaCorrienteManager({ socio }: { socio: Socio }) {
   const router = useRouter();
   const [tipo, setTipo] = useState<string>('DEUDA');
+  const formRef = useRef<HTMLFormElement>(null);
   
   const initialState = { message: '', errors: {}, success: false };
   const [stateMovimiento, formActionMovimiento] = useFormState(registrarMovimiento, initialState);
   const [stateCerrar, formActionCerrar] = useFormState(cerrarCuentaCorriente, initialState);
   const [stateReabrir, formActionReabrir] = useFormState(reabrirCuentaCorriente, initialState);
+
+  // Refrescar cuando hay éxito
+  useEffect(() => {
+    if (stateMovimiento?.success) {
+      formRef.current?.reset();
+      setTimeout(() => {
+        router.refresh();
+      }, 1500);
+    }
+  }, [stateMovimiento?.success, router]);
+
+  useEffect(() => {
+    if (stateCerrar?.success || stateReabrir?.success) {
+      setTimeout(() => {
+        router.refresh();
+      }, 1000);
+    }
+  }, [stateCerrar?.success, stateReabrir?.success, router]);
 
   const cuentaCorriente = socio.cuentaCorriente;
   if (!cuentaCorriente) {
@@ -128,11 +147,20 @@ export default function CuentaCorrienteManager({ socio }: { socio: Socio }) {
                 ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200'
                 : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200'
             }`}>
-              {stateMovimiento.message}
+              <p className="font-medium">{stateMovimiento.message}</p>
+              {stateMovimiento.errors && Object.keys(stateMovimiento.errors).length > 0 && (
+                <ul className="mt-2 list-disc list-inside text-sm">
+                  {Object.entries(stateMovimiento.errors).map(([key, errors]) => 
+                    errors?.map((error: string, idx: number) => (
+                      <li key={`${key}-${idx}`}>{error}</li>
+                    ))
+                  )}
+                </ul>
+              )}
             </div>
           )}
 
-          <form action={formActionMovimiento} className="space-y-4">
+          <form ref={formRef} action={formActionMovimiento} className="space-y-4">
             <input type="hidden" name="cuentaCorrienteId" value={cuentaCorriente.id} />
             
             <div className="grid gap-4 md:grid-cols-2">

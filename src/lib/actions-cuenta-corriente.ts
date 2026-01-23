@@ -194,9 +194,10 @@ export async function registrarMovimiento(
   });
 
   if (!validatedFields.success) {
+    console.error('Error de validación:', validatedFields.error);
     return {
       errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Error de validación.',
+      message: 'Error de validación. Verifica los campos.',
       success: false,
     };
   }
@@ -209,6 +210,7 @@ export async function registrarMovimiento(
     });
 
     if (!cuentaCorriente) {
+      console.error('Cuenta corriente no encontrada:', cuentaCorrienteId);
       return {
         message: 'La cuenta corriente no existe.',
         success: false,
@@ -259,6 +261,8 @@ export async function registrarMovimiento(
       ? 'SALDADO'
       : 'ACTIVO';
 
+    console.log('Registrando movimiento:', { tipo, monto, descripcion, nuevoSaldoDeuda: nuevoSaldoDeuda.toNumber(), nuevoSaldoCredito: nuevoSaldoCredito.toNumber() });
+
     await prisma.$transaction([
       prisma.movimientoCuentaCorriente.create({
         data: {
@@ -289,7 +293,7 @@ export async function registrarMovimiento(
   } catch (error) {
     console.error('Error al registrar movimiento:', error);
     return {
-      message: 'Error al registrar movimiento.',
+      message: `Error al registrar movimiento: ${error instanceof Error ? error.message : 'Error desconocido'}`,
       success: false,
     };
   }
