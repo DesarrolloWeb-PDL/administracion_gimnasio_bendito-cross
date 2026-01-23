@@ -148,15 +148,14 @@ export function IngresosPorDia() {
 
       {/* Tabla de ingresos por día */}
       <div className="overflow-x-auto">
-        <div className="inline-block min-w-full lg:min-w-0 lg:w-auto">
-          <table className="w-full lg:w-auto text-left text-sm">
-            <thead className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-              <tr>
-                <th className="px-8 py-3 font-semibold text-center">📅 Día</th>
-                <th className="px-12 py-3 font-semibold text-center">💰 Ingreso</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white dark:bg-gray-700">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+            <tr>
+              <th className="px-8 py-3 font-semibold text-center">📅 Día</th>
+              <th className="px-12 py-3 font-semibold text-center">💰 Ingreso</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white dark:bg-gray-700">
               {loading ? (
                 <tr>
                   <td colSpan={2} className="px-4 py-4 text-center text-gray-500 dark:text-gray-400">
@@ -301,7 +300,6 @@ export function IngresosPorDia() {
             )}
           </tbody>
         </table>
-        </div>
       </div>
     </div>
   );
