@@ -61,18 +61,7 @@ export default async function AdminLayout({
             await signOut();
           }}
         >
-          <button 
-            className="flex w-full items-center justify-start gap-2 rounded-md p-3 text-sm font-medium text-white transition-all duration-200"
-            style={{
-              backgroundColor: 'rgba(var(--secondary-color-rgb), 0.3)',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(var(--secondary-color-rgb), 0.5)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(var(--secondary-color-rgb), 0.3)';
-            }}
-          >
+          <button className="nav-link flex w-full items-center justify-start gap-2 rounded-md p-3 text-sm font-medium text-white transition-all duration-200">
             Cerrar Sesión
           </button>
         </form>
@@ -114,18 +103,7 @@ export default async function AdminLayout({
                 await signOut();
               }}
             >
-              <button 
-                className="flex h-12 w-full items-center justify-start gap-2 rounded-md p-2 px-3 text-sm font-medium text-white transition-all duration-200"
-                style={{
-                  backgroundColor: 'rgba(var(--secondary-color-rgb), 0.3)',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(var(--secondary-color-rgb), 0.5)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(var(--secondary-color-rgb), 0.3)';
-                }}
-              >
+              <button className="nav-link flex h-12 w-full items-center justify-start gap-2 rounded-md p-2 px-3 text-sm font-medium text-white transition-all duration-200">
                 <div>Cerrar Sesión</div>
               </button>
             </form>

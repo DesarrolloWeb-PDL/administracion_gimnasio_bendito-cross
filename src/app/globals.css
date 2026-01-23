@@ -60,3 +60,12 @@ h1, h2, h3, h4, h5, h6 {
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
 }
+
+/* Estilos para links del sidebar con color secundario translúcido */
+.nav-link {
+  background-color: rgba(var(--secondary-color-rgb), 0.3);
+}
+
+.nav-link:hover {
+  background-color: rgba(var(--secondary-color-rgb), 0.5);
+}
