@@ -9,14 +9,24 @@ import { Decimal } from '@prisma/client/runtime/library';
 const FormSchema = z.object({
   id: z.string(),
   suscripcionId: z.string().min(1, 'Debe seleccionar una suscripción'),
-  monto: z.coerce.number().min(0.01, 'El monto debe ser mayor a 0'),
+  monto: z.coerce.number().min(0, 'El monto no puede ser negativo'),
   metodoPago: z.string().min(1, 'Seleccione un método de pago'),
   fecha: z.string().optional(),
-  notas: z.string().optional(),
+  notas: z.string().min(1, 'La descripción es requerida'),
   incluirCuentaCorriente: z.boolean().optional(),
   montoCuentaCorriente: z.coerce.number().optional(),
   cuentaCorrienteId: z.string().optional(),
-});
+}).refine(
+  (data) => {
+    const monto = data.monto || 0;
+    const montoCuentaC = data.montoCuentaCorriente || 0;
+    return monto + montoCuentaC > 0;
+  },
+  {
+    message: 'Debe ingresar un monto o un pago de cuenta corriente mayor a $0',
+    path: ['monto'],
+  }
+);
 
 const CreateTransaccion = FormSchema.omit({ id: true });
 

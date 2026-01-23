@@ -186,7 +186,7 @@ export default function Form({ suscripciones, logoUrl }: { suscripciones: Suscri
           {/* Monto */}
           <div className="mb-4">
             <label htmlFor="monto" className="mb-2 block text-sm font-medium text-gray-900">
-              Monto de Cuota {incluirCuentaCorriente && <span className="text-xs text-gray-500">(puede ser 0 si solo paga cuenta corriente)</span>}
+              Monto {incluirCuentaCorriente && <span className="text-xs text-gray-500">(puede ser $0 si solo paga cuenta corriente)</span>}
             </label>
             <div className="relative mt-2 rounded-md">
               <div className="relative">
@@ -220,7 +220,7 @@ export default function Form({ suscripciones, logoUrl }: { suscripciones: Suscri
               <h4 className="text-sm font-semibold mb-3 text-gray-900 dark:text-gray-100">Desglose del Pago</h4>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between text-gray-700 dark:text-gray-300">
-                  <span>Monto de Cuota:</span>
+                  <span>Monto:</span>
                   <span className="font-medium">${montoCuota.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-700 dark:text-gray-300">
@@ -262,17 +262,18 @@ export default function Form({ suscripciones, logoUrl }: { suscripciones: Suscri
             <p className="mt-1 text-xs text-gray-500">Si no se especifica, se usará la fecha actual</p>
           </div>
 
-          {/* Notas */}
+          {/* Descripción */}
           <div className="mb-4">
             <label htmlFor="notas" className="mb-2 block text-sm font-medium text-gray-900">
-              Notas
+              Descripción *
             </label>
             <div className="relative">
               <input
                 id="notas"
                 name="notas"
                 type="text"
-                placeholder="Ej: Pago mensualidad, Compra bebida"
+                placeholder="Ej: Pago mensualidad, Compra bebida, Pago deuda"
+                required
                 className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
                 aria-describedby="notas-error"
               />
