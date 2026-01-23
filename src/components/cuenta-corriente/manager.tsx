@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { registrarMovimiento, cerrarCuentaCorriente } from '@/lib/actions-cuenta-corriente';
+import { registrarMovimiento, cerrarCuentaCorriente, reabrirCuentaCorriente } from '@/lib/actions-cuenta-corriente';
 import { useFormState } from 'react-dom';
 import { useRouter } from 'next/navigation';
 
@@ -32,6 +32,7 @@ export default function CuentaCorrienteManager({ socio }: { socio: Socio }) {
   const initialState = { message: '', errors: {}, success: false };
   const [stateMovimiento, formActionMovimiento] = useFormState(registrarMovimiento, initialState);
   const [stateCerrar, formActionCerrar] = useFormState(cerrarCuentaCorriente, initialState);
+  const [stateReabrir, formActionReabrir] = useFormState(reabrirCuentaCorriente, initialState);
 
   const cuentaCorriente = socio.cuentaCorriente;
   if (!cuentaCorriente) {
@@ -47,6 +48,7 @@ export default function CuentaCorrienteManager({ socio }: { socio: Socio }) {
   const saldoNeto = cuentaCorriente.saldoDeuda - cuentaCorriente.saldoCredito;
   const puedeRegistrarMovimientos = cuentaCorriente.estado === 'ACTIVO';
   const puedeCerrar = cuentaCorriente.estado === 'ACTIVO' && saldoNeto === 0;
+  const puedeReabrir = cuentaCorriente.estado === 'CERRADO';
 
   return (
     <div className="space-y-6">
@@ -161,7 +163,7 @@ export default function CuentaCorrienteManager({ socio }: { socio: Socio }) {
                   id="monto"
                   name="monto"
                   step="0.01"
-                  min="0"
+                  min="0.01"
                   placeholder="0.00"
                   required
                   className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white"
@@ -202,12 +204,37 @@ export default function CuentaCorrienteManager({ socio }: { socio: Socio }) {
               type="submit"
               className="w-full rounded-md bg-gray-600 px-4 py-2 text-sm font-medium text-white hover:bg-gray-500"
               onClick={(e) => {
-                if (!confirm('¿Está seguro de cerrar esta cuenta corriente? Esta acción no se puede deshacer.')) {
+                if (!confirm('¿Está seguro de cerrar esta cuenta corriente?')) {
                   e.preventDefault();
                 }
               }}
             >
               Cerrar Cuenta Corriente
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* Botón para reabrir cuenta */}
+      {puedeReabrir && (
+        <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm">
+          <div className="mb-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 p-4">
+            <p className="text-sm text-blue-800 dark:text-blue-200">
+              Esta cuenta está cerrada. Puede reabrirla para registrar nuevos movimientos.
+            </p>
+          </div>
+          <form action={formActionReabrir}>
+            <input type="hidden" name="cuentaCorrienteId" value={cuentaCorriente.id} />
+            <button
+              type="submit"
+              className="w-full rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-500"
+              onClick={(e) => {
+                if (!confirm('¿Está seguro de reabrir esta cuenta corriente?')) {
+                  e.preventDefault();
+                }
+              }}
+            >
+              Reabrir Cuenta Corriente
             </button>
           </form>
         </div>

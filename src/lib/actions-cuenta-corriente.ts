@@ -24,6 +24,10 @@ const CerrarCuentaCorrienteSchema = z.object({
   cuentaCorrienteId: z.string().min(1, 'La cuenta corriente es requerida'),
 });
 
+const ReabrirCuentaCorrienteSchema = z.object({
+  cuentaCorrienteId: z.string().min(1, 'La cuenta corriente es requerida'),
+});
+
 // === TYPES ===
 
 type AbrirCuentaCorrienteState = {
@@ -47,6 +51,14 @@ type RegistrarMovimientoState = {
 };
 
 type CerrarCuentaCorrienteState = {
+  errors?: {
+    cuentaCorrienteId?: string[];
+  };
+  message?: string;
+  success?: boolean;
+};
+
+type ReabrirCuentaCorrienteState = {
   errors?: {
     cuentaCorrienteId?: string[];
   };
@@ -340,6 +352,66 @@ export async function cerrarCuentaCorriente(
     console.error('Error al cerrar cuenta corriente:', error);
     return {
       message: 'Error al cerrar cuenta corriente.',
+      success: false,
+    };
+  }
+}
+
+// === REABRIR CUENTA CORRIENTE ===
+
+export async function reabrirCuentaCorriente(
+  prevState: ReabrirCuentaCorrienteState,
+  formData: FormData
+): Promise<ReabrirCuentaCorrienteState> {
+  const validatedFields = ReabrirCuentaCorrienteSchema.safeParse({
+    cuentaCorrienteId: formData.get('cuentaCorrienteId'),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Error de validación.',
+      success: false,
+    };
+  }
+
+  const { cuentaCorrienteId } = validatedFields.data;
+
+  try {
+    const cuentaCorriente = await prisma.cuentaCorriente.findUnique({
+      where: { id: cuentaCorrienteId },
+    });
+
+    if (!cuentaCorriente) {
+      return {
+        message: 'La cuenta corriente no existe.',
+        success: false,
+      };
+    }
+
+    if (cuentaCorriente.estado !== 'CERRADO') {
+      return {
+        message: 'Solo se pueden reabrir cuentas cerradas.',
+        success: false,
+      };
+    }
+
+    await prisma.cuentaCorriente.update({
+      where: { id: cuentaCorrienteId },
+      data: { estado: 'ACTIVO' },
+    });
+
+    revalidatePath(`/admin/cuenta-corriente/${cuentaCorriente.socioId}`);
+    revalidatePath('/admin/cuenta-corriente');
+
+    return {
+      message: 'Cuenta corriente reabierta exitosamente.',
+      success: true,
+    };
+  } catch (error) {
+    console.error('Error al reabrir cuenta corriente:', error);
+    return {
+      message: 'Error al reabrir cuenta corriente.',
       success: false,
     };
   }
