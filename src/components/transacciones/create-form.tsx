@@ -208,14 +208,10 @@ export default function Form({ suscripciones, logoUrl }: { suscripciones: Suscri
             </div>
           )}
 
-          {/* Hidden inputs para cuenta corriente */}
-          {incluirCuentaCorriente && (
-            <>
-              <input type="hidden" name="incluirCuentaCorriente" value="true" />
-              <input type="hidden" name="montoCuentaCorriente" value={montoCuentaCorriente} />
-              <input type="hidden" name="cuentaCorrienteId" value={cuentaCorriente?.id || ''} />
-            </>
-          )}
+          {/* Hidden inputs para cuenta corriente - siempre enviar con valores por defecto */}
+          <input type="hidden" name="incluirCuentaCorriente" value={incluirCuentaCorriente ? "true" : "false"} />
+          <input type="hidden" name="montoCuentaCorriente" value={incluirCuentaCorriente ? montoCuentaCorriente : 0} />
+          <input type="hidden" name="cuentaCorrienteId" value={incluirCuentaCorriente && cuentaCorriente?.id ? cuentaCorriente.id : ''} />
         </div>
 
         {/* Tarjeta: Detalles del Pago */}
@@ -239,7 +235,8 @@ export default function Form({ suscripciones, logoUrl }: { suscripciones: Suscri
                 min="0"
                 defaultValue="0"
                 onChange={(e) => setMontoCuota(parseFloat(e.target.value) || 0)}
-                placeholder="0.00"
+                onFocus={(e) => e.target.select()}
+                placeholder="Ingrese el monto"
                 className="block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 py-2 px-3 text-sm"
               />
               {state.errors?.monto && (
