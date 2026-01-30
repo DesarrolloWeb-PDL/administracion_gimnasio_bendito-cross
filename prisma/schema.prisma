@@ -103,10 +103,11 @@ model Transaccion {
 }
 
 model Asistencia {
-  id      String   @id @default(cuid())
-  socioId String
-  fecha   DateTime @default(now())
-  socio   Socio    @relation(fields: [socioId], references: [id])
+  id         String   @id @default(cuid())
+  socioId    String
+  fecha      DateTime @default(now())
+  modalidad  String?
+  socio      Socio    @relation(fields: [socioId], references: [id])
 }
 
 model CuentaCorriente {
