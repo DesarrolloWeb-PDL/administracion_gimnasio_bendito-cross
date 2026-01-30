@@ -4,7 +4,6 @@ import Pagination from '@/components/pagination';
 import DisciplineFilter from '@/components/asistencias/discipline-filter';
 import DateFilter from '@/components/asistencias/date-filter';
 import SearchInput from '@/components/ui/search-input';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { Suspense } from 'react';
 import { fetchAsistenciasPages } from '@/lib/data-asistencias';
 
@@ -30,21 +29,10 @@ export default async function Page({
       <div className="flex w-full items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Historial de Asistencias</h1>
       </div>
-      <div className="mt-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex flex-1 items-center gap-2">
-            <div className="relative flex flex-1 shrink-0">
-                <label htmlFor="search" className="sr-only">
-                Buscar
-                </label>
-                <div className="relative w-full">
-                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <MagnifyingGlassIcon className="h-5 w-5 text-gray-500" />
-                  </div>
-                  <SearchInput placeholder="Buscar por socio..." />
-                </div>
-            </div>
-            <DateFilter />
-            <DisciplineFilter />
+      <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
+        <div className="relative flex flex-1 shrink-0">
+          <label htmlFor="search" className="sr-only">Buscar</label>
+          <SearchInput placeholder="Buscar por socio..." />
         </div>
         <Link
           href="/admin/asistencias/check-in"
@@ -53,6 +41,10 @@ export default async function Page({
           <span className="hidden md:block">Check-in Manual</span>
           <span className="md:hidden">+</span>
         </Link>
+      </div>
+      <div className="mt-4 flex items-center gap-2">
+        <DateFilter />
+        <DisciplineFilter />
       </div>
       <Suspense fallback={<div>Cargando...</div>}>
         <AsistenciasTable query={query} currentPage={currentPage} discipline={discipline} date={date} />
