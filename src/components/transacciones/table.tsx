@@ -19,37 +19,31 @@ export default async function TransaccionesTable({
             {transacciones?.map((transaccion) => (
               <div
                 key={transaccion.id}
-                className="mb-2 w-full rounded-md bg-white dark:bg-gray-700 p-4"
+                className="mb-3 w-full rounded-md bg-white dark:bg-gray-700 p-4"
               >
-                <div className="flex items-center justify-between border-b dark:border-gray-600 pb-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="mb-2 flex items-center">
-                      <p className="text-gray-900 dark:text-gray-100">{transaccion.suscripcion.socio.nombre} {transaccion.suscripcion.socio.apellido}</p>
-                    </div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate" title={transaccion.notas || transaccion.suscripcion.plan.nombre}>
+                <div className="flex items-start justify-between pb-3 border-b dark:border-gray-600">
+                  <div className="flex-1 min-w-0 pr-3">
+                    <p className="font-medium text-gray-900 dark:text-gray-100 mb-1">
+                      {transaccion.suscripcion.socio.nombre} {transaccion.suscripcion.socio.apellido}
+                    </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2" title={transaccion.notas || transaccion.suscripcion.plan.nombre}>
                       {transaccion.notas || transaccion.suscripcion.plan.nombre}
                     </p>
                   </div>
-                  <div className="text-xl font-medium text-gray-900 dark:text-gray-100">
-                    ${Number(transaccion.monto).toFixed(2)}
+                  <div className="flex-shrink-0 text-right">
+                    <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                      ${Number(transaccion.monto).toFixed(0)}
+                    </p>
                   </div>
                 </div>
-                <div className="flex w-full items-center justify-between pt-4">
-                  <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{transaccion.fecha.toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', year: 'numeric', month: '2-digit', day: '2-digit' })}</p>
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    <div className="px-2 py-1 text-xs rounded-full bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-gray-200">
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-3">
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {transaccion.fecha.toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', year: 'numeric', month: '2-digit', day: '2-digit' })}
+                    </p>
+                    <span className="px-2 py-1 text-xs rounded-full bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 uppercase font-medium">
                       {transaccion.metodoPago}
-                    </div>
-                    <div className="flex gap-1">
-                      <Link
-                        href={`/admin/transacciones/${transaccion.id}`}
-                        className="rounded-md bg-blue-100 dark:bg-blue-900 px-2 py-1 text-xs font-medium text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800"
-                      >
-                        Editar
-                      </Link>
-                    </div>
+                    </span>
                   </div>
                 </div>
               </div>

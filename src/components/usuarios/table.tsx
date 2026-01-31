@@ -19,30 +19,35 @@ export default async function UsersTable({
             {users?.map((user) => (
               <div
                 key={user.id}
-                className="mb-2 w-full rounded-md bg-white dark:bg-gray-700 p-4"
+                className="mb-3 w-full rounded-md bg-white dark:bg-gray-700 p-4"
               >
-                <div className="flex items-center justify-between border-b dark:border-gray-600 pb-4">
-                  <div>
-                    <div className="mb-2 flex items-center">
-                      <p className="text-gray-900 dark:text-gray-100">{user.nombre}</p>
-                    </div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
+                <div className="flex items-start justify-between pb-3 border-b dark:border-gray-600">
+                  <div className="flex-1 min-w-0 pr-3">
+                    <p className="font-medium text-gray-900 dark:text-gray-100 mb-1">
+                      {user.nombre}
+                    </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                      {user.email}
+                    </p>
                   </div>
-                  <div className="px-2 py-1 text-xs rounded-full bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-gray-200">
-                    {user.rol}
+                  <div className="flex-shrink-0">
+                    <span className="px-2 py-1 text-xs rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 uppercase font-medium whitespace-nowrap">
+                      {user.rol}
+                    </span>
                   </div>
                 </div>
-                <div className="flex w-full items-center justify-between pt-4">
-                  <div className="flex justify-end gap-2">
-                    <Link href={`/admin/usuarios/${user.id}/edit`} className="rounded-md border border-gray-300 dark:border-gray-600 p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
-                        ✏️
-                    </Link>
-                    <form action={deleteUsuario.bind(null, user.id)}>
-                        <button className="rounded-md border border-gray-300 dark:border-gray-600 p-2 hover:bg-gray-100 dark:hover:bg-gray-600 text-red-600 dark:text-red-400">
-                            🗑️
-                        </button>
-                    </form>
-                  </div>
+                <div className="flex justify-end gap-2 pt-3">
+                  <Link 
+                    href={`/admin/usuarios/${user.id}/edit`} 
+                    className="rounded-md border border-gray-300 dark:border-gray-600 p-2 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                  >
+                    ✏️
+                  </Link>
+                  <form action={deleteUsuario.bind(null, user.id)}>
+                    <button className="rounded-md border border-gray-300 dark:border-gray-600 p-2 hover:bg-gray-100 dark:hover:bg-gray-600 text-red-600 dark:text-red-400 transition-colors">
+                      🗑️
+                    </button>
+                  </form>
                 </div>
               </div>
             ))}
