@@ -28,8 +28,8 @@ export default function MobileSidebar({
 
   return (
     <div 
-      className="md:hidden w-full shadow-md relative" 
-      style={{ backgroundColor: primaryColor }}
+      className="md:hidden w-full shadow-lg relative border-b-4 border-red-600" 
+      style={{ backgroundColor: '#000000' }}
       suppressHydrationWarning
     >
       <div className="relative overflow-hidden">
@@ -40,7 +40,7 @@ export default function MobileSidebar({
             <img 
               src={fondoUrl} 
               alt="Logo" 
-              className="h-14 w-auto max-w-[200px] object-contain opacity-50"
+              className="h-14 w-auto max-w-[200px] object-contain opacity-40"
             />
           </div>
         )}
@@ -50,13 +50,13 @@ export default function MobileSidebar({
           </span>
           <button 
             onClick={() => setIsOpen(!isOpen)}
-            className="text-white p-2 rounded-md hover:bg-white/10 focus:outline-none transition-colors"
+            className="text-red-600 p-2 rounded-md hover:bg-red-600/20 focus:outline-none transition-colors border border-red-600"
             aria-label="Abrir menú"
           >
             {isOpen ? (
-              <XMarkIcon className="h-6 w-6" />
+              <XMarkIcon className="h-7 w-7" />
             ) : (
-              <Bars3Icon className="h-6 w-6" />
+              <Bars3Icon className="h-7 w-7" />
             )}
           </button>
         </div>
@@ -64,15 +64,15 @@ export default function MobileSidebar({
 
       {isOpen && (
         <div 
-          className="absolute top-full left-0 w-full z-50 px-4 pb-4 space-y-2 animate-in slide-in-from-top-2 duration-200 shadow-xl max-h-[80vh] overflow-y-auto"
-          style={{ backgroundColor: primaryColor }}
+          className="absolute top-full left-0 w-full z-50 px-4 pb-4 space-y-2 animate-in slide-in-from-top-2 duration-200 shadow-xl max-h-[80vh] overflow-y-auto border-l-4 border-r-4 border-b-4 border-red-600"
+          style={{ backgroundColor: '#000000' }}
         >
            <NavLinks 
              permissions={permissions} 
              role={role} 
              onLinkClick={() => setIsOpen(false)} 
            />
-           <div className="pt-2 mt-2 border-t border-white/20">
+           <div className="pt-2 mt-2 border-t border-red-600/40">
              {children}
            </div>
         </div>
