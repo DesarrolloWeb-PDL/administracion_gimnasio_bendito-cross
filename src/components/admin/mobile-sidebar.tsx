@@ -32,26 +32,25 @@ export default function MobileSidebar({
       style={{ backgroundColor: primaryColor }}
       suppressHydrationWarning
     >
-      <div className="relative overflow-hidden h-20">
+      <div className="relative overflow-hidden">
         {fondoUrl && (
           <div 
-            className="absolute inset-0 z-0 flex items-center justify-center p-3" 
+            className="absolute inset-0 z-0 flex items-center justify-center py-2" 
           >
             <img 
               src={fondoUrl} 
               alt="Logo" 
-              className="h-full w-auto max-w-full object-contain opacity-90"
-              style={{ filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))' }}
+              className="h-10 w-auto max-w-[120px] object-contain opacity-50"
             />
           </div>
         )}
-        <div className="flex items-center justify-between h-full px-4 relative z-10">
-          <span className="text-white font-bold text-lg truncate drop-shadow-md bg-black/30 px-3 py-1 rounded-md backdrop-blur-sm">
+        <div className="flex items-center justify-between p-4 relative z-10">
+          <span className="text-white font-bold text-lg truncate drop-shadow-md">
             {nombreGimnasio}
           </span>
           <button 
             onClick={() => setIsOpen(!isOpen)}
-            className="text-white p-2 rounded-md hover:bg-white/20 focus:outline-none bg-black/30 backdrop-blur-sm transition-colors"
+            className="text-white p-2 rounded-md hover:bg-white/10 focus:outline-none transition-colors"
             aria-label="Abrir menú"
           >
             {isOpen ? (
