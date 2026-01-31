@@ -87,14 +87,19 @@ export async function registrarAsistencia(prevState: CheckInState, formData: For
 
             if (diffDays >= 0) {
                 // CASO: Suscripción Vigente
-                estadoSuscripcion = 'ACTIVA';
                 diasVencimiento = diffDays;
                 
-                if (diffDays <= 7) {
-                    // AVISO PREVIO (Verde con advertencia)
-                    mensajeEstado = `Su cuota vence en ${diffDays} días.`;
+                if (diffDays <= 5 && diffDays > 0) {
+                    // ADVERTENCIA (Naranja) - Quedan 5 días o menos
+                    estadoSuscripcion = 'PERSUADIDO';
+                    mensajeEstado = `Su cuota vence en ${diffDays} día${diffDays === 1 ? '' : 's'}. Regularice su situación pronto.`;
+                } else if (diffDays === 0) {
+                    // HOY VENCE (Naranja)
+                    estadoSuscripcion = 'PERSUADIDO';
+                    mensajeEstado = 'Su cuota vence hoy. Regularice su situación con la administración.';
                 } else {
-                    // NORMAL
+                    // NORMAL (Verde) - Más de 5 días
+                    estadoSuscripcion = 'ACTIVA';
                     mensajeEstado = 'Bienvenido/a';
                 }
             } else {
@@ -102,15 +107,9 @@ export async function registrarAsistencia(prevState: CheckInState, formData: For
                 const diasVencidos = Math.abs(diffDays);
                 diasVencimiento = -diasVencidos; // Negativo para indicar vencido
 
-                if (diasVencidos <= 6) {
-                    // TOLERANCIA (Naranja)
-                    estadoSuscripcion = 'PERSUADIDO';
-                    mensajeEstado = `Su cuota venció hace ${diasVencidos} días. Regularice su situación con la administración.`;
-                } else {
-                    // BLOQUEO (Rojo)
-                    estadoSuscripcion = 'VENCIDA';
-                    mensajeEstado = 'Acceso denegado. Su cuota venció hace más de 6 días. Regularice su situación.';
-                }
+                // BLOQUEO (Rojo) - Ya venció
+                estadoSuscripcion = 'VENCIDA';
+                mensajeEstado = `Su cuota venció hace ${diasVencidos} día${diasVencidos === 1 ? '' : 's'}. Diríjase a la administración para regularizar su situación.`;
             }
         } else {
             // No tiene ninguna suscripción registrada
@@ -120,7 +119,7 @@ export async function registrarAsistencia(prevState: CheckInState, formData: For
     }
 
     // 3. Registrar asistencia y Retornar Resultado
-    // Solo registramos si está ACTIVA o PERSUADIDO (Naranja)
+    // Solo registramos si está ACTIVA o PERSUADIDO (Naranja/Amarillo - advertencia)
     if (estadoSuscripcion === 'ACTIVA' || estadoSuscripcion === 'PERSUADIDO') {
       await prisma.asistencia.create({
         data: {
@@ -132,9 +131,20 @@ export async function registrarAsistencia(prevState: CheckInState, formData: For
       revalidatePath('/admin'); 
       revalidatePath('/admin/asistencias');
 
+      // Determinar el status del mensaje
+      let statusResponse: 'success' | 'warning' | 'error' = 'success';
+      
+      if (estadoSuscripcion === 'PERSUADIDO') {
+        // Naranja: cuando quedan 5 días o menos
+        statusResponse = 'warning';
+      } else {
+        // Verde: normal (más de 5 días)
+        statusResponse = 'success';
+      }
+
       return {
         message: mensajeEstado,
-        status: estadoSuscripcion === 'ACTIVA' ? 'success' : 'warning',
+        status: statusResponse,
         socio: {
           nombre: socio.nombre,
           apellido: socio.apellido,
@@ -144,7 +154,7 @@ export async function registrarAsistencia(prevState: CheckInState, formData: For
         },
       };
     } else {
-      // Bloqueo (Rojo) o Sin Suscripción
+      // Bloqueo (Rojo) - Vencida o Sin Suscripción
       return {
         message: mensajeEstado,
         status: 'error',
