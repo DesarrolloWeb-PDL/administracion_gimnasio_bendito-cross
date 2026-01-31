@@ -35,12 +35,12 @@ export default function MobileSidebar({
       <div className="relative overflow-hidden">
         {fondoUrl && (
           <div 
-            className="absolute inset-0 z-0 flex items-center justify-center py-2" 
+            className="absolute inset-0 z-0 flex items-center justify-center py-1" 
           >
             <img 
               src={fondoUrl} 
               alt="Logo" 
-              className="h-10 w-auto max-w-[120px] object-contain opacity-50"
+              className="h-14 w-auto max-w-[200px] object-contain opacity-50"
             />
           </div>
         )}
