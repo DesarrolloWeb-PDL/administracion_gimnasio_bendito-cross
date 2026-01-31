@@ -32,7 +32,7 @@ export default function MobileSidebar({
       style={{ backgroundColor: '#000000' }}
       suppressHydrationWarning
     >
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden h-24">
         {fondoUrl && (
           <div 
             className="absolute inset-0 z-0 flex items-center justify-center py-1" 
@@ -40,11 +40,11 @@ export default function MobileSidebar({
             <img 
               src={fondoUrl} 
               alt="Logo" 
-              className="h-20 w-auto max-w-[280px] object-contain opacity-70"
+              className="h-[90px] w-auto max-w-[320px] object-contain opacity-70"
             />
           </div>
         )}
-        <div className="flex items-center justify-between p-4 relative z-10">
+        <div className="flex items-center justify-between h-full px-4 relative z-10">
           <span className="text-white font-bold text-lg truncate drop-shadow-md">
             {nombreGimnasio}
           </span>
