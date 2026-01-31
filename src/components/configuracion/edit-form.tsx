@@ -40,6 +40,7 @@ export default function ConfigForm({ config }: { config: Configuracion | null })
   };
 
   return (
+    <>
     <form action={dispatch}>
       <div className="rounded-md bg-gray-50 dark:bg-gray-800 p-4 md:p-6">
         {/* Nombre del Gimnasio */}
@@ -269,6 +270,6 @@ export default function ConfigForm({ config }: { config: Configuracion | null })
         </form>
       </div>
     </div>
-    </form>
+    </>
   );
 }
