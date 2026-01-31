@@ -40,7 +40,7 @@ export default function MobileSidebar({
             <img 
               src={fondoUrl} 
               alt="Logo" 
-              className="h-[72px] w-auto max-w-[280px] object-contain opacity-70"
+              className="h-[144px] w-auto max-w-[280px] object-contain opacity-70"
             />
           </div>
         )}
