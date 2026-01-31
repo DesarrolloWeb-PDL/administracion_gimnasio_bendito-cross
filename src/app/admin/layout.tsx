@@ -118,13 +118,14 @@ export default async function AdminLayout({
           background: `linear-gradient(135deg, rgba(var(--secondary-color-rgb), 0.05), rgba(var(--primary-color-rgb), 0.05))`
         }}
       >
-        <header className="mb-8 flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white drop-shadow-sm">Panel de Administración</h2>
-            <div className="flex items-center gap-4">
+        <header className="mb-4 md:mb-8 flex flex-col md:flex-row items-start md:items-center gap-4 md:justify-between">
+            <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white drop-shadow-sm">Panel de Administración</h2>
+            <div className="flex items-center gap-3 md:gap-4 w-full md:w-auto justify-between md:justify-end">
+              <div className="text-xs md:text-sm text-gray-700 dark:text-white/90 flex-1 md:flex-initial">
+                Hola, <span className="font-semibold">{userPermissions?.nombre || session?.user?.name || 'Usuario'}</span>
+                <span className="hidden sm:inline"> ({userPermissions?.rol || session?.user?.rol})</span>
+              </div>
               <ThemeToggle />
-                <div className="text-sm text-gray-700 dark:text-white/90">
-                  Hola, <span className="font-semibold">{userPermissions?.nombre || session?.user?.name || 'Usuario'}</span> ({userPermissions?.rol || session?.user?.rol})
-                </div>
             </div>
         </header>
         {children}
