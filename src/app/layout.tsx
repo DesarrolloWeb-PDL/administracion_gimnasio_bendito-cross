@@ -18,7 +18,7 @@ const openSans = Open_Sans({
 export const metadata: Metadata = {
   title: "Administración de Gimnasios",
   description: "Sistema de Gestión de Gimnasio",
-  manifest: "/manifest.json",
+  manifest: "/manifest",
   themeColor: "#000000",
   appleWebApp: {
     capable: true,
@@ -26,8 +26,13 @@ export const metadata: Metadata = {
     title: "Gym Manager",
   },
   icons: {
-    icon: "/icon-192x192.png",
-    apple: "/icon-192x192.png",
+    icon: [
+      { url: '/api/icon?size=192', sizes: '192x192', type: 'image/png' },
+      { url: '/api/icon?size=512', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/api/icon?size=180', sizes: '180x180', type: 'image/png' },
+    ],
   },
 };
 
