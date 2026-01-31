@@ -21,20 +21,16 @@ export default async function UsersTable({
                 key={user.id}
                 className="mb-3 w-full rounded-md bg-white dark:bg-gray-700 p-4"
               >
-                <div className="flex items-start justify-between pb-3 border-b dark:border-gray-600">
-                  <div className="flex-1 min-w-0 pr-3">
-                    <p className="font-medium text-gray-900 dark:text-gray-100 mb-1">
-                      {user.nombre}
-                    </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                      {user.email}
-                    </p>
-                  </div>
-                  <div className="flex-shrink-0">
-                    <span className="px-2 py-1 text-xs rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 uppercase font-medium whitespace-nowrap">
-                      {user.rol}
-                    </span>
-                  </div>
+                <div className="pb-3 border-b dark:border-gray-600">
+                  <p className="font-medium text-gray-900 dark:text-gray-100 mb-1">
+                    {user.nombre}
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-2 break-all">
+                    {user.email}
+                  </p>
+                  <span className="inline-block px-2 py-1 text-xs rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 font-medium">
+                    {user.rol}
+                  </span>
                 </div>
                 <div className="flex justify-end gap-2 pt-3">
                   <Link 
