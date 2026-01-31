@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server';
 import { getConfiguracion } from '@/lib/data';
 
 export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,7 +15,7 @@ export async function GET(request: NextRequest) {
     const primaryColor = config?.colorPrimario || '#DC2626';
     const gymName = config?.nombreGimnasio || 'GYM';
 
-    return new ImageResponse(
+    const response = new ImageResponse(
       (
         <div
           style={{
@@ -64,8 +65,15 @@ export async function GET(request: NextRequest) {
       {
         width: size,
         height: size,
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
       }
     );
+
+    return response;
   } catch (e) {
     console.error('Error generating icon:', e);
     return new Response('Error generating icon', { status: 500 });
