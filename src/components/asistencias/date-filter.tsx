@@ -19,14 +19,14 @@ export default function DateFilter() {
   };
 
   return (
-    <div className="relative">
+    <div className="relative w-full sm:w-auto">
       <label htmlFor="date-filter" className="sr-only">
         Filtrar por fecha
       </label>
       <input
         id="date-filter"
         type="date"
-        className="block w-full rounded-md border border-gray-200 py-[9px] pl-3 text-sm outline-2 placeholder:text-gray-500"
+        className="block w-full sm:w-auto rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white py-2 px-3 text-sm outline-2 placeholder:text-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
         onChange={(e) => handleDateChange(e.target.value)}
         defaultValue={searchParams.get('date')?.toString()}
       />
