@@ -28,7 +28,7 @@ export default function MobileSidebar({
 
   return (
     <div 
-      className="md:hidden w-full shadow-lg relative border-b-4 border-red-600" 
+      className="md:hidden w-full shadow-lg relative border-b border-red-600" 
       style={{ backgroundColor: '#000000' }}
       suppressHydrationWarning
     >
@@ -40,7 +40,7 @@ export default function MobileSidebar({
             <img 
               src={fondoUrl} 
               alt="Logo" 
-              className="h-14 w-auto max-w-[200px] object-contain opacity-40"
+              className="h-20 w-auto max-w-[280px] object-contain opacity-70"
             />
           </div>
         )}
@@ -64,7 +64,7 @@ export default function MobileSidebar({
 
       {isOpen && (
         <div 
-          className="absolute top-full left-0 w-full z-50 px-4 pb-4 space-y-2 animate-in slide-in-from-top-2 duration-200 shadow-xl max-h-[80vh] overflow-y-auto border-l-4 border-r-4 border-b-4 border-red-600"
+          className="absolute top-full left-0 w-full z-50 px-4 pb-4 space-y-2 animate-in slide-in-from-top-2 duration-200 shadow-xl max-h-[80vh] overflow-y-auto border-l border-r border-b border-red-600"
           style={{ backgroundColor: '#000000' }}
         >
            <NavLinks 
