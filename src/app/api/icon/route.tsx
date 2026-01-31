@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     
     const config = await getConfiguracion();
     const logoUrl = config?.fondoUrl;
-    const primaryColor = config?.colorPrimario || '#DC2626'; // Rojo por defecto
+    const primaryColor = config?.colorPrimario || '#DC2626';
     const gymName = config?.nombreGimnasio || 'GYM';
 
     return new ImageResponse(
