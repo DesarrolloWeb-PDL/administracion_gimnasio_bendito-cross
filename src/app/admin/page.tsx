@@ -25,7 +25,26 @@ export default async function Page() {
 
   const isAdmin = userPermissions?.rol === 'ADMIN' || userPermissions?.rol === 'admin';
   if (!isAdmin) {
-    redirect('/admin/socios');
+    // Redirigir a la primera sección que el usuario tenga permiso
+    if (userPermissions?.permisoAsistencias) {
+      redirect('/admin/asistencias');
+    } else if (userPermissions?.permisoSocios) {
+      redirect('/admin/socios');
+    } else if (userPermissions?.permisoSuscripciones) {
+      redirect('/admin/suscripciones');
+    } else if (userPermissions?.permisoTransacciones) {
+      redirect('/admin/transacciones');
+    } else if (userPermissions?.permisoReportes) {
+      redirect('/admin/reportes');
+    } else if (userPermissions?.permisoPlanes) {
+      redirect('/admin/planes');
+    } else if (userPermissions?.permisoUsuarios) {
+      redirect('/admin/usuarios');
+    } else if (userPermissions?.permisoConfiguracion) {
+      redirect('/admin/configuracion');
+    } else {
+      redirect('/login');
+    }
   }
 
   const {

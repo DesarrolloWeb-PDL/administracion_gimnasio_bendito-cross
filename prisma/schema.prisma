@@ -15,10 +15,10 @@ model Usuario {
   password              String
   nombre                String
   rol                   String   @default("RECEPCIONISTA")
-  permisoSocios         Boolean  @default(true)
+  permisoSocios         Boolean  @default(false)
   permisoPlanes         Boolean  @default(false)
-  permisoSuscripciones  Boolean  @default(true)
-  permisoAsistencias    Boolean  @default(true)
+  permisoSuscripciones  Boolean  @default(false)
+  permisoAsistencias    Boolean  @default(false)
   permisoReportes       Boolean  @default(false)
   permisoConfiguracion  Boolean  @default(false)
   permisoUsuarios       Boolean  @default(false)
