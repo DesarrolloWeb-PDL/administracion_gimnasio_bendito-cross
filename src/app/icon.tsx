@@ -1,5 +1,4 @@
 import { ImageResponse } from 'next/og';
-import { getConfiguracion } from '@/lib/data';
 
 export const runtime = 'edge';
 
@@ -11,16 +10,11 @@ export const size = {
 export const contentType = 'image/png';
 
 export default async function Icon() {
-  const config = await getConfiguracion();
-  const logoUrl = config?.fondoUrl;
-  const primaryColor = config?.colorPrimario || '#000000';
-  const gymName = config?.nombreGimnasio || 'GYM';
-
   return new ImageResponse(
     (
       <div
         style={{
-          background: primaryColor,
+          background: '#000000',
           width: '100%',
           height: '100%',
           display: 'flex',
@@ -29,22 +23,37 @@ export default async function Icon() {
           borderRadius: '32px',
         }}
       >
-        {logoUrl ? (
-          <img
-            src={logoUrl}
-            alt="Logo"
-            width="160"
-            height="160"
-            style={{
-              objectFit: 'contain',
-            }}
+        <svg
+          width="140"
+          height="140"
+          viewBox="0 0 140 140"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          {/* Clipboard / Planilla - white */}
+          <rect x="25" y="18" width="65" height="85" rx="4" fill="#FFFFFF" />
+          <rect x="42" y="10" width="30" height="16" rx="4" fill="#FFFFFF" />
+          <rect x="50" y="6" width="14" height="10" rx="3" stroke="#000000" strokeWidth="3" fill="none" />
+          {/* Lines on clipboard */}
+          <rect x="35" y="42" width="44" height="4" rx="2" fill="#CCCCCC" />
+          <rect x="35" y="52" width="44" height="4" rx="2" fill="#CCCCCC" />
+          <rect x="35" y="62" width="44" height="4" rx="2" fill="#CCCCCC" />
+          <rect x="35" y="72" width="30" height="4" rx="2" fill="#CCCCCC" />
+
+          {/* Kettlebell / Pesa rusa - red */}
+          {/* Handle */}
+          <path
+            d="M95 32 C95 20, 120 20, 120 32 L120 42 C120 46, 95 46, 95 42 Z"
+            fill="none"
+            stroke="#DC2626"
+            strokeWidth="6"
+            strokeLinecap="round"
           />
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: 'white' }}>
-            <div style={{ fontSize: 80, fontWeight: 'bold' }}>💪</div>
-            <div style={{ fontSize: 28, marginTop: 10, fontWeight: 'bold' }}>{gymName.substring(0, 10)}</div>
-          </div>
-        )}
+          {/* Body */}
+          <circle cx="107" cy="68" r="28" fill="#DC2626" />
+          {/* Highlight */}
+          <circle cx="100" cy="60" r="8" fill="#EF4444" opacity="0.6" />
+        </svg>
       </div>
     ),
     {

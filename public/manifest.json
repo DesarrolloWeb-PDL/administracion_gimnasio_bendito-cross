@@ -1,11 +1,11 @@
 {
-  "name": "Gym Manager",
-  "short_name": "Gym",
-  "description": "Sistema de Gestión de Gimnasio",
+  "name": "Bendito Cross - Administración",
+  "short_name": "Bendito Cross",
+  "description": "Sistema de administración del gimnasio Bendito Cross",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "background_color": "#000000",
+  "theme_color": "#DC2626",
   "orientation": "portrait",
   "icons": [
     {
@@ -19,6 +19,11 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
     }
   ]
 }
