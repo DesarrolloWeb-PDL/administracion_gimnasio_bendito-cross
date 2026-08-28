@@ -1,13 +1,6 @@
-const CACHE_NAME = 'bendito-cross-v1';
-const urlsToCache = [
-  '/',
-];
+const CACHE_NAME = 'bendito-cross-v2';
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(urlsToCache))
-  );
   self.skipWaiting();
 });
 
@@ -27,13 +20,29 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  const { request } = event;
+
+  // Skip non-GET requests
+  if (request.method !== 'GET') return;
+
+  // Skip API routes and navigation requests (HTML pages)
+  if (request.url.includes('/api/') || request.mode === 'navigate') {
+    return;
+  }
+
   event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        if (response) {
-          return response;
+    caches.match(request).then((cached) => {
+      const fetched = fetch(request).then((response) => {
+        if (response && response.status === 200) {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(request, responseClone);
+          });
         }
-        return fetch(event.request);
-      })
+        return response;
+      }).catch(() => cached);
+
+      return cached || fetched;
+    })
   );
 });
