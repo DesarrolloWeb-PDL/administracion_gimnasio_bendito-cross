@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Montserrat, Open_Sans } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import { PwaInstall } from "@/components/pwa-install";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -60,6 +61,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <PwaInstall />
         </ThemeProvider>
       </body>
     </html>
