@@ -113,10 +113,7 @@ export default async function AdminLayout({
       
       {/* Contenido Principal */}
       <div 
-        className="grow p-6 md:overflow-y-auto md:p-12 transition-colors"
-        style={{ 
-          background: `linear-gradient(135deg, rgba(var(--secondary-color-rgb), 0.05), rgba(var(--primary-color-rgb), 0.05))`
-        }}
+        className="grow p-6 md:overflow-y-auto md:p-12 transition-colors bg-black"
       >
         <header className="mb-4 md:mb-8 flex flex-col md:flex-row items-start md:items-center gap-4 md:justify-between">
             <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white drop-shadow-sm">Panel de Administración</h2>

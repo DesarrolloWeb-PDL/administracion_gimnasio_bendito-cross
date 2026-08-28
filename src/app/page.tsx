@@ -5,7 +5,7 @@ import Footer from "@/components/footer";
 
 export default function Home() {
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-center p-4 bg-gray-100 dark:bg-gray-950 transition-colors overflow-hidden">
+    <main className="relative flex min-h-screen flex-col items-center justify-center p-4 bg-black transition-colors overflow-hidden">
       {/* Botón de tema flotante */}
       <div className="absolute top-4 right-4">
         <ThemeToggle />
