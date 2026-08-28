@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Home() {
@@ -16,6 +17,14 @@ export default function Home() {
 
       <div className="z-10 flex flex-col items-center text-center gap-8 max-w-3xl">
         <div className="space-y-4">
+          <Image
+            src="/logo-bendito.png"
+            alt="Bendito Cross"
+            width={280}
+            height={140}
+            className="mx-auto object-contain"
+            priority
+          />
           <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl">
             Administración Bendito-Cross
           </h1>
