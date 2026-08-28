@@ -25,8 +25,8 @@ export default function Home() {
             className="mx-auto object-contain"
             priority
           />
-          <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl">
-            Administración Bendito-Cross
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl">
+            Administración Bendito Cross
           </h1>
           <p className="text-lg leading-8 text-gray-600 dark:text-gray-300">
             Sistema integral para el control de socios, asistencias, pagos y reportes financieros.
