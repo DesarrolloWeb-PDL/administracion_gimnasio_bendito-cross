@@ -9,7 +9,7 @@ export default function LoginForm() {
 
   return (
     <form action={dispatch} className="space-y-3">
-      <div className="flex-1 rounded-lg bg-gray-50 dark:bg-gray-900 px-6 pb-4 pt-8 transition-colors">
+      <div className="flex-1 rounded-lg bg-gray-800 px-6 pb-4 pt-8 transition-colors">
         <h1 className="mb-3 text-2xl font-bold text-gray-900 dark:text-white">
           Iniciar Sesión
         </h1>
@@ -72,7 +72,7 @@ function LoginButton() {
 
   return (
     <button
-      className="mt-4 w-full rounded-md bg-blue-500 px-4 py-2 text-white transition-colors hover:bg-blue-400 aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
+      className="mt-4 w-full rounded-md bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700 aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
       aria-disabled={pending}
     >
       Ingresar
