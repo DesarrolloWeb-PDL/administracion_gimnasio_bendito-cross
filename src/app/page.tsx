@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ThemeToggle } from "@/components/theme-toggle";
+import Footer from "@/components/footer";
 
 export default function Home() {
   return (
@@ -43,9 +44,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="absolute bottom-4 text-center text-xs text-gray-500 dark:text-gray-400">
-        <p>&copy; {new Date().getFullYear()} Bendito Cross. Todos los derechos reservados.</p>
-      </div>
+      <Footer />
     </main>
   );
 }
