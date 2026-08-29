@@ -1,168 +1,119 @@
 import { NextRequest, NextResponse } from 'next/server';
+import exercisesData from '@/data/exercises.json';
 
-interface ExerciseDBExercise {
-  id: string;
-  name: string;
-  gifUrl: string;
-  muscleGroup: string;
-  equipment: string;
-  source: 'exerciseDB';
-}
-
-interface CrossFitExercise {
-  id: string;
-  name: string;
-  videoUrl: string;
-  source: 'crossfit';
-}
-
-interface CacheEntry {
-  data: ExerciseDBExercise[];
-  timestamp: number;
-}
-
-// In-memory cache: query → { data, timestamp }
-const cache = new Map<string, CacheEntry>();
-const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
-
-// 23 local CrossFit exercises
-const CROSSFIT_EXERCISES: CrossFitExercise[] = [
-  { id: 'cf-001', name: 'Air Squat', videoUrl: 'https://www.youtube.com/embed/E6VIIoGma_g', source: 'crossfit' },
-  { id: 'cf-002', name: 'Back Squat', videoUrl: 'https://www.youtube.com/embed/E6VIIoGma_g', source: 'crossfit' },
-  { id: 'cf-003', name: 'Clean', videoUrl: 'https://www.youtube.com/embed/A_oNig2bnp8', source: 'crossfit' },
-  { id: 'cf-004', name: 'Clean and Jerk', videoUrl: 'https://www.youtube.com/embed/A_oNig2bnp8', source: 'crossfit' },
-  { id: 'cf-005', name: 'Deadlift', videoUrl: 'https://www.youtube.com/embed/op9kVnSo2Wc', source: 'crossfit' },
-  { id: 'cf-006', name: 'Front Squat', videoUrl: 'https://www.youtube.com/embed/E6VIIoGma_g', source: 'crossfit' },
-  { id: 'cf-007', name: 'Hang Clean', videoUrl: 'https://www.youtube.com/embed/A_oNig2bnp8', source: 'crossfit' },
-  { id: 'cf-008', name: 'Hang Snatch', videoUrl: 'https://www.youtube.com/embed/RE5Qjd4YB5c', source: 'crossfit' },
-  { id: 'cf-009', name: 'Jerk', videoUrl: 'https://www.youtube.com/embed/A_oNig2bnp8', source: 'crossfit' },
-  { id: 'cf-010', name: 'Muscle-Up', videoUrl: 'https://www.youtube.com/embed/E6VIIoGma_g', source: 'crossfit' },
-  { id: 'cf-011', name: 'Overhead Squat', videoUrl: 'https://www.youtube.com/embed/E6VIIoGma_g', source: 'crossfit' },
-  { id: 'cf-012', name: 'Power Clean', videoUrl: 'https://www.youtube.com/embed/A_oNig2bnp8', source: 'crossfit' },
-  { id: 'cf-013', name: 'Power Snatch', videoUrl: 'https://www.youtube.com/embed/RE5Qjd4YB5c', source: 'crossfit' },
-  { id: 'cf-014', name: 'Push Jerk', videoUrl: 'https://www.youtube.com/embed/A_oNig2bnp8', source: 'crossfit' },
-  { id: 'cf-015', name: 'Push Press', videoUrl: 'https://www.youtube.com/embed/A_oNig2bnp8', source: 'crossfit' },
-  { id: 'cf-016', name: 'Snatch', videoUrl: 'https://www.youtube.com/embed/RE5Qjd4YB5c', source: 'crossfit' },
-  { id: 'cf-017', name: 'Snatch Balance', videoUrl: 'https://www.youtube.com/embed/RE5Qjd4YB5c', source: 'crossfit' },
-  { id: 'cf-018', name: 'Thruster', videoUrl: 'https://www.youtube.com/embed/E6VIIoGma_g', source: 'crossfit' },
-  { id: 'cf-019', name: 'Toes to Bar', videoUrl: 'https://www.youtube.com/embed/E6VIIoGma_g', source: 'crossfit' },
-  { id: 'cf-020', name: 'Wall Ball', videoUrl: 'https://www.youtube.com/embed/E6VIIoGma_g', source: 'crossfit' },
-  { id: 'cf-021', name: 'Box Jump', videoUrl: 'https://www.youtube.com/embed/op9kVnSo2Wc', source: 'crossfit' },
-  { id: 'cf-022', name: 'Burpee', videoUrl: 'https://www.youtube.com/embed/op9kVnSo2Wc', source: 'crossfit' },
-  { id: 'cf-023', name: 'Double Under', videoUrl: 'https://www.youtube.com/embed/op9kVnSo2Wc', source: 'crossfit' },
+// CrossFit exercises (local)
+const CROSSFIT_EXERCISES = [
+  { id: 'cf-001', name: 'Air Squat', videoUrl: 'https://www.youtube.com/embed/E6VIIoGma_g' },
+  { id: 'cf-002', name: 'Back Squat', videoUrl: 'https://www.youtube.com/embed/E6VIIoGma_g' },
+  { id: 'cf-003', name: 'Thruster', videoUrl: 'https://www.youtube.com/embed/tZkUDLNNY40' },
+  { id: 'cf-004', name: 'Wall Ball', videoUrl: 'https://www.youtube.com/embed/52r_Ul5k03g' },
+  { id: 'cf-005', name: 'Box Jump', videoUrl: 'https://www.youtube.com/embed/52r_Ul5k03g' },
+  { id: 'cf-006', name: 'Front Squat', videoUrl: 'https://www.youtube.com/embed/E6VIIoGma_g' },
+  { id: 'cf-007', name: 'Clean', videoUrl: 'https://www.youtube.com/embed/RuvEX5DeytA' },
+  { id: 'cf-008', name: 'Snatch', videoUrl: 'https://www.youtube.com/embed/z7DU830K2SM' },
+  { id: 'cf-009', name: 'Deadlift', videoUrl: 'https://www.youtube.com/embed/Vj4NP-oqAZ8' },
+  { id: 'cf-010', name: 'Clean and Jerk', videoUrl: 'https://www.youtube.com/embed/RuvEX5DeytA' },
+  { id: 'cf-011', name: 'Overhead Squat', videoUrl: 'https://www.youtube.com/embed/uabFHXlyQpI' },
+  { id: 'cf-012', name: 'Push Press', videoUrl: 'https://www.youtube.com/embed/Wqq4JBOJeKQ' },
+  { id: 'cf-013', name: 'Shoulder Press', videoUrl: 'https://www.youtube.com/embed/Q0M-VXJtVUI' },
+  { id: 'cf-014', name: 'Push Jerk', videoUrl: 'https://www.youtube.com/embed/v_0E1udYSnQ' },
+  { id: 'cf-015', name: 'Split Jerk', videoUrl: 'https://www.youtube.com/embed/WhqUzVtVQI4' },
+  { id: 'cf-016', name: 'Sumo Deadlift', videoUrl: 'https://www.youtube.com/embed/GZIfh5DPaJM' },
+  { id: 'cf-017', name: 'Burpee', videoUrl: 'https://www.youtube.com/embed/7mj1pP0Xds8' },
+  { id: 'cf-018', name: 'Pull-up', videoUrl: 'https://www.youtube.com/embed/eGo4IYlbE5g' },
+  { id: 'cf-019', name: 'Push-up', videoUrl: 'https://www.youtube.com/embed/0pkjOk0EiAk' },
+  { id: 'cf-020', name: 'Toes-to-Bar', videoUrl: 'https://www.youtube.com/embed/eGo4IYlbE5g' },
+  { id: 'cf-021', name: 'Muscle-up', videoUrl: 'https://www.youtube.com/embed/eGo4IYlbE5g' },
+  { id: 'cf-022', name: 'Handstand Push-up', videoUrl: 'https://www.youtube.com/embed/0pkjOk0EiAk' },
+  { id: 'cf-023', name: 'Kettlebell Swing', videoUrl: 'https://www.youtube.com/embed/YSxHifyx6-s' },
 ];
 
-function normalizeQuery(q: string): string {
-  return q.toLowerCase().trim().replace(/\s+/g, ' ');
+// Map local DB fields to our Exercise type
+interface LocalExercise {
+  id: string;
+  name: string;
+  category: string;
+  bodyPart: string;
+  equipment: string;
+  primaryMuscles: string[];
+  secondaryMuscles: string[];
+  images: string[];
 }
 
-async function fetchExerciseDB(query: string): Promise<ExerciseDBExercise[]> {
-  const cacheKey = `edb:${normalizeQuery(query)}`;
-  const cached = cache.get(cacheKey);
-
-  // Return cache if valid
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-    return cached.data;
-  }
-
-  try {
-    const url = `https://oss.exercisedb.dev/api/v1/exercises?name=${encodeURIComponent(query)}`;
-    const response = await fetch(url, {
-      headers: { 'Accept': 'application/json' },
-      signal: AbortSignal.timeout(10000),
-    });
-
-    if (!response.ok) {
-      console.error(`ExerciseDB returned ${response.status}`);
-      // Return cached data if available, even if stale
-      return cached?.data ?? [];
-    }
-
-    const raw = await response.json();
-
-    // ExerciseDB returns an array of exercises
-    const exercises: ExerciseDBExercise[] = Array.isArray(raw)
-      ? raw.map((ex: Record<string, unknown>) => ({
-          id: String(ex.exerciseId ?? ex.id ?? ''),
-          name: String(ex.name ?? ''),
-          gifUrl: String(ex.gifUrl ?? ''),
-          muscleGroup: Array.isArray(ex.bodyParts) ? ex.bodyParts.join(', ') : String(ex.bodyPart ?? ex.muscleGroup ?? ''),
-          equipment: Array.isArray(ex.equipments) ? ex.equipments.join(', ') : String(ex.equipment ?? ''),
-          source: 'exerciseDB' as const,
-        }))
-      : [];
-
-    // Update cache
-    cache.set(cacheKey, { data: exercises, timestamp: Date.now() });
-
-    return exercises;
-  } catch (error) {
-    console.error('ExerciseDB fetch error:', error);
-    // Return stale cache if available
-    return cached?.data ?? [];
-  }
+function mapLocalExercise(ex: LocalExercise) {
+  return {
+    id: ex.id,
+    name: ex.name,
+    muscleGroup: ex.primaryMuscles?.[0] || ex.bodyPart || '',
+    equipment: ex.equipment || '',
+    gifUrl: ex.images?.[0] || '',
+    source: 'exercisedb' as const,
+  };
 }
 
-function searchCrossFit(query: string): CrossFitExercise[] {
-  if (!query) return CROSSFIT_EXERCISES;
-
-  const normalized = normalizeQuery(query);
-  return CROSSFIT_EXERCISES.filter((ex) =>
-    ex.name.toLowerCase().includes(normalized)
-  );
+function mapCrossfitExercise(ex: typeof CROSSFIT_EXERCISES[0]) {
+  return {
+    id: ex.id,
+    name: ex.name,
+    muscleGroup: '',
+    equipment: '',
+    gifUrl: '',
+    videoUrl: ex.videoUrl,
+    source: 'crossfit' as const,
+  };
 }
 
 export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const query = searchParams.get('q') || '';
-    const type = searchParams.get('type') || 'all'; // exerciseDB | crossfit | all
+  const { searchParams } = new URL(request.url);
+  const query = searchParams.get('q') || '';
+  const type = searchParams.get('type') || 'all';
+  const limit = parseInt(searchParams.get('limit') || '20');
 
-    const normalizedQuery = normalizeQuery(query);
-
-    if (!normalizedQuery) {
-      return NextResponse.json(
-        { error: 'Se requiere un término de búsqueda (?q=)' },
-        { status: 400 }
-      );
-    }
-
-    let exerciseDBResults: ExerciseDBExercise[] = [];
-    let crossfitResults: CrossFitExercise[] = [];
-    let partial = false;
-
-    if (type === 'exerciseDB' || type === 'all') {
-      exerciseDBResults = await fetchExerciseDB(normalizedQuery);
-    }
-
-    if (type === 'crossfit' || type === 'all') {
-      crossfitResults = searchCrossFit(normalizedQuery);
-    }
-
-    // If ExerciseDB failed and we have no crossfit results, flag as partial
-    if (exerciseDBResults.length === 0 && type === 'all') {
-      partial = true;
-    }
-
-    const results = [
-      ...exerciseDBResults,
-      ...crossfitResults,
-    ];
-
-    return NextResponse.json({
-      results,
-      partial,
-      counts: {
-        exerciseDB: exerciseDBResults.length,
-        crossfit: crossfitResults.length,
-        total: results.length,
-      },
-    });
-  } catch (error) {
-    console.error('Error in exercise search:', error);
-    return NextResponse.json(
-      { error: 'Error al buscar ejercicios', results: [], partial: true, counts: { exerciseDB: 0, crossfit: 0, total: 0 } },
-      { status: 500 }
-    );
+  if (!query || query.length < 2) {
+    return NextResponse.json({ results: [], partial: false, counts: { exercisedb: 0, crossfit: 0, total: 0 } });
   }
+
+  const lowerQuery = query.toLowerCase();
+
+  const results: Array<{
+    id: string;
+    name: string;
+    muscleGroup?: string;
+    equipment?: string;
+    gifUrl?: string;
+    videoUrl?: string;
+    source: 'exercisedb' | 'crossfit';
+  }> = [];
+
+  // Search local exercise DB (musculación)
+  if (type === 'all' || type === 'exerciseDB') {
+    const exercises = (exercisesData as { exercises: LocalExercise[] }).exercises || [];
+    const matches = exercises
+      .filter(ex => {
+        const searchText = `${ex.name} ${ex.primaryMuscles?.join(' ')} ${ex.equipment} ${ex.bodyPart}`.toLowerCase();
+        return searchText.includes(lowerQuery);
+      })
+      .slice(0, limit)
+      .map(mapLocalExercise);
+    results.push(...matches);
+  }
+
+  // Search CrossFit exercises
+  if (type === 'all' || type === 'crossfit') {
+    const matches = CROSSFIT_EXERCISES
+      .filter(ex => ex.name.toLowerCase().includes(lowerQuery))
+      .slice(0, limit)
+      .map(mapCrossfitExercise);
+    results.push(...matches);
+  }
+
+  return NextResponse.json({
+    results: results.slice(0, limit),
+    partial: results.length > limit,
+    counts: {
+      exercisedb: results.filter(r => r.source === 'exercisedb').length,
+      crossfit: results.filter(r => r.source === 'crossfit').length,
+      total: results.length,
+    },
+  });
 }
