@@ -2,6 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import crypto from 'crypto';
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': 'https://benditocross.vercel.app',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
+}
+
 // Token store in-memory (en producción usar Redis o DB)
 const activeTokens = new Map<string, { socioId: string; expiresAt: number }>();
 
@@ -21,7 +31,7 @@ export async function POST(request: NextRequest) {
     const { socioId, dni } = body;
 
     if (!socioId || !dni) {
-      return NextResponse.json({ error: 'Faltan socioId y dni' }, { status: 400 });
+      return NextResponse.json({ error: 'Faltan socioId y dni' }, { status: 400, headers: CORS_HEADERS });
     }
 
     const socio = await prisma.socio.findUnique({
@@ -35,15 +45,15 @@ export async function POST(request: NextRequest) {
     });
 
     if (!socio) {
-      return NextResponse.json({ error: 'Socio no encontrado' }, { status: 404 });
+      return NextResponse.json({ error: 'Socio no encontrado' }, { status: 404, headers: CORS_HEADERS });
     }
 
     if (!socio.activo) {
-      return NextResponse.json({ error: 'Socio inactivo' }, { status: 403 });
+      return NextResponse.json({ error: 'Socio inactivo' }, { status: 403, headers: CORS_HEADERS });
     }
 
     if (socio.dni !== dni) {
-      return NextResponse.json({ error: 'DNI incorrecto' }, { status: 401 });
+      return NextResponse.json({ error: 'DNI incorrecto' }, { status: 401, headers: CORS_HEADERS });
     }
 
     // Verificar que tenga suscripción activa con acceso a crossfit o musculacion
@@ -52,7 +62,7 @@ export async function POST(request: NextRequest) {
     );
 
     if (!tieneAcceso) {
-      return NextResponse.json({ error: 'No tiene suscripción activa para acceder a rutinas' }, { status: 403 });
+      return NextResponse.json({ error: 'No tiene suscripción activa para acceder a rutinas' }, { status: 403, headers: CORS_HEADERS });
     }
 
     // Generar token (válido por 12 horas)
@@ -69,10 +79,10 @@ export async function POST(request: NextRequest) {
         nombre: socio.nombre,
         apellido: socio.apellido,
       },
-    });
+    }, { headers: CORS_HEADERS });
   } catch (error) {
     console.error('Error en auth pública:', error);
-    return NextResponse.json({ error: 'Error al autenticar' }, { status: 500 });
+    return NextResponse.json({ error: 'Error al autenticar' }, { status: 500, headers: CORS_HEADERS });
   }
 }
 
