@@ -85,7 +85,7 @@ export default function DayColumn({
         onClick={() => setExpanded(!expanded)}
         className={`w-full flex items-center justify-between px-4 py-3 text-left transition-colors ${
           expanded
-            ? isCrossfit ? 'bg-[var(--primary-color)]' : 'bg-blue-600'
+            ? 'bg-[var(--primary-color)]'
             : 'bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800'
         }`}
       >

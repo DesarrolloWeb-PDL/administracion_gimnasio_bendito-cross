@@ -1,8 +1,6 @@
 'use client';
 
-import { useState } from 'react';
 import { type Exercise } from './exercise-card';
-import ExerciseSearchDialog from './exercise-search-dialog';
 
 export interface ExerciseEntry {
   exerciseId: string;
@@ -35,30 +33,15 @@ export default function RoutineSection({
   onReorder,
   onUpdate,
 }: RoutineSectionProps) {
-  const [searchOpen, setSearchOpen] = useState(false);
-
-  const handleSelect = (exercise: Exercise) => {
-    onAdd({
-      exerciseId: exercise.id,
-      nombre: exercise.name,
-      gifUrl: exercise.gifUrl,
-      videoUrl: exercise.videoUrl,
-      muscleGroup: exercise.muscleGroup,
-      equipment: exercise.equipment,
-      orden: exercises.length,
-    });
-  };
-
   return (
     <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 p-3">
       <div className="flex items-center justify-between mb-2">
         <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-200">{title}</h4>
-        <button
-          onClick={() => setSearchOpen(true)}
-          className="text-xs text-[var(--primary-color)] hover:underline font-medium"
-        >
-          + Agregar
-        </button>
+        {exercises.length > 0 && (
+          <span className="text-[10px] text-gray-400 dark:text-gray-500">
+            {exercises.length} ejercicio{exercises.length !== 1 ? 's' : ''}
+          </span>
+        )}
       </div>
 
       {exercises.length === 0 ? (
@@ -91,6 +74,16 @@ export default function RoutineSection({
                   ▼
                 </button>
               </div>
+
+              {/* GIF thumbnail */}
+              {entry.gifUrl && (
+                <img
+                  src={entry.gifUrl}
+                  alt={entry.nombre}
+                  className="h-10 w-10 rounded object-cover flex-shrink-0 bg-gray-100 dark:bg-gray-700"
+                  loading="lazy"
+                />
+              )}
 
               {/* Exercise info */}
               <div className="flex-1 min-w-0">
@@ -127,13 +120,6 @@ export default function RoutineSection({
           ))}
         </div>
       )}
-
-      <ExerciseSearchDialog
-        open={searchOpen}
-        onSelect={handleSelect}
-        onClose={() => setSearchOpen(false)}
-        type={tipo}
-      />
     </div>
   );
 }

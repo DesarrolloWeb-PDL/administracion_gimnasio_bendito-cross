@@ -38,7 +38,7 @@ export default function ExerciseSidebar({ onSelect, type = 'all' }: ExerciseSide
 
   // Load initial exercises on mount
   useEffect(() => {
-    performSearch('');
+    performSearch('a');
   }, [performSearch]);
 
   useEffect(() => {
