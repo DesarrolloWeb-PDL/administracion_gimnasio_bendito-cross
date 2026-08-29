@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
 
     // Verificar que tenga suscripción activa con acceso a crossfit o musculacion
     const tieneAcceso = socio.suscripciones.some(
-      (s) => s.plan.allowsCrossfit || s.plan.allowsMusculacion
+      (s) => s.plan && (s.plan.allowsCrossfit || s.plan.allowsMusculacion)
     );
 
     if (!tieneAcceso) {
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
       },
     }, { headers: CORS_HEADERS });
   } catch (error) {
-    console.error('Error en auth pública:', error);
+    console.error('Error en auth pública:', error instanceof Error ? error.message : String(error));
     return NextResponse.json({ error: 'Error al autenticar' }, { status: 500, headers: CORS_HEADERS });
   }
 }
