@@ -9,10 +9,14 @@ import bcrypt from 'bcryptjs';
 declare module 'next-auth' {
   interface User {
     rol?: string;
+    esProfesorCrossfit?: boolean;
+    esProfesorMusculacion?: boolean;
   }
   interface Session {
     user: {
       rol?: string;
+      esProfesorCrossfit?: boolean;
+      esProfesorMusculacion?: boolean;
     } & import('next-auth').DefaultSession['user'];
   }
 }
@@ -32,7 +36,16 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
           if (!user) return null;
           
           const passwordsMatch = await bcrypt.compare(password, user.password);
-          if (passwordsMatch) return user;
+          if (passwordsMatch) {
+            return {
+              id: user.id,
+              name: user.nombre,
+              email: user.email,
+              rol: user.rol,
+              esProfesorCrossfit: user.esProfesorCrossfit,
+              esProfesorMusculacion: user.esProfesorMusculacion,
+            };
+          }
         }
 
         console.log('Invalid credentials');

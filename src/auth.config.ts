@@ -21,12 +21,16 @@ export const authConfig = {
     jwt({ token, user }) {
       if (user) {
         token.role = user.rol;
+        token.esProfesorCrossfit = user.esProfesorCrossfit;
+        token.esProfesorMusculacion = user.esProfesorMusculacion;
       }
       return token;
     },
     session({ session, token }) {
       if (token.role && session.user) {
         session.user.rol = token.role as string;
+        session.user.esProfesorCrossfit = token.esProfesorCrossfit as boolean;
+        session.user.esProfesorMusculacion = token.esProfesorMusculacion as boolean;
       }
       return session;
     },
