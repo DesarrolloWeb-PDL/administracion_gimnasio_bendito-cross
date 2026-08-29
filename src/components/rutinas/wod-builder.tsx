@@ -60,7 +60,6 @@ export default function WodBuilder({ rutina, tipo, onSave }: WodBuilderProps) {
   });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [selectedDay, setSelectedDay] = useState<string>('lunes');
 
   const handleAddExercise = (dia: string, section: string, entry: ExerciseEntry) => {
     setWeek((prev) => ({
@@ -114,7 +113,8 @@ export default function WodBuilder({ rutina, tipo, onSave }: WodBuilderProps) {
   };
 
   const handleSidebarSelect = (exercise: Exercise) => {
-    // Add to the selected day's appropriate section
+    // Add to the first day (Lunes) by default
+    const targetDay = 'lunes';
     const isMusculacion = tipo === 'musculacion';
     const targetSection = isMusculacion ? 'superiores' : 'wod_dia';
     const entry: ExerciseEntry = {
@@ -124,9 +124,9 @@ export default function WodBuilder({ rutina, tipo, onSave }: WodBuilderProps) {
       videoUrl: exercise.videoUrl,
       muscleGroup: exercise.muscleGroup,
       equipment: exercise.equipment,
-      orden: (week[selectedDay][targetSection as keyof RoutineDay] || []).length,
+      orden: (week[targetDay][targetSection as keyof RoutineDay] || []).length,
     };
-    handleAddExercise(selectedDay, targetSection, entry);
+    handleAddExercise(targetDay, targetSection, entry);
   };
 
   const handleSave = async () => {
@@ -194,56 +194,21 @@ export default function WodBuilder({ rutina, tipo, onSave }: WodBuilderProps) {
           </button>
         </div>
 
-        {/* Day tabs (mobile) */}
-        <div className="flex md:hidden overflow-x-auto border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+        {/* Days - vertical accordion list */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-2">
           {DAYS.map((d) => (
-            <button
-              key={d.key}
-              onClick={() => setSelectedDay(d.key)}
-              className={`px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors ${
-                selectedDay === d.key
-                  ? 'text-[var(--primary-color)] border-b-2 border-[var(--primary-color)]'
-                  : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-              }`}
-            >
-              {d.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Weekly grid - scrollable */}
-        <div className="flex-1 overflow-x-auto overflow-y-hidden p-4">
-          {/* Desktop: all days visible */}
-          <div className="hidden md:flex gap-3 h-full">
-            {DAYS.map((d) => (
-              <div key={d.key} className="w-[240px] flex-shrink-0 h-full overflow-y-auto">
-                <DayColumn
-                  dia={d.key}
-                  diaLabel={d.label}
-                  routineDay={week[d.key]}
-                  tipo={tipo}
-                  onAddExercise={handleAddExercise}
-                  onRemoveExercise={handleRemoveExercise}
-                  onReorderExercise={handleReorderExercise}
-                  onUpdateExercise={handleUpdateExercise}
-                />
-              </div>
-            ))}
-          </div>
-
-          {/* Mobile: single day */}
-          <div className="md:hidden">
             <DayColumn
-              dia={selectedDay}
-              diaLabel={DAYS.find(d => d.key === selectedDay)?.label || selectedDay}
-              routineDay={week[selectedDay]}
+              key={d.key}
+              dia={d.key}
+              diaLabel={d.label}
+              routineDay={week[d.key]}
               tipo={tipo}
               onAddExercise={handleAddExercise}
               onRemoveExercise={handleRemoveExercise}
               onReorderExercise={handleReorderExercise}
               onUpdateExercise={handleUpdateExercise}
             />
-          </div>
+          ))}
         </div>
       </div>
     </div>

@@ -1,14 +1,13 @@
 'use client';
 
+import { useState } from 'react';
 import RoutineSection, { type ExerciseEntry } from './routine-section';
 
 export interface RoutineDay {
-  // CrossFit sections
   activacion: ExerciseEntry[];
   entrada_calor: ExerciseEntry[];
   trabajos_dia: ExerciseEntry[];
   wod_dia: ExerciseEntry[];
-  // Musculación sections
   superiores?: ExerciseEntry[];
   zona_media?: ExerciseEntry[];
   inferiores?: ExerciseEntry[];
@@ -36,9 +35,9 @@ const MUSCULACION_SECTIONS = ['activacion', 'entrada_calor', 'superiores', 'zona
 const MUSCULACION_TITLES: Record<string, string> = {
   activacion: 'Activación',
   entrada_calor: 'Entrada en calor',
-  superiores: 'Superiores (Pecho, Hombros, Bíceps, Tríceps)',
-  zona_media: 'Zona Media (Abdomen, Oblicuos, Espalda baja)',
-  inferiores: 'Inferiores (Cuádriceps, Isquios, Glúteos, Gemelos)',
+  superiores: 'Superiores',
+  zona_media: 'Zona Media',
+  inferiores: 'Inferiores',
 };
 
 interface DayColumnProps {
@@ -64,36 +63,71 @@ export default function DayColumn({
 }: DayColumnProps) {
   const day = routineDay || EMPTY_DAY;
   const isCrossfit = tipo === 'crossfit';
+  const [expanded, setExpanded] = useState(false);
 
   const sections = isCrossfit ? CROSSFIT_SECTIONS : MUSCULACION_SECTIONS;
   const titles = isCrossfit ? CROSSFIT_TITLES : MUSCULACION_TITLES;
 
-  return (
-    <div className="flex flex-col rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden min-w-[260px]">
-      {/* Day header */}
-      <div className={`px-4 py-2.5 ${isCrossfit ? 'bg-[var(--primary-color)]' : 'bg-blue-600'}`}>
-        <h3 className="text-sm font-bold text-white">{diaLabel}</h3>
-      </div>
+  // Count total exercises in this day
+  const totalExercises = sections.reduce((sum, key) => {
+    const exerciseKey = key as keyof RoutineDay;
+    return sum + (day[exerciseKey]?.length || 0);
+  }, 0);
 
-      {/* Sections */}
-      <div className="flex flex-col gap-2 p-3">
-        {sections.map((key) => {
-          // For musculación, map section keys to the RoutineDay fields
-          const exerciseKey = key as keyof RoutineDay;
-          return (
-            <RoutineSection
-              key={key}
-              title={titles[key]}
-              exercises={day[exerciseKey] || []}
-              tipo={tipo}
-              onAdd={(entry) => onAddExercise(dia, key, entry)}
-              onRemove={(index) => onRemoveExercise(dia, key, index)}
-              onReorder={(from, to) => onReorderExercise(dia, key, from, to)}
-              onUpdate={(index, updates) => onUpdateExercise(dia, key, index, updates)}
-            />
-          );
-        })}
-      </div>
+  return (
+    <div className={`rounded-xl border transition-all overflow-hidden ${
+      expanded
+        ? 'border-[var(--primary-color)] shadow-lg'
+        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+    } bg-white dark:bg-gray-800`}>
+      {/* Day header - clickable button */}
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className={`w-full flex items-center justify-between px-4 py-3 text-left transition-colors ${
+          expanded
+            ? isCrossfit ? 'bg-[var(--primary-color)]' : 'bg-blue-600'
+            : 'bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800'
+        }`}
+      >
+        <div className="flex items-center gap-2">
+          <span className={`text-lg transition-transform ${expanded ? 'rotate-90' : ''}`}>
+            ▶
+          </span>
+          <h3 className={`text-sm font-bold ${expanded ? 'text-white' : 'text-gray-800 dark:text-white'}`}>
+            {diaLabel}
+          </h3>
+        </div>
+        {totalExercises > 0 && (
+          <span className={`text-xs px-2 py-0.5 rounded-full ${
+            expanded
+              ? 'bg-white/20 text-white'
+              : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+          }`}>
+            {totalExercises}
+          </span>
+        )}
+      </button>
+
+      {/* Expanded content */}
+      {expanded && (
+        <div className="p-3 space-y-2 border-t border-gray-200 dark:border-gray-700">
+          {sections.map((key) => {
+            const exerciseKey = key as keyof RoutineDay;
+            return (
+              <RoutineSection
+                key={key}
+                title={titles[key]}
+                exercises={day[exerciseKey] || []}
+                tipo={tipo}
+                onAdd={(entry) => onAddExercise(dia, key, entry)}
+                onRemove={(index) => onRemoveExercise(dia, key, index)}
+                onReorder={(from, to) => onReorderExercise(dia, key, from, to)}
+                onUpdate={(index, updates) => onUpdateExercise(dia, key, index, updates)}
+              />
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
