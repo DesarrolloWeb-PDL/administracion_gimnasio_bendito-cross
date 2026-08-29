@@ -21,6 +21,7 @@ export default function NavLinks({ permissions, role, onLinkClick }: NavLinksPro
     { name: 'Pagos', href: '/admin/transacciones', show: isAdmin || (permissions?.permisoTransacciones ?? false) },
     { name: 'Cuenta Corriente', href: '/admin/cuenta-corriente', show: isAdmin || (permissions?.permisoTransacciones ?? false) },
     { name: 'Reportes', href: '/admin/reportes', show: isAdmin || (permissions?.permisoReportes ?? false) },
+    { name: 'Rutinas', href: '/admin/rutinas', show: isAdmin || (permissions?.esProfesorCrossfit ?? false) || (permissions?.esProfesorMusculacion ?? false) },
     { name: 'Configuración', href: '/admin/configuracion', show: isAdmin || (permissions?.permisoConfiguracion ?? false) },
   ];
 

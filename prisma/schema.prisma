@@ -27,6 +27,7 @@ model Usuario {
   updatedAt             DateTime @updatedAt
   esProfesorCrossfit    Boolean  @default(false)
   esProfesorMusculacion Boolean  @default(false)
+  rutinas               Rutina[]
 }
 
 model Configuracion {
@@ -136,4 +137,22 @@ model MovimientoCuentaCorriente {
   createdAt         DateTime        @default(now())
 
   @@index([cuentaCorrienteId])
+}
+
+model Rutina {
+  id           String   @id @default(cuid())
+  titulo       String
+  contenido    String
+  tipo         String   @default("crossfit") // crossfit | musculacion
+  nivel        String?  // principiante | intermedio | avanzado (opcional)
+  fecha        DateTime @default(now())
+  activa       Boolean  @default(true)
+  profesorId   String
+  profesor     Usuario  @relation(fields: [profesorId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([fecha])
+  @@index([tipo])
+  @@index([activa])
 }
