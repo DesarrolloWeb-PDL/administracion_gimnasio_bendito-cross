@@ -20,6 +20,8 @@ const FormSchema = z.object({
   permisoConfiguracion: z.string().optional().nullable(),
   permisoUsuarios: z.string().optional().nullable(),
   permisoTransacciones: z.string().optional().nullable(),
+  esProfesorCrossfit: z.string().optional().nullable(),
+  esProfesorMusculacion: z.string().optional().nullable(),
 });
 
 const CreateUsuario = FormSchema.omit({ id: true });
@@ -41,6 +43,8 @@ export async function createUsuario(prevState: unknown, formData: FormData) {
     permisoConfiguracion: formData.get('permisoConfiguracion'),
     permisoUsuarios: formData.get('permisoUsuarios'),
     permisoTransacciones: formData.get('permisoTransacciones'),
+    esProfesorCrossfit: formData.get('esProfesorCrossfit'),
+    esProfesorMusculacion: formData.get('esProfesorMusculacion'),
   });
 
   if (!validatedFields.success) {
@@ -50,7 +54,7 @@ export async function createUsuario(prevState: unknown, formData: FormData) {
     };
   }
 
-  const { nombre, email, password, rol, permisoSocios, permisoPlanes, permisoSuscripciones, permisoAsistencias, permisoReportes, permisoConfiguracion, permisoUsuarios, permisoTransacciones } = validatedFields.data;
+  const { nombre, email, password, rol, permisoSocios, permisoPlanes, permisoSuscripciones, permisoAsistencias, permisoReportes, permisoConfiguracion, permisoUsuarios, permisoTransacciones, esProfesorCrossfit, esProfesorMusculacion } = validatedFields.data;
   const hashedPassword = await bcrypt.hash(password, 10);
 
   try {
@@ -68,6 +72,8 @@ export async function createUsuario(prevState: unknown, formData: FormData) {
         permisoConfiguracion: permisoConfiguracion === 'on',
         permisoUsuarios: permisoUsuarios === 'on',
         permisoTransacciones: permisoTransacciones === 'on',
+        esProfesorCrossfit: esProfesorCrossfit === 'on',
+        esProfesorMusculacion: esProfesorMusculacion === 'on',
       },
     });
   } catch {
@@ -96,6 +102,8 @@ export async function updateUsuario(id: string, prevState: unknown, formData: Fo
     permisoConfiguracion: formData.get('permisoConfiguracion'),
     permisoUsuarios: formData.get('permisoUsuarios'),
     permisoTransacciones: formData.get('permisoTransacciones'),
+    esProfesorCrossfit: formData.get('esProfesorCrossfit'),
+    esProfesorMusculacion: formData.get('esProfesorMusculacion'),
     ...(passwordRaw ? { password: passwordRaw } : {}),
   };
 
@@ -113,7 +121,7 @@ export async function updateUsuario(id: string, prevState: unknown, formData: Fo
     };
   }
 
-  const { nombre, email, rol, password, permisoSocios, permisoPlanes, permisoSuscripciones, permisoAsistencias, permisoReportes, permisoConfiguracion, permisoUsuarios, permisoTransacciones } = validatedFields.data;
+  const { nombre, email, rol, password, permisoSocios, permisoPlanes, permisoSuscripciones, permisoAsistencias, permisoReportes, permisoConfiguracion, permisoUsuarios, permisoTransacciones, esProfesorCrossfit, esProfesorMusculacion } = validatedFields.data;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const dataToUpdate: any = {
@@ -128,6 +136,8 @@ export async function updateUsuario(id: string, prevState: unknown, formData: Fo
     permisoConfiguracion: permisoConfiguracion === 'on',
     permisoUsuarios: permisoUsuarios === 'on',
     permisoTransacciones: permisoTransacciones === 'on',
+    esProfesorCrossfit: esProfesorCrossfit === 'on',
+    esProfesorMusculacion: esProfesorMusculacion === 'on',
   };
 
   if (password) {

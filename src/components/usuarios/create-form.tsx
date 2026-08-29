@@ -224,6 +224,28 @@ export default function Form() {
                 Gestión de Usuarios
               </label>
             </div>
+            <div className="flex items-center">
+              <input
+                id="esProfesorCrossfit"
+                name="esProfesorCrossfit"
+                type="checkbox"
+                className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+              />
+              <label htmlFor="esProfesorCrossfit" className="ml-2 block text-sm text-gray-900 dark:text-gray-100">
+                Profesor de Crossfit
+              </label>
+            </div>
+            <div className="flex items-center">
+              <input
+                id="esProfesorMusculacion"
+                name="esProfesorMusculacion"
+                type="checkbox"
+                className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+              />
+              <label htmlFor="esProfesorMusculacion" className="ml-2 block text-sm text-gray-900 dark:text-gray-100">
+                Profesor de Musculación
+              </label>
+            </div>
           </div>
         </div>
       </div>
