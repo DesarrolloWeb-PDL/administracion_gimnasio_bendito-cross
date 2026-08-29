@@ -83,11 +83,11 @@ async function fetchExerciseDB(query: string): Promise<ExerciseDBExercise[]> {
     // ExerciseDB returns an array of exercises
     const exercises: ExerciseDBExercise[] = Array.isArray(raw)
       ? raw.map((ex: Record<string, unknown>) => ({
-          id: String(ex.id ?? ''),
+          id: String(ex.exerciseId ?? ex.id ?? ''),
           name: String(ex.name ?? ''),
           gifUrl: String(ex.gifUrl ?? ''),
-          muscleGroup: String(ex.bodyPart ?? ex.muscleGroup ?? ''),
-          equipment: String(ex.equipment ?? ''),
+          muscleGroup: Array.isArray(ex.bodyParts) ? ex.bodyParts.join(', ') : String(ex.bodyPart ?? ex.muscleGroup ?? ''),
+          equipment: Array.isArray(ex.equipments) ? ex.equipments.join(', ') : String(ex.equipment ?? ''),
           source: 'exerciseDB' as const,
         }))
       : [];
