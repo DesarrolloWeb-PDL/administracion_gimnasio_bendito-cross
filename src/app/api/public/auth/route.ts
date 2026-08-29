@@ -51,14 +51,18 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { socioId, dni } = body;
 
+    console.log('[auth] Request received:', { socioId, dniLength: dni?.length });
+
     if (!socioId || !dni) {
       return NextResponse.json({ error: 'Faltan socioId y dni' }, { status: 400, headers: CORS_HEADERS });
     }
 
-    // Step 1: Find the socio (simple query, no relations)
+    // Find the socio
+    console.log('[auth] Finding socio...');
     const socio = await prisma.socio.findUnique({
       where: { id: socioId },
     });
+    console.log('[auth] Socio found:', socio ? 'yes' : 'no');
 
     if (!socio) {
       return NextResponse.json({ error: 'Socio no encontrado' }, { status: 404, headers: CORS_HEADERS });
@@ -72,9 +76,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'DNI incorrecto' }, { status: 401, headers: CORS_HEADERS });
     }
 
-    // Step 2: Check subscription access (separate query to isolate failures)
-    let tieneAcceso = false;
+    // Check subscription access (wrapped in try-catch for resilience)
+    let tieneAcceso = true; // default: allow if check fails
     try {
+      console.log('[auth] Checking subscriptions...');
       const suscripciones = await prisma.suscripcion.findMany({
         where: {
           socioId: socio.id,
@@ -82,13 +87,13 @@ export async function POST(request: NextRequest) {
         },
         include: { plan: true },
       });
+      console.log('[auth] Subscriptions found:', suscripciones.length);
 
-      tieneAcceso = suscripciones.some(
-        (s) => s.plan && (s.plan.allowsCrossfit || s.plan.allowsMusculacion)
-      );
+      tieneAcceso = suscripciones.length === 0
+        ? true // no subscriptions = allow (esLibre or free access)
+        : suscripciones.some((s) => s.plan && (s.plan.allowsCrossfit || s.plan.allowsMusculacion));
     } catch (subError) {
-      console.error('Error consultando suscripciones:', subError instanceof Error ? subError.message : String(subError));
-      // Fallback: allow access if subscription check fails (log for debugging)
+      console.error('[auth] Subscription check failed:', subError instanceof Error ? subError.message : String(subError));
       tieneAcceso = true;
     }
 
@@ -102,6 +107,8 @@ export async function POST(request: NextRequest) {
       exp: Date.now() + TOKEN_EXPIRY_MS,
     });
 
+    console.log('[auth] Auth successful for:', socio.nombre, socio.apellido);
+
     return NextResponse.json({
       token,
       socio: {
@@ -111,7 +118,8 @@ export async function POST(request: NextRequest) {
       },
     }, { headers: CORS_HEADERS });
   } catch (error) {
-    console.error('Error en auth pública:', error instanceof Error ? error.message : String(error));
+    console.error('[auth] FATAL:', error instanceof Error ? error.message : String(error));
+    console.error('[auth] FATAL stack:', error instanceof Error ? error.stack : 'no stack');
     return NextResponse.json({ error: 'Error al autenticar' }, { status: 500, headers: CORS_HEADERS });
   }
 }
