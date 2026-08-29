@@ -72,8 +72,40 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'DNI incorrecto' }, { status: 401, headers: CORS_HEADERS });
     }
 
-    // Check subscription access (wrapped in try-catch for resilience)
-    let tieneAcceso = true; // default: allow if check fails
+    // Check attendance for today (required to see routines)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    let asistenciaHoy = false;
+    try {
+      const asistencia = await prisma.asistencia.findFirst({
+        where: {
+          socioId: socio.id,
+          fecha: {
+            gte: today,
+            lt: tomorrow,
+          },
+        },
+      });
+      asistenciaHoy = !!asistencia;
+    } catch {
+      // If attendance check fails, allow access (resilient fallback)
+      asistenciaHoy = true;
+    }
+
+    if (!asistenciaHoy) {
+      return NextResponse.json(
+        { error: 'No tenés registro de asistencia para hoy. Registrate en la recepción del gimnasio.' },
+        { status: 403, headers: CORS_HEADERS }
+      );
+    }
+
+    // Check subscription access and get allowed types
+    let tieneAcceso = true;
+    let tiposAcceso: string[] = ['crossfit', 'musculacion']; // default: both if no subscriptions
+
     try {
       const suscripciones = await prisma.suscripcion.findMany({
         where: {
@@ -83,16 +115,27 @@ export async function POST(request: NextRequest) {
         include: { plan: true },
       });
 
-      tieneAcceso = suscripciones.length === 0
-        ? true // no subscriptions = allow (esLibre or free access)
-        : suscripciones.some((s) => s.plan && (s.plan.allowsCrossfit || s.plan.allowsMusculacion));
+      if (suscripciones.length > 0) {
+        const tiposSet = new Set<string>();
+        suscripciones.forEach((s) => {
+          if (s.plan) {
+            if (s.plan.allowsCrossfit) tiposSet.add('crossfit');
+            if (s.plan.allowsMusculacion) tiposSet.add('musculacion');
+          }
+        });
+        tiposAcceso = Array.from(tiposSet);
+        tieneAcceso = tiposAcceso.length > 0;
+      }
     } catch {
-      // If subscription check fails, still allow access (resilient fallback)
+      // If subscription check fails, allow access (resilient fallback)
       tieneAcceso = true;
     }
 
     if (!tieneAcceso) {
-      return NextResponse.json({ error: 'No tiene suscripción activa para acceder a rutinas' }, { status: 403, headers: CORS_HEADERS });
+      return NextResponse.json(
+        { error: 'No tiene suscripción activa para acceder a rutinas' },
+        { status: 403, headers: CORS_HEADERS }
+      );
     }
 
     // Generate HMAC-signed stateless token
@@ -108,6 +151,7 @@ export async function POST(request: NextRequest) {
         nombre: socio.nombre,
         apellido: socio.apellido,
       },
+      tiposAcceso, // e.g. ['crossfit'] or ['musculacion'] or ['crossfit', 'musculacion']
     }, { headers: CORS_HEADERS });
   } catch (error) {
     console.error('Error en auth pública:', error instanceof Error ? error.message : String(error));
