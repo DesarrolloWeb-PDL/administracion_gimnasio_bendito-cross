@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { verifyToken } from '../auth/route';
+import { verifyToken } from '../../auth/route';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': 'https://benditocross.vercel.app',
