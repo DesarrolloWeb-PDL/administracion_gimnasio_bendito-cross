@@ -16,7 +16,15 @@ const DAYS = [
 ];
 
 function emptyDay(): RoutineDay {
-  return { activacion: [], entrada_calor: [], trabajos_dia: [], wod_dia: [] };
+  return {
+    activacion: [],
+    entrada_calor: [],
+    trabajos_dia: [],
+    wod_dia: [],
+    superiores: [],
+    zona_media: [],
+    inferiores: [],
+  };
 }
 
 function emptyWeek(): Record<string, RoutineDay> {
@@ -59,7 +67,7 @@ export default function WodBuilder({ rutina, tipo, onSave }: WodBuilderProps) {
       ...prev,
       [dia]: {
         ...prev[dia],
-        [section]: [...prev[dia][section as keyof RoutineDay], entry],
+        [section]: [...(prev[dia][section as keyof RoutineDay] || []), entry],
       },
     }));
     setSaved(false);
@@ -70,7 +78,7 @@ export default function WodBuilder({ rutina, tipo, onSave }: WodBuilderProps) {
       ...prev,
       [dia]: {
         ...prev[dia],
-        [section]: prev[dia][section as keyof RoutineDay].filter((_: ExerciseEntry, i: number) => i !== index),
+        [section]: (prev[dia][section as keyof RoutineDay] || []).filter((_: ExerciseEntry, i: number) => i !== index),
       },
     }));
     setSaved(false);
@@ -78,7 +86,7 @@ export default function WodBuilder({ rutina, tipo, onSave }: WodBuilderProps) {
 
   const handleReorderExercise = (dia: string, section: string, fromIndex: number, toIndex: number) => {
     setWeek((prev) => {
-      const items = [...prev[dia][section as keyof RoutineDay]];
+      const items = [...(prev[dia][section as keyof RoutineDay] || [])];
       const [moved] = items.splice(fromIndex, 1);
       items.splice(toIndex, 0, moved);
       return {
@@ -97,7 +105,7 @@ export default function WodBuilder({ rutina, tipo, onSave }: WodBuilderProps) {
       ...prev,
       [dia]: {
         ...prev[dia],
-        [section]: prev[dia][section as keyof RoutineDay].map((e: ExerciseEntry, i: number) =>
+        [section]: (prev[dia][section as keyof RoutineDay] || []).map((e: ExerciseEntry, i: number) =>
           i === index ? { ...e, ...updates } : e
         ),
       },
@@ -106,7 +114,9 @@ export default function WodBuilder({ rutina, tipo, onSave }: WodBuilderProps) {
   };
 
   const handleSidebarSelect = (exercise: Exercise) => {
-    // Add to the selected day's "wod_dia" section by default
+    // Add to the selected day's appropriate section
+    const isMusculacion = tipo === 'musculacion';
+    const targetSection = isMusculacion ? 'superiores' : 'wod_dia';
     const entry: ExerciseEntry = {
       exerciseId: exercise.id,
       nombre: exercise.name,
@@ -114,9 +124,9 @@ export default function WodBuilder({ rutina, tipo, onSave }: WodBuilderProps) {
       videoUrl: exercise.videoUrl,
       muscleGroup: exercise.muscleGroup,
       equipment: exercise.equipment,
-      orden: week[selectedDay].wod_dia.length,
+      orden: (week[selectedDay][targetSection as keyof RoutineDay] || []).length,
     };
-    handleAddExercise(selectedDay, 'wod_dia', entry);
+    handleAddExercise(selectedDay, targetSection, entry);
   };
 
   const handleSave = async () => {
