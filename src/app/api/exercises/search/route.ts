@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import exercisesData from '@/data/exercises.json';
+import { readFile } from 'fs/promises';
+import { join } from 'path';
 
 // CrossFit exercises (local)
 const CROSSFIT_EXERCISES = [
@@ -28,40 +29,22 @@ const CROSSFIT_EXERCISES = [
   { id: 'cf-023', name: 'Kettlebell Swing', videoUrl: 'https://www.youtube.com/embed/YSxHifyx6-s' },
 ];
 
-// Map local DB fields to our Exercise type
-interface LocalExercise {
-  id: string;
-  name: string;
-  category: string;
-  bodyPart: string;
-  equipment: string;
-  target?: string;
-  primaryMuscles: string[];
-  secondaryMuscles: string[];
-  images: string[];
-}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let cachedExercises: any[] | null = null;
 
-function mapLocalExercise(ex: LocalExercise) {
-  return {
-    id: ex.id,
-    name: ex.name,
-    muscleGroup: ex.target || ex.primaryMuscles?.[0] || ex.bodyPart || '',
-    equipment: ex.equipment || '',
-    gifUrl: ex.images?.[0] || '',
-    source: 'exercisedb' as const,
-  };
-}
-
-function mapCrossfitExercise(ex: typeof CROSSFIT_EXERCISES[0]) {
-  return {
-    id: ex.id,
-    name: ex.name,
-    muscleGroup: '',
-    equipment: '',
-    gifUrl: '',
-    videoUrl: ex.videoUrl,
-    source: 'crossfit' as const,
-  };
+async function loadExercises() {
+  if (cachedExercises) return cachedExercises;
+  
+  try {
+    const filePath = join(process.cwd(), 'src', 'data', 'exercises.json');
+    const raw = await readFile(filePath, 'utf-8');
+    const data = JSON.parse(raw);
+    cachedExercises = data.exercises || [];
+    return cachedExercises;
+  } catch (error) {
+    console.error('Failed to load exercises:', error);
+    return [];
+  }
 }
 
 export async function GET(request: NextRequest) {
@@ -75,6 +58,7 @@ export async function GET(request: NextRequest) {
   }
 
   const lowerQuery = query.toLowerCase();
+  const exercises = await loadExercises();
 
   const results: Array<{
     id: string;
@@ -88,14 +72,20 @@ export async function GET(request: NextRequest) {
 
   // Search local exercise DB (musculación)
   if (type === 'all' || type === 'exerciseDB') {
-    const exercises = (exercisesData as { exercises: LocalExercise[] }).exercises || [];
     const matches = exercises
       .filter(ex => {
-        const searchText = `${ex.name} ${ex.primaryMuscles?.join(' ')} ${ex.equipment} ${ex.bodyPart}`.toLowerCase();
+        const searchText = `${ex.name} ${ex.target || ''} ${ex.primaryMuscles?.join(' ') || ''} ${ex.equipment || ''} ${ex.bodyPart || ''}`.toLowerCase();
         return searchText.includes(lowerQuery);
       })
       .slice(0, limit)
-      .map(mapLocalExercise);
+      .map((ex) => ({
+        id: ex.id,
+        name: ex.name,
+        muscleGroup: ex.target || ex.primaryMuscles?.[0] || ex.bodyPart || '',
+        equipment: ex.equipment || '',
+        gifUrl: ex.images?.[0] || '',
+        source: 'exercisedb' as const,
+      }));
     results.push(...matches);
   }
 
@@ -104,7 +94,15 @@ export async function GET(request: NextRequest) {
     const matches = CROSSFIT_EXERCISES
       .filter(ex => ex.name.toLowerCase().includes(lowerQuery))
       .slice(0, limit)
-      .map(mapCrossfitExercise);
+      .map((ex) => ({
+        id: ex.id,
+        name: ex.name,
+        muscleGroup: '',
+        equipment: '',
+        gifUrl: '',
+        videoUrl: ex.videoUrl,
+        source: 'crossfit' as const,
+      }));
     results.push(...matches);
   }
 
