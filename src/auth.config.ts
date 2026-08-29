@@ -9,6 +9,12 @@ export const authConfig = {
       const isLoggedIn = !!auth?.user;
       const isOnAdmin = nextUrl.pathname.startsWith('/admin');
       const isOnKiosco = nextUrl.pathname.startsWith('/kiosco');
+      const isApiPublic = nextUrl.pathname.startsWith('/api/public');
+
+      // Las API públicas no requieren autenticación
+      if (isApiPublic) {
+        return true;
+      }
 
       if (isOnAdmin || isOnKiosco) {
         if (isLoggedIn) return true;
