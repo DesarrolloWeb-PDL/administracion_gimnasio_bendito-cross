@@ -12,18 +12,39 @@ export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
 }
 
-// Token store in-memory (en producción usar Redis o DB)
-const activeTokens = new Map<string, { socioId: string; expiresAt: number }>();
+// HMAC-signed token (stateless - works across serverless instances)
+const TOKEN_SECRET = process.env.TOKEN_SECRET || process.env.NEXTAUTH_SECRET || 'benditocross-default-secret-change-me';
+const TOKEN_EXPIRY_MS = 12 * 60 * 60 * 1000; // 12 hours
 
-// Limpiar tokens expirados cada 5 minutos
-setInterval(() => {
-  const now = Date.now();
-  for (const [token, data] of activeTokens.entries()) {
-    if (data.expiresAt < now) {
-      activeTokens.delete(token);
-    }
+function signToken(payload: { socioId: string; exp: number }): string {
+  const data = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const signature = crypto
+    .createHmac('sha256', TOKEN_SECRET)
+    .update(data)
+    .digest('base64url');
+  return `${data}.${signature}`;
+}
+
+export function verifyToken(token: string): string | null {
+  try {
+    const [data, signature] = token.split('.');
+    if (!data || !signature) return null;
+
+    const expectedSig = crypto
+      .createHmac('sha256', TOKEN_SECRET)
+      .update(data)
+      .digest('base64url');
+
+    if (signature !== expectedSig) return null;
+
+    const payload = JSON.parse(Buffer.from(data, 'base64url').toString());
+    if (payload.exp < Date.now()) return null;
+
+    return payload.socioId;
+  } catch {
+    return null;
   }
-}, 5 * 60 * 1000);
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -67,8 +88,7 @@ export async function POST(request: NextRequest) {
       );
     } catch (subError) {
       console.error('Error consultando suscripciones:', subError instanceof Error ? subError.message : String(subError));
-      // If subscriptions check fails, still allow access but log the error
-      // This ensures auth works even if subscription data has issues
+      // Fallback: allow access if subscription check fails (log for debugging)
       tieneAcceso = true;
     }
 
@@ -76,11 +96,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No tiene suscripción activa para acceder a rutinas' }, { status: 403, headers: CORS_HEADERS });
     }
 
-    // Generate token (valid for 12 hours)
-    const token = crypto.randomBytes(32).toString('hex');
-    activeTokens.set(token, {
+    // Generate HMAC-signed stateless token
+    const token = signToken({
       socioId: socio.id,
-      expiresAt: Date.now() + 12 * 60 * 60 * 1000,
+      exp: Date.now() + TOKEN_EXPIRY_MS,
     });
 
     return NextResponse.json({
@@ -95,13 +114,4 @@ export async function POST(request: NextRequest) {
     console.error('Error en auth pública:', error instanceof Error ? error.message : String(error));
     return NextResponse.json({ error: 'Error al autenticar' }, { status: 500, headers: CORS_HEADERS });
   }
-}
-
-export function verifyToken(token: string): string | null {
-  const data = activeTokens.get(token);
-  if (!data || data.expiresAt < Date.now()) {
-    activeTokens.delete(token);
-    return null;
-  }
-  return data.socioId;
 }
