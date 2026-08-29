@@ -29,10 +29,15 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { titulo, contenido, tipo, nivel } = body;
+    const { titulo, contenido, contenidoJson, tipo, nivel, semanaInicio } = body;
 
-    if (!titulo || !contenido || !tipo) {
+    if (!titulo || !tipo) {
       return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
+    }
+
+    // Must have either contenido or contenidoJson
+    if (!contenido && !contenidoJson) {
+      return NextResponse.json({ error: 'Se requiere contenido o contenidoJson' }, { status: 400 });
     }
 
     // Verificar que el profesor pueda crear el tipo de rutina
@@ -43,12 +48,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No es profesor de Musculación' }, { status: 403 });
     }
 
+    // Determine version based on content type
+    const version = contenidoJson ? 'structured' : 'legacy';
+
     const rutina = await prisma.rutina.create({
       data: {
         titulo,
-        contenido,
+        contenido: contenido || null,
+        contenidoJson: contenidoJson || null,
+        version,
         tipo,
         nivel: nivel || null,
+        semanaInicio: semanaInicio ? new Date(semanaInicio) : null,
         profesorId: user.id,
       },
     });
@@ -60,17 +71,28 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    const { searchParams } = new URL(request.url);
+    const semana = searchParams.get('semana');
+
+    let whereClause: Record<string, unknown> = {};
+
+    if (semana) {
+      // Filter by week start date
+      const semanaDate = new Date(semana);
+      whereClause.semanaInicio = semanaDate;
+    } else {
+      // Default: today's routines
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      whereClause.fecha = { gte: today, lt: tomorrow };
+    }
 
     const rutinas = await prisma.rutina.findMany({
-      where: {
-        fecha: { gte: today, lt: tomorrow },
-      },
+      where: whereClause,
       include: {
         profesor: { select: { nombre: true } },
       },

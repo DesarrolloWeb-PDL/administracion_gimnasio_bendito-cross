@@ -27,6 +27,7 @@ model Usuario {
   updatedAt             DateTime @updatedAt
   esProfesorCrossfit    Boolean  @default(false)
   esProfesorMusculacion Boolean  @default(false)
+  horarios              Json?    // { crossfit: { lunes: { inicio, fin }, ... }, musculacion: { ... } }
   rutinas               Rutina[]
 }
 
@@ -140,19 +141,23 @@ model MovimientoCuentaCorriente {
 }
 
 model Rutina {
-  id           String   @id @default(cuid())
-  titulo       String
-  contenido    String
-  tipo         String   @default("crossfit") // crossfit | musculacion
-  nivel        String?  // principiante | intermedio | avanzado (opcional)
-  fecha        DateTime @default(now())
-  activa       Boolean  @default(true)
-  profesorId   String
-  profesor     Usuario  @relation(fields: [profesorId], references: [id])
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id            String    @id @default(cuid())
+  titulo        String
+  contenido     String?
+  contenidoJson Json?     // Structured: { lunes: { activacion: [...], ... }, ... }
+  version       String    @default("legacy") // "legacy" | "structured"
+  tipo          String    @default("crossfit") // crossfit | musculacion
+  nivel         String?   // principiante | intermedio | avanzado (opcional)
+  semanaInicio  DateTime? // Start of week (Monday) for structured routines
+  fecha         DateTime  @default(now())
+  activa        Boolean   @default(true)
+  profesorId    String
+  profesor      Usuario   @relation(fields: [profesorId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   @@index([fecha])
   @@index([tipo])
   @@index([activa])
+  @@index([semanaInicio])
 }

@@ -6,9 +6,12 @@ import { useRouter } from 'next/navigation';
 interface Rutina {
   id: string;
   titulo: string;
-  contenido: string;
+  contenido: string | null;
+  contenidoJson?: unknown;
+  version?: string;
   tipo: string;
   nivel: string | null;
+  semanaInicio?: Date | null;
   profesor: { nombre: string };
   createdAt: Date;
 }
@@ -34,7 +37,11 @@ export default function RutinaCard({ rutina }: { rutina: Rutina }) {
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <h3 className="font-semibold text-gray-800 dark:text-white">{rutina.titulo}</h3>
-          <p className="mt-1 text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap">{rutina.contenido}</p>
+          {rutina.contenido ? (
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap">{rutina.contenido}</p>
+          ) : (
+            <p className="mt-1 text-sm text-gray-400 dark:text-gray-500 italic">Rutina estructurada</p>
+          )}
           <div className="mt-2 flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
             <span>Por: {rutina.profesor.nombre}</span>
             {rutina.nivel && (

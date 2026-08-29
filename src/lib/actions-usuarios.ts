@@ -6,6 +6,31 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import bcrypt from 'bcryptjs';
 
+const TimeSlotSchema = z.object({
+  inicio: z.string().regex(/^\d{2}:\d{2}$/, 'Formato de hora inválido (HH:MM)'),
+  fin: z.string().regex(/^\d{2}:\d{2}$/, 'Formato de hora inválido (HH:MM)'),
+}).refine((data) => {
+  const [inicioH, inicioM] = data.inicio.split(':').map(Number);
+  const [finH, finM] = data.fin.split(':').map(Number);
+  const inicioMinutes = inicioH * 60 + inicioM;
+  const finMinutes = finH * 60 + finM;
+  return inicioMinutes < finMinutes;
+}, { message: 'La hora de inicio debe ser anterior a la hora de fin' });
+
+const DayScheduleSchema = z.object({
+  lunes: TimeSlotSchema.nullable().optional(),
+  martes: TimeSlotSchema.nullable().optional(),
+  miercoles: TimeSlotSchema.nullable().optional(),
+  jueves: TimeSlotSchema.nullable().optional(),
+  viernes: TimeSlotSchema.nullable().optional(),
+  sabado: TimeSlotSchema.nullable().optional(),
+}).nullable();
+
+const HorariosSchema = z.object({
+  crossfit: DayScheduleSchema.optional(),
+  musculacion: DayScheduleSchema.optional(),
+}).nullable();
+
 const FormSchema = z.object({
   id: z.string(),
   nombre: z.string().min(1, 'El nombre es obligatorio.'),
@@ -22,6 +47,7 @@ const FormSchema = z.object({
   permisoTransacciones: z.string().optional().nullable(),
   esProfesorCrossfit: z.string().optional().nullable(),
   esProfesorMusculacion: z.string().optional().nullable(),
+  horarios: z.string().optional().nullable(),
 });
 
 const CreateUsuario = FormSchema.omit({ id: true });
@@ -45,6 +71,7 @@ export async function createUsuario(prevState: unknown, formData: FormData) {
     permisoTransacciones: formData.get('permisoTransacciones'),
     esProfesorCrossfit: formData.get('esProfesorCrossfit'),
     esProfesorMusculacion: formData.get('esProfesorMusculacion'),
+    horarios: formData.get('horarios'),
   });
 
   if (!validatedFields.success) {
@@ -54,8 +81,29 @@ export async function createUsuario(prevState: unknown, formData: FormData) {
     };
   }
 
-  const { nombre, email, password, rol, permisoSocios, permisoPlanes, permisoSuscripciones, permisoAsistencias, permisoReportes, permisoConfiguracion, permisoUsuarios, permisoTransacciones, esProfesorCrossfit, esProfesorMusculacion } = validatedFields.data;
+  const { nombre, email, password, rol, permisoSocios, permisoPlanes, permisoSuscripciones, permisoAsistencias, permisoReportes, permisoConfiguracion, permisoUsuarios, permisoTransacciones, esProfesorCrossfit, esProfesorMusculacion, horarios } = validatedFields.data;
   const hashedPassword = await bcrypt.hash(password, 10);
+
+  // Parse horarios from JSON string if provided
+  let horariosData = null;
+  if (horarios) {
+    try {
+      horariosData = JSON.parse(horarios);
+      // Validate horarios structure
+      const horariosValidation = HorariosSchema.safeParse(horariosData);
+      if (!horariosValidation.success) {
+        return {
+          errors: { horarios: ['Estructura de horarios inválida'] },
+          message: 'Los horarios tienen un formato inválido.',
+        };
+      }
+    } catch {
+      return {
+        errors: { horarios: ['JSON de horarios inválido'] },
+        message: 'Los horarios deben ser un JSON válido.',
+      };
+    }
+  }
 
   try {
     await prisma.usuario.create({
@@ -74,6 +122,7 @@ export async function createUsuario(prevState: unknown, formData: FormData) {
         permisoTransacciones: permisoTransacciones === 'on',
         esProfesorCrossfit: esProfesorCrossfit === 'on',
         esProfesorMusculacion: esProfesorMusculacion === 'on',
+        horarios: horariosData,
       },
     });
   } catch {
@@ -104,6 +153,7 @@ export async function updateUsuario(id: string, prevState: unknown, formData: Fo
     permisoTransacciones: formData.get('permisoTransacciones'),
     esProfesorCrossfit: formData.get('esProfesorCrossfit'),
     esProfesorMusculacion: formData.get('esProfesorMusculacion'),
+    horarios: formData.get('horarios'),
     ...(passwordRaw ? { password: passwordRaw } : {}),
   };
 
@@ -121,7 +171,28 @@ export async function updateUsuario(id: string, prevState: unknown, formData: Fo
     };
   }
 
-  const { nombre, email, rol, password, permisoSocios, permisoPlanes, permisoSuscripciones, permisoAsistencias, permisoReportes, permisoConfiguracion, permisoUsuarios, permisoTransacciones, esProfesorCrossfit, esProfesorMusculacion } = validatedFields.data;
+  const { nombre, email, rol, password, permisoSocios, permisoPlanes, permisoSuscripciones, permisoAsistencias, permisoReportes, permisoConfiguracion, permisoUsuarios, permisoTransacciones, esProfesorCrossfit, esProfesorMusculacion, horarios } = validatedFields.data;
+
+  // Parse horarios from JSON string if provided
+  let horariosData = null;
+  if (horarios) {
+    try {
+      horariosData = JSON.parse(horarios);
+      // Validate horarios structure
+      const horariosValidation = HorariosSchema.safeParse(horariosData);
+      if (!horariosValidation.success) {
+        return {
+          errors: { horarios: ['Estructura de horarios inválida'] },
+          message: 'Los horarios tienen un formato inválido.',
+        };
+      }
+    } catch {
+      return {
+        errors: { horarios: ['JSON de horarios inválido'] },
+        message: 'Los horarios deben ser un JSON válido.',
+      };
+    }
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const dataToUpdate: any = {
@@ -138,6 +209,7 @@ export async function updateUsuario(id: string, prevState: unknown, formData: Fo
     permisoTransacciones: permisoTransacciones === 'on',
     esProfesorCrossfit: esProfesorCrossfit === 'on',
     esProfesorMusculacion: esProfesorMusculacion === 'on',
+    horarios: horariosData,
   };
 
   if (password) {
