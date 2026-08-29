@@ -35,6 +35,7 @@ interface LocalExercise {
   category: string;
   bodyPart: string;
   equipment: string;
+  target?: string;
   primaryMuscles: string[];
   secondaryMuscles: string[];
   images: string[];
@@ -44,7 +45,7 @@ function mapLocalExercise(ex: LocalExercise) {
   return {
     id: ex.id,
     name: ex.name,
-    muscleGroup: ex.primaryMuscles?.[0] || ex.bodyPart || '',
+    muscleGroup: ex.target || ex.primaryMuscles?.[0] || ex.bodyPart || '',
     equipment: ex.equipment || '',
     gifUrl: ex.images?.[0] || '',
     source: 'exercisedb' as const,
