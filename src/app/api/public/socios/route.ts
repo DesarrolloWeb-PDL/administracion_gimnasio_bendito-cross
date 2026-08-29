@@ -20,6 +20,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json([], { headers: CORS_HEADERS });
     }
 
+    // Only show socios who registered attendance in the last 3 hours
+    const threeHoursAgo = new Date();
+    threeHoursAgo.setHours(threeHoursAgo.getHours() - 3);
+
     const socios = await prisma.socio.findMany({
       where: {
         activo: true,
@@ -27,6 +31,14 @@ export async function GET(request: NextRequest) {
           { nombre: { contains: query, mode: 'insensitive' } },
           { apellido: { contains: query, mode: 'insensitive' } },
         ],
+        // Must have attendance in the last 3 hours
+        asistencias: {
+          some: {
+            fecha: {
+              gte: threeHoursAgo,
+            },
+          },
+        },
       },
       select: {
         id: true,
