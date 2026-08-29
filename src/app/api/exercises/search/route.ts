@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readFile } from 'fs/promises';
-import { join } from 'path';
 
 // CrossFit exercises (local)
 const CROSSFIT_EXERCISES = [
@@ -29,21 +27,75 @@ const CROSSFIT_EXERCISES = [
   { id: 'cf-023', name: 'Kettlebell Swing', videoUrl: 'https://www.youtube.com/embed/YSxHifyx6-s' },
 ];
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let cachedExercises: any[] | null = null;
+const CSV_URL = 'https://raw.githubusercontent.com/omercotkd/exercises-gifs/main/exercises.csv';
+const GIF_BASE = 'https://raw.githubusercontent.com/omercotkd/exercises-gifs/main/assets/';
 
-async function loadExercises() {
-  if (cachedExercises) return cachedExercises;
+interface CsvExercise {
+  id: string;
+  name: string;
+  bodyPart: string;
+  equipment: string;
+  target: string;
+  gifUrl: string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let cachedExercises: CsvExercise[] | null = null;
+let cacheTime = 0;
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+function parseCsvLine(line: string): string[] {
+  const fields: string[] = [];
+  let current = '';
+  let inQuotes = false;
   
-  try {
-    const filePath = join(process.cwd(), 'src', 'data', 'exercises.json');
-    const raw = await readFile(filePath, 'utf-8');
-    const data = JSON.parse(raw);
-    cachedExercises = data.exercises || [];
+  for (const char of line) {
+    if (char === '"') { inQuotes = !inQuotes; continue; }
+    if (char === ',' && !inQuotes) { fields.push(current); current = ''; continue; }
+    current += char;
+  }
+  fields.push(current);
+  return fields;
+}
+
+async function loadExercises(): Promise<CsvExercise[]> {
+  if (cachedExercises && Date.now() - cacheTime < CACHE_TTL) {
     return cachedExercises;
+  }
+
+  try {
+    const res = await fetch(CSV_URL, { next: { revalidate: 300 } });
+    if (!res.ok) throw new Error(`CSV fetch failed: ${res.status}`);
+    
+    const text = await res.text();
+    const lines = text.split('\n');
+    
+    const exercises: CsvExercise[] = [];
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+      
+      const fields = parseCsvLine(line);
+      if (fields.length < 5) continue;
+      
+      const [bodyPart, equipment, id, name, target] = fields;
+      
+      exercises.push({
+        id,
+        name,
+        bodyPart: bodyPart || '',
+        equipment: equipment || '',
+        target: target || '',
+        gifUrl: `${GIF_BASE}${id}.gif`,
+      });
+    }
+
+    cachedExercises = exercises;
+    cacheTime = Date.now();
+    return exercises;
   } catch (error) {
-    console.error('Failed to load exercises:', error);
-    return [];
+    console.error('Failed to load exercises CSV:', error);
+    return cachedExercises || [];
   }
 }
 
@@ -70,20 +122,20 @@ export async function GET(request: NextRequest) {
     source: 'exercisedb' | 'crossfit';
   }> = [];
 
-  // Search local exercise DB (musculación)
+  // Search musculación exercises (from CSV)
   if (type === 'all' || type === 'exerciseDB') {
     const matches = exercises
       .filter(ex => {
-        const searchText = `${ex.name} ${ex.target || ''} ${ex.primaryMuscles?.join(' ') || ''} ${ex.equipment || ''} ${ex.bodyPart || ''}`.toLowerCase();
+        const searchText = `${ex.name} ${ex.target} ${ex.bodyPart} ${ex.equipment}`.toLowerCase();
         return searchText.includes(lowerQuery);
       })
       .slice(0, limit)
       .map((ex) => ({
         id: ex.id,
         name: ex.name,
-        muscleGroup: ex.target || ex.primaryMuscles?.[0] || ex.bodyPart || '',
+        muscleGroup: ex.target || ex.bodyPart || '',
         equipment: ex.equipment || '',
-        gifUrl: ex.images?.[0] || '',
+        gifUrl: ex.gifUrl,
         source: 'exercisedb' as const,
       }));
     results.push(...matches);
