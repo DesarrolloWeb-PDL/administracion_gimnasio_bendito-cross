@@ -66,7 +66,7 @@ export default function ExerciseSidebar({ onSelect, tipo = 'musculacion' }: Exer
 
   // Load initial exercises on mount
   useEffect(() => {
-    performSearch('');
+    performSearch('a');
   }, [performSearch]);
 
   // Group exercises by muscle group
