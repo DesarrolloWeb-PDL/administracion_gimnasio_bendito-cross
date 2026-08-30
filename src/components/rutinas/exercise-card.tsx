@@ -3,10 +3,15 @@
 export interface Exercise {
   id: string;
   name: string;
+  esName?: string;
   gifUrl?: string;
   videoUrl?: string;
   muscleGroup?: string;
+  muscleGroupEs?: string;
   equipment?: string;
+  equipmentEs?: string;
+  bodyPart?: string;
+  bodyPartEs?: string;
   source: 'exerciseDB' | 'crossfit';
 }
 

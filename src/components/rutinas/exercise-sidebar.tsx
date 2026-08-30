@@ -1,174 +1,237 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import type { Exercise } from './exercise-card';
+import { useState, useCallback, useEffect, useMemo } from 'react';
+import { type Exercise } from './exercise-card';
 
 interface ExerciseSidebarProps {
-  onSelect: (exercise: Exercise) => void;
-  type?: 'crossfit' | 'musculacion' | 'all';
+  onSelect: (exercise: Exercise, section?: string) => void;
+  tipo?: 'crossfit' | 'musculacion';
 }
 
-export default function ExerciseSidebar({ onSelect, type = 'all' }: ExerciseSidebarProps) {
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState<Exercise[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+const BODY_PART_ORDER = [
+  'Pecho', 'Espalda', 'Hombros', 'Brazos', 'Piernas', 'Abdomen', 'Cardio'
+];
 
-  const searchType = type === 'crossfit' ? 'crossfit' : type === 'musculacion' ? 'exerciseDB' : 'all';
+// Map body part to musculación section
+function bodyPartToSection(bodyPartEs: string): string {
+  const lower = (bodyPartEs || '').toLowerCase();
+  if (lower.includes('pecho') || lower.includes('espalda') || lower.includes('hombro') || 
+      lower.includes('brazo') || lower.includes('bíceps') || lower.includes(' tríceps')) {
+    return 'superiores';
+  }
+  if (lower.includes('abdomen') || lower.includes('abdominales') || lower.includes('oblicuo') || lower.includes('cintura')) {
+    return 'zona_media';
+  }
+  if (lower.includes('pierna') || lower.includes('muslo') || lower.includes('pantorrilla') || 
+      lower.includes('cuádriceps') || lower.includes('isquio') || lower.includes('glúteo')) {
+    return 'inferiores';
+  }
+  return 'superiores'; // default
+}
+
+export default function ExerciseSidebar({ onSelect, tipo = 'musculacion' }: ExerciseSidebarProps) {
+  const [search, setSearch] = useState('');
+  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
 
   const performSearch = useCallback(async (q: string) => {
+    if (!q || q.length < 1) {
+      setLoading(true);
+      try {
+        const typeParam = tipo === 'crossfit' ? 'crossfit' : 'exerciseDB';
+        const res = await fetch(`/api/exercises/search?q=${encodeURIComponent(q)}&type=${typeParam}&limit=50&groupBy=bodyPart`);
+        const data = await res.json();
+        setExercises(data.results || []);
+      } catch (err) {
+        console.error('Exercise search error:', err);
+        setExercises([]);
+      }
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
-      const res = await fetch(
-        `/api/exercises/search?q=${encodeURIComponent(q)}&type=${searchType}&limit=50`
-      );
-      if (res.ok) {
-        const data = await res.json();
-        setResults(data.results ?? []);
-      } else {
-        setResults([]);
-      }
-    } catch {
-      setResults([]);
+      const typeParam = tipo === 'crossfit' ? 'crossfit' : 'exerciseDB';
+      const res = await fetch(`/api/exercises/search?q=${encodeURIComponent(q)}&type=${typeParam}&limit=50&groupBy=bodyPart`);
+      const data = await res.json();
+      setExercises(data.results || []);
+    } catch (err) {
+      console.error('Exercise search error:', err);
+      setExercises([]);
     }
     setLoading(false);
-  }, [searchType]);
+  }, [tipo]);
 
   // Load initial exercises on mount
   useEffect(() => {
-    performSearch('a');
+    performSearch('');
   }, [performSearch]);
 
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => performSearch(query), 300);
-    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
-  }, [query, performSearch]);
+  // Group exercises by muscle group
+  const grouped = useMemo(() => {
+    const groups: Record<string, Exercise[]> = {};
+    
+    for (const ex of exercises) {
+      let group = 'Otros';
+      
+      if (tipo === 'musculacion') {
+        // Use bodyPartEs for grouping, with a fallback to muscleGroupEs
+        group = ex.bodyPartEs || ex.muscleGroupEs || 'Otros';
+        
+        // Map to the 5 main groups
+        const lower = (ex.bodyPartEs || '').toLowerCase();
+        if (lower.includes('pecho')) group = 'Pecho';
+        else if (lower.includes('espalda')) group = 'Espalda';
+        else if (lower.includes('hombro')) group = 'Hombros';
+        else if (lower.includes('brazo') || lower.includes('bíceps') || lower.includes(' tríceps')) group = 'Brazos';
+        else if (lower.includes('pierna') || lower.includes('muslo') || lower.includes('pantorrilla')) group = 'Piernas';
+        else if (lower.includes('abdomen') || lower.includes('abdominales') || lower.includes('oblicuo')) group = 'Abdomen';
+        else if (lower.includes('cardio')) group = 'Cardio';
+      } else {
+        group = 'CrossFit';
+      }
+      
+      if (!groups[group]) groups[group] = [];
+      groups[group].push(ex);
+    }
+    
+    return groups;
+  }, [exercises, tipo]);
+
+  const sortedGroups = useMemo(() => {
+    const groups = Object.keys(grouped);
+    if (tipo === 'musculacion') {
+      return groups.sort((a, b) => {
+        const aIdx = BODY_PART_ORDER.indexOf(a);
+        const bIdx = BODY_PART_ORDER.indexOf(b);
+        return (aIdx === -1 ? 99 : aIdx) - (bIdx === -1 ? 99 : bIdx);
+      });
+    }
+    return groups;
+  }, [grouped, tipo]);
+
+  const handleExerciseClick = (exercise: Exercise) => {
+    // Auto-detect section based on body part
+    const section = tipo === 'musculacion' ? bodyPartToSection(exercise.bodyPartEs || '') : undefined;
+    onSelect(exercise, section);
+  };
 
   return (
-    <div className={`flex flex-col bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 ${collapsed ? 'w-12' : 'w-80'}`}>
-      {/* Collapse toggle */}
-      <button
-        onClick={() => setCollapsed(!collapsed)}
-        className="flex items-center justify-center h-10 border-b border-gray-200 dark:border-gray-700 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 flex-shrink-0"
-        title={collapsed ? 'Expandir panel' : 'Colapsar panel'}
-      >
-        {collapsed ? '»' : '«'}
-      </button>
-
-      {!collapsed && (
-        <>
-          {/* Search */}
-          <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-            <div className="relative">
-              <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs">🔍</span>
-              <input
-                ref={inputRef}
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Buscar ejercicio..."
-                className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 pl-7 pr-2 py-2 text-sm text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]"
-              />
-            </div>
-          </div>
-
-          {/* Exercise list */}
-          <div className="flex-1 overflow-y-auto">
-            {loading && results.length === 0 ? (
-              <div className="flex items-center justify-center py-8">
-                <span className="text-sm text-gray-400 animate-pulse">Cargando ejercicios...</span>
-              </div>
-            ) : results.length === 0 ? (
-              <div className="text-center py-8 px-4">
-                <p className="text-sm text-gray-400 dark:text-gray-500">
-                  {query ? 'Sin resultados' : 'Escribí para buscar'}
-                </p>
-              </div>
-            ) : (
-              <div className="p-2 space-y-1">
-                {results.map((exercise) => (
-                  <ExerciseSidebarItem
-                    key={exercise.id}
-                    exercise={exercise}
-                    onSelect={onSelect}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Footer */}
-          <div className="px-3 py-1.5 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
-            <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center">
-              {results.length} ejercicios · {type === 'crossfit' ? 'CrossFit' : type === 'musculacion' ? 'Musculación' : 'Todos'}
-            </p>
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
-
-function ExerciseSidebarItem({ exercise, onSelect }: { exercise: Exercise; onSelect: (e: Exercise) => void }) {
-  const [imgError, setImgError] = useState(false);
-
-  return (
-    <button
-      onClick={() => onSelect(exercise)}
-      className="w-full flex items-center gap-2.5 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-2 text-left hover:border-[var(--primary-color)] hover:shadow-md transition-all group cursor-pointer"
-    >
-      {/* Thumbnail */}
-      {exercise.gifUrl && !imgError ? (
-        <img
-          src={exercise.gifUrl}
-          alt={exercise.name}
-          className="h-14 w-14 rounded-lg object-cover flex-shrink-0 bg-gray-100 dark:bg-gray-700"
-          loading="lazy"
-          onError={() => setImgError(true)}
+    <div className="w-72 flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex flex-col overflow-hidden">
+      {/* Header */}
+      <div className="px-3 py-3 border-b border-gray-200 dark:border-gray-700">
+        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+          Ejercicios
+        </h3>
+        <input
+          type="text"
+          placeholder="Buscar ejercicio..."
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            performSearch(e.target.value);
+          }}
+          className="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-1.5 text-sm text-gray-800 dark:text-white placeholder-gray-500 focus:outline-none focus:border-[var(--primary-color)]"
         />
-      ) : exercise.videoUrl ? (
-        <div className="h-14 w-14 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
-          <span className="text-xl">▶</span>
-        </div>
-      ) : (
-        <div className="h-14 w-14 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 text-gray-400">
-          <span className="text-xl">🏋️</span>
-        </div>
-      )}
-
-      {/* Info */}
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-800 dark:text-white truncate group-hover:text-[var(--primary-color)]">
-          {exercise.name}
-        </p>
-        <div className="flex items-center gap-1.5 mt-0.5">
-          {exercise.muscleGroup && (
-            <span className="text-[10px] text-gray-500 dark:text-gray-400 truncate">
-              {exercise.muscleGroup}
-            </span>
-          )}
-          {exercise.equipment && (
-            <>
-              <span className="text-[10px] text-gray-300 dark:text-gray-600">·</span>
-              <span className="text-[10px] text-gray-500 dark:text-gray-400 truncate">
-                {exercise.equipment}
-              </span>
-            </>
-          )}
-        </div>
       </div>
 
-      {/* Source badge */}
-      <span className={`text-[9px] px-1.5 py-0.5 rounded flex-shrink-0 font-medium ${
-        exercise.source === 'crossfit'
-          ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400'
-          : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-      }`}>
-        {exercise.source === 'crossfit' ? 'CF' : 'GYM'}
-      </span>
-    </button>
+      {/* Exercise list */}
+      <div className="flex-1 overflow-y-auto">
+        {loading ? (
+          <div className="p-4 text-center text-sm text-gray-500">
+            Cargando...
+          </div>
+        ) : exercises.length === 0 ? (
+          <div className="p-4 text-center text-sm text-gray-500">
+            {search ? 'Sin resultados' : 'Escribí para buscar'}
+          </div>
+        ) : tipo === 'musculacion' ? (
+          // Grouped view for musculación
+          <div className="p-2 space-y-1">
+            {sortedGroups.map(group => {
+              const isExpanded = expandedGroup === group || sortedGroups.length === 1;
+              const items = grouped[group] || [];
+              return (
+                <div key={group}>
+                  <button
+                    onClick={() => setExpandedGroup(isExpanded && sortedGroups.length > 1 ? null : group)}
+                    className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                  >
+                    <span>{group}</span>
+                    <span className="text-xs text-gray-400">{items.length}</span>
+                  </button>
+                  {isExpanded && (
+                    <div className="pl-2 space-y-1">
+                      {items.map(ex => (
+                        <button
+                          key={ex.id}
+                          onClick={() => handleExerciseClick(ex)}
+                          className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left"
+                        >
+                          {ex.gifUrl ? (
+                            <img
+                              src={ex.gifUrl}
+                              alt={ex.esName || ex.name}
+                              className="h-8 w-8 rounded object-cover flex-shrink-0 bg-gray-200 dark:bg-gray-700"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="h-8 w-8 rounded bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                              <span className="text-[10px] text-gray-400">HD</span>
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium text-gray-800 dark:text-white truncate">
+                              {ex.esName || ex.name}
+                            </p>
+                            {ex.muscleGroupEs && (
+                              <p className="text-[10px] text-gray-400 truncate">{ex.muscleGroupEs}</p>
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          // Flat list for CrossFit
+          <div className="p-2 space-y-1">
+            {exercises.map(ex => (
+              <button
+                key={ex.id}
+                onClick={() => handleExerciseClick(ex)}
+                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left"
+              >
+                {ex.gifUrl ? (
+                  <img
+                    src={ex.gifUrl}
+                    alt={ex.esName || ex.name}
+                    className="h-8 w-8 rounded object-cover flex-shrink-0 bg-gray-200 dark:bg-gray-700"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="h-8 w-8 rounded bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                    <span className="text-[10px] text-gray-400">HD</span>
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-gray-800 dark:text-white truncate">
+                    {ex.esName || ex.name}
+                  </p>
+                  {ex.videoUrl && (
+                    <p className="text-[10px] text-gray-400 truncate">Video</p>
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

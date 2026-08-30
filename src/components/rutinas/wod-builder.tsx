@@ -112,18 +112,18 @@ export default function WodBuilder({ rutina, tipo, onSave }: WodBuilderProps) {
     setSaved(false);
   };
 
-  const handleSidebarSelect = (exercise: Exercise) => {
+  const handleSidebarSelect = (exercise: Exercise, section?: string) => {
     // Add to the first day (Lunes) by default
     const targetDay = 'lunes';
     const isMusculacion = tipo === 'musculacion';
-    const targetSection = isMusculacion ? 'superiores' : 'wod_dia';
+    const targetSection = section || (isMusculacion ? 'superiores' : 'wod_dia');
     const entry: ExerciseEntry = {
       exerciseId: exercise.id,
-      nombre: exercise.name,
+      nombre: exercise.esName || exercise.name,
       gifUrl: exercise.gifUrl,
       videoUrl: exercise.videoUrl,
-      muscleGroup: exercise.muscleGroup,
-      equipment: exercise.equipment,
+      muscleGroup: exercise.muscleGroupEs || exercise.muscleGroup,
+      equipment: exercise.equipmentEs || exercise.equipment,
       orden: (week[targetDay][targetSection as keyof RoutineDay] || []).length,
     };
     handleAddExercise(targetDay, targetSection, entry);
@@ -162,7 +162,7 @@ export default function WodBuilder({ rutina, tipo, onSave }: WodBuilderProps) {
   return (
     <div className="flex h-[calc(100vh-120px)] overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
       {/* Sidebar */}
-      <ExerciseSidebar onSelect={handleSidebarSelect} type={tipo} />
+      <ExerciseSidebar onSelect={handleSidebarSelect} tipo={tipo} />
 
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
