@@ -33,14 +33,53 @@ export default function RoutineSection({
   onReorder,
   onUpdate,
 }: RoutineSectionProps) {
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.currentTarget.classList.remove('ring-2', 'ring-[var(--primary-color)]');
+    
+    try {
+      const data = JSON.parse(e.dataTransfer.getData('application/json'));
+      if (data && data.id) {
+        const entry: ExerciseEntry = {
+          exerciseId: data.id,
+          nombre: data.esName || data.name,
+          gifUrl: data.gifUrl,
+          videoUrl: data.videoUrl,
+          muscleGroup: data.muscleGroupEs || data.muscleGroup,
+          equipment: data.equipmentEs || data.equipment,
+          orden: exercises.length,
+        };
+        onAdd(entry);
+      }
+    } catch (err) {
+      console.error('Drop error:', err);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.currentTarget.classList.add('ring-2', 'ring-[var(--primary-color)]');
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.currentTarget.classList.remove('ring-2', 'ring-[var(--primary-color)]');
+  };
+
   return (
-    <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 p-3">
+    <div
+      onDrop={handleDrop}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 p-3 transition-all"
+    >
       <div className="flex items-center justify-between mb-2">
         <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-200">{title}</h4>
-        {exercises.length > 0 && (
+        {exercises.length > 0 ? (
           <span className="text-[10px] text-gray-400 dark:text-gray-500">
             {exercises.length} ejercicio{exercises.length !== 1 ? 's' : ''}
           </span>
+        ) : (
+          <span className="text-[10px] text-[var(--primary-color)] italic">Arrastrá aquí</span>
         )}
       </div>
 
