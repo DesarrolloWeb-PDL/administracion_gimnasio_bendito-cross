@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { verifyToken } from '../auth/route';
+import { getProfesoresEnTurno } from '@/lib/horarios';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': 'https://benditocross.vercel.app',
@@ -33,7 +34,36 @@ export async function GET(request: NextRequest) {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const whereClause: any = {
+    // Determinar qué profesores están en turno ahora mismo
+    const now = new Date();
+    const profesores = await prisma.usuario.findMany({
+      where: {
+        OR: [
+          { esProfesorCrossfit: true },
+          { esProfesorMusculacion: true },
+        ],
+      },
+      select: {
+        id: true,
+        horarios: true,
+        esProfesorCrossfit: true,
+        esProfesorMusculacion: true,
+      },
+    });
+
+    // Si se pide un tipo específico, filtrar profesores en turno para ese tipo
+    // Si no se pide tipo, combinar ambos
+    const disciplinas: Array<'crossfit' | 'musculacion'> = tipo === 'crossfit' || tipo === 'musculacion'
+      ? [tipo]
+      : ['crossfit', 'musculacion'];
+
+    const profesorIdsEnTurno = new Set<string>();
+    for (const disc of disciplinas) {
+      const ids = getProfesoresEnTurno(profesores, disc, now);
+      ids.forEach((id) => profesorIdsEnTurno.add(id));
+    }
+
+    const whereClause: Record<string, unknown> = {
       activa: true,
       fecha: {
         gte: today,
@@ -43,6 +73,12 @@ export async function GET(request: NextRequest) {
 
     if (tipo) {
       whereClause.tipo = tipo;
+    }
+
+    // Si hay profesores en turno, filtrar solo sus rutinas
+    // Si no hay ninguno en turno, devolver todas (fallback graceful)
+    if (profesorIdsEnTurno.size > 0) {
+      whereClause.profesorId = { in: Array.from(profesorIdsEnTurno) };
     }
 
     const rutinas = await prisma.rutina.findMany({

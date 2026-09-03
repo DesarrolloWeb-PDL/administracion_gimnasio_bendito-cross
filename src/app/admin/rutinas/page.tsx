@@ -19,14 +19,18 @@ export default async function RutinasPage() {
   }
 
   // Rutinas de hoy (legacy daily)
+  // Profesores solo ven sus propias rutinas; admin ve todas
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
 
+  const profesorFilter = user.rol !== 'ADMIN' ? { profesorId: user.id } : {};
+
   const rutinas = await prisma.rutina.findMany({
     where: {
       fecha: { gte: today, lt: tomorrow },
+      ...profesorFilter,
     },
     include: {
       profesor: { select: { nombre: true } },
@@ -40,6 +44,7 @@ export default async function RutinasPage() {
       version: 'structured',
       contenidoJson: { not: Prisma.JsonNull },
       activa: true,
+      ...profesorFilter,
     },
     include: {
       profesor: { select: { nombre: true } },
