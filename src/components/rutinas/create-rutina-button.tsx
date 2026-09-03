@@ -11,17 +11,18 @@ interface CreateRutinaButtonProps {
 }
 
 export default function CreateRutinaButton({ userRol, esProfesorCrossfit, esProfesorMusculacion }: CreateRutinaButtonProps) {
+  const canCreateCrossfit = userRol === 'ADMIN' || esProfesorCrossfit;
+  const canCreateMusculacion = userRol === 'ADMIN' || esProfesorMusculacion;
+  const defaultTipo = canCreateMusculacion && !canCreateCrossfit ? 'musculacion' : 'crossfit';
+
   const [showModal, setShowModal] = useState(false);
   const [showWodBuilder, setShowWodBuilder] = useState(false);
   const [titulo, setTitulo] = useState('');
   const [contenido, setContenido] = useState('');
-  const [tipo, setTipo] = useState('crossfit');
+  const [tipo, setTipo] = useState(defaultTipo);
   const [nivel, setNivel] = useState('');
   const [saving, setSaving] = useState(false);
   const router = useRouter();
-
-  const canCreateCrossfit = userRol === 'ADMIN' || esProfesorCrossfit;
-  const canCreateMusculacion = userRol === 'ADMIN' || esProfesorMusculacion;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
