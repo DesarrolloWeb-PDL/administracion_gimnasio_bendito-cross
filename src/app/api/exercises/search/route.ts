@@ -134,8 +134,45 @@ async function loadExercises(): Promise<CsvExercise[]> {
       console.error('Failed to load CostruTrain exercises:', cstrError);
     }
 
+    // Load ExerciseGymGifsDB (1300+ GIFs from CDN)
+    const GIF_DB_TREE_URL = 'https://api.github.com/repos/JahelCuadrado/ExerciseGymGifsDB/git/trees/v1.1.0?recursive=1';
+    const GIF_DB_CDN = 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0';
+    let gifDbExercises: CsvExercise[] = [];
+    try {
+      const treeRes = await fetch(GIF_DB_TREE_URL, { next: { revalidate: 300 } });
+      if (treeRes.ok) {
+        const treeData = await treeRes.json();
+        const gifFiles: Array<{ path: string }> = treeData.tree?.filter(
+          (item: { type: string; path: string }) => item.type === 'blob' && item.path.endsWith('.gif')
+        ) || [];
+
+        for (const file of gifFiles) {
+          const parts = file.path.split('/');
+          if (parts.length !== 2) continue; // expect "category/filename.gif"
+          const [category, filename] = parts;
+          const name = filename.replace('.gif', '').replace(/-/g, ' ');
+
+          gifDbExercises.push({
+            id: `gif-${category}-${filename.replace('.gif', '')}`,
+            name,
+            esName: translateExerciseName(name),
+            bodyPart: category,
+            bodyPartEs: translateBodyPart(category),
+            equipment: '',
+            equipmentEs: '',
+            target: category,
+            targetEs: translateMuscle(category),
+            gifUrl: `${GIF_DB_CDN}/${file.path}`,
+          });
+        }
+        console.log(`Loaded ${gifDbExercises.length} exercises from ExerciseGymGifsDB`);
+      }
+    } catch (gifError) {
+      console.error('Failed to load ExerciseGymGifsDB:', gifError);
+    }
+
     // Merge and deduplicate by name (case-insensitive)
-    const allExercises = [...csvExercises, ...cstrExercises];
+    const allExercises = [...csvExercises, ...cstrExercises, ...gifDbExercises];
     const seen = new Set<string>();
     const merged: CsvExercise[] = [];
     
