@@ -112,12 +112,11 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const query = searchParams.get('q') || '';
   const type = searchParams.get('type') || 'all';
-  const limit = parseInt(searchParams.get('limit') || '20');
   const groupBy = searchParams.get('groupBy') || '';
 
-  if (!query || query.length < 1) {
-    return NextResponse.json({ results: [], partial: false, counts: { exercisedb: 0, crossfit: 0, total: 0 } });
-  }
+  // If query is empty, return all exercises (for sidebar initial load)
+  const showAll = !query || query.length < 1;
+  const limit = parseInt(searchParams.get('limit') || (showAll ? '2000' : '20'));
 
   const lowerQuery = query.toLowerCase();
   const exercises = await loadExercises();
@@ -141,6 +140,7 @@ export async function GET(request: NextRequest) {
   if (type === 'all' || type === 'exerciseDB') {
     const matches = exercises
       .filter(ex => {
+        if (showAll) return true;
         const searchText = `${ex.name} ${ex.esName} ${ex.target} ${ex.targetEs} ${ex.bodyPart} ${ex.bodyPartEs} ${ex.equipment} ${ex.equipmentEs}`.toLowerCase();
         return searchText.includes(lowerQuery);
       })
@@ -165,6 +165,7 @@ export async function GET(request: NextRequest) {
   if (type === 'all' || type === 'crossfit') {
     const matches = CROSSFIT_EXERCISES
       .filter(ex => {
+        if (showAll) return true;
         const searchText = `${ex.name} ${ex.esName}`.toLowerCase();
         return searchText.includes(lowerQuery);
       })

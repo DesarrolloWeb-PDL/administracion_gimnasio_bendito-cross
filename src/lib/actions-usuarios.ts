@@ -47,6 +47,7 @@ const FormSchema = z.object({
   permisoTransacciones: z.string().optional().nullable(),
   esProfesorCrossfit: z.string().optional().nullable(),
   esProfesorMusculacion: z.string().optional().nullable(),
+  disciplina: z.string().optional().nullable(),
   horarios: z.string().optional().nullable(),
 });
 
@@ -69,8 +70,7 @@ export async function createUsuario(prevState: unknown, formData: FormData) {
     permisoConfiguracion: formData.get('permisoConfiguracion'),
     permisoUsuarios: formData.get('permisoUsuarios'),
     permisoTransacciones: formData.get('permisoTransacciones'),
-    esProfesorCrossfit: formData.get('esProfesorCrossfit'),
-    esProfesorMusculacion: formData.get('esProfesorMusculacion'),
+    disciplina: formData.get('disciplina'),
     horarios: formData.get('horarios'),
   });
 
@@ -81,7 +81,7 @@ export async function createUsuario(prevState: unknown, formData: FormData) {
     };
   }
 
-  const { nombre, email, password, rol, permisoSocios, permisoPlanes, permisoSuscripciones, permisoAsistencias, permisoReportes, permisoConfiguracion, permisoUsuarios, permisoTransacciones, esProfesorCrossfit, esProfesorMusculacion, horarios } = validatedFields.data;
+  const { nombre, email, password, rol, permisoSocios, permisoPlanes, permisoSuscripciones, permisoAsistencias, permisoReportes, permisoConfiguracion, permisoUsuarios, permisoTransacciones, disciplina, horarios } = validatedFields.data;
   const hashedPassword = await bcrypt.hash(password, 10);
 
   // Parse horarios from JSON string if provided
@@ -105,6 +105,19 @@ export async function createUsuario(prevState: unknown, formData: FormData) {
     }
   }
 
+  // Derive discipline booleans from disciplina field
+  let esProfesorCrossfit = false;
+  let esProfesorMusculacion = false;
+  
+  if (disciplina === 'crossfit') {
+    esProfesorCrossfit = true;
+  } else if (disciplina === 'musculacion') {
+    esProfesorMusculacion = true;
+  } else if (disciplina === 'ambos') {
+    esProfesorCrossfit = true;
+    esProfesorMusculacion = true;
+  }
+
   try {
     await prisma.usuario.create({
       data: {
@@ -120,8 +133,8 @@ export async function createUsuario(prevState: unknown, formData: FormData) {
         permisoConfiguracion: permisoConfiguracion === 'on',
         permisoUsuarios: permisoUsuarios === 'on',
         permisoTransacciones: permisoTransacciones === 'on',
-        esProfesorCrossfit: esProfesorCrossfit === 'on',
-        esProfesorMusculacion: esProfesorMusculacion === 'on',
+        esProfesorCrossfit,
+        esProfesorMusculacion,
         horarios: horariosData,
       },
     });
@@ -151,8 +164,7 @@ export async function updateUsuario(id: string, prevState: unknown, formData: Fo
     permisoConfiguracion: formData.get('permisoConfiguracion'),
     permisoUsuarios: formData.get('permisoUsuarios'),
     permisoTransacciones: formData.get('permisoTransacciones'),
-    esProfesorCrossfit: formData.get('esProfesorCrossfit'),
-    esProfesorMusculacion: formData.get('esProfesorMusculacion'),
+    disciplina: formData.get('disciplina'),
     horarios: formData.get('horarios'),
     ...(passwordRaw ? { password: passwordRaw } : {}),
   };
@@ -171,7 +183,7 @@ export async function updateUsuario(id: string, prevState: unknown, formData: Fo
     };
   }
 
-  const { nombre, email, rol, password, permisoSocios, permisoPlanes, permisoSuscripciones, permisoAsistencias, permisoReportes, permisoConfiguracion, permisoUsuarios, permisoTransacciones, esProfesorCrossfit, esProfesorMusculacion, horarios } = validatedFields.data;
+  const { nombre, email, rol, password, permisoSocios, permisoPlanes, permisoSuscripciones, permisoAsistencias, permisoReportes, permisoConfiguracion, permisoUsuarios, permisoTransacciones, disciplina, horarios } = validatedFields.data;
 
   // Parse horarios from JSON string if provided
   let horariosData = null;
@@ -207,10 +219,23 @@ export async function updateUsuario(id: string, prevState: unknown, formData: Fo
     permisoConfiguracion: permisoConfiguracion === 'on',
     permisoUsuarios: permisoUsuarios === 'on',
     permisoTransacciones: permisoTransacciones === 'on',
-    esProfesorCrossfit: esProfesorCrossfit === 'on',
-    esProfesorMusculacion: esProfesorMusculacion === 'on',
     horarios: horariosData,
   };
+
+  // Derive discipline booleans from disciplina field
+  if (disciplina === 'crossfit') {
+    dataToUpdate.esProfesorCrossfit = true;
+    dataToUpdate.esProfesorMusculacion = false;
+  } else if (disciplina === 'musculacion') {
+    dataToUpdate.esProfesorCrossfit = false;
+    dataToUpdate.esProfesorMusculacion = true;
+  } else if (disciplina === 'ambos') {
+    dataToUpdate.esProfesorCrossfit = true;
+    dataToUpdate.esProfesorMusculacion = true;
+  } else {
+    dataToUpdate.esProfesorCrossfit = false;
+    dataToUpdate.esProfesorMusculacion = false;
+  }
 
   if (password) {
     dataToUpdate.password = await bcrypt.hash(password, 10);

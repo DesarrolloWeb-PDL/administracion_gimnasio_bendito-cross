@@ -55,7 +55,7 @@ export default function ExerciseSidebar({ onSelect, tipo = 'musculacion' }: Exer
       setLoading(true);
       try {
         const typeParam = tipo === 'crossfit' ? 'crossfit' : 'exerciseDB';
-        const res = await fetch(`/api/exercises/search?q=${encodeURIComponent(q)}&type=${typeParam}&limit=80&groupBy=bodyPart`);
+        const res = await fetch(`/api/exercises/search?q=${encodeURIComponent(q)}&type=${typeParam}&limit=2000&groupBy=bodyPart`);
         const data = await res.json();
         setExercises(data.results || []);
       } catch (err) {
@@ -69,7 +69,7 @@ export default function ExerciseSidebar({ onSelect, tipo = 'musculacion' }: Exer
     setLoading(true);
     try {
       const typeParam = tipo === 'crossfit' ? 'crossfit' : 'exerciseDB';
-      const res = await fetch(`/api/exercises/search?q=${encodeURIComponent(q)}&type=${typeParam}&limit=80&groupBy=bodyPart`);
+      const res = await fetch(`/api/exercises/search?q=${encodeURIComponent(q)}&type=${typeParam}&limit=2000&groupBy=bodyPart`);
       const data = await res.json();
       setExercises(data.results || []);
     } catch (err) {
@@ -80,7 +80,7 @@ export default function ExerciseSidebar({ onSelect, tipo = 'musculacion' }: Exer
   }, [tipo]);
 
   useEffect(() => {
-    performSearch('a');
+    performSearch('');
   }, [performSearch]);
 
   // Group exercises

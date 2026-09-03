@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 import { updateUsuario } from '@/lib/actions-usuarios';
 import { Usuario } from '@prisma/client';
 
@@ -9,6 +9,7 @@ export default function EditForm({ usuario }: { usuario: Usuario }) {
   const initialState = { message: '', errors: {} };
   const updateUserWithId = updateUsuario.bind(null, usuario.id);
   const [state, dispatch, isPending] = useActionState(updateUserWithId, initialState);
+  const [rol, setRol] = useState(usuario.rol);
 
   return (
     <form action={dispatch}>
@@ -77,10 +78,13 @@ export default function EditForm({ usuario }: { usuario: Usuario }) {
               className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
               defaultValue={usuario.rol}
               aria-describedby="role-error"
+              onChange={(e) => setRol(e.target.value)}
             >
               <option value="ADMIN">Administrador</option>
               <option value="RECEPCIONISTA">Recepcionista</option>
-              <option value="PROFESOR">Profesor</option>
+              <option value="PROFESOR_MUSCULACION">Profesor de Musculación</option>
+              <option value="PROFESOR_CROSSFIT">Profesor de Crossfit</option>
+              <option value="PROFESOR_FUNCIONAL">Profesor de Funcional</option>
             </select>
           </div>
           <div id="role-error" aria-live="polite" aria-atomic="true">
@@ -195,32 +199,35 @@ export default function EditForm({ usuario }: { usuario: Usuario }) {
                 Gestión de Usuarios
               </label>
             </div>
-            <div className="flex items-center">
-              <input
-                id="esProfesorCrossfit"
-                name="esProfesorCrossfit"
-                type="checkbox"
-                defaultChecked={usuario.esProfesorCrossfit}
-                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              <label htmlFor="esProfesorCrossfit" className="ml-2 block text-sm text-gray-900">
-                Profesor de Crossfit
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                id="esProfesorMusculacion"
-                name="esProfesorMusculacion"
-                type="checkbox"
-                defaultChecked={usuario.esProfesorMusculacion}
-                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              <label htmlFor="esProfesorMusculacion" className="ml-2 block text-sm text-gray-900">
-                Profesor de Musculación
-              </label>
-            </div>
           </div>
         </div>
+
+        {/* Disciplina del Profesor */}
+        {(rol === 'PROFESOR_CROSSFIT' || rol === 'PROFESOR_MUSCULACION' || rol === 'PROFESOR_FUNCIONAL') && (
+          <div className="mb-4">
+            <label htmlFor="disciplina" className="mb-2 block text-sm font-medium text-gray-900">
+              Disciplina
+            </label>
+            <div className="relative">
+              <select
+                id="disciplina"
+                name="disciplina"
+                className="peer block w-full rounded-md border border-gray-200 bg-white text-gray-900 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
+                defaultValue={
+                  usuario.esProfesorCrossfit && usuario.esProfesorMusculacion ? 'ambos' :
+                  usuario.esProfesorCrossfit ? 'crossfit' :
+                  usuario.esProfesorMusculacion ? 'musculacion' : ''
+                }
+                aria-describedby="disciplina-error"
+              >
+                <option value="">Sin disciplina</option>
+                <option value="crossfit">CrossFit / Funcional</option>
+                <option value="musculacion">Musculación</option>
+                <option value="ambos">Ambos (CrossFit y Musculación)</option>
+              </select>
+            </div>
+          </div>
+        )}
 
         <div aria-live="polite" aria-atomic="true">
             {state.message && (

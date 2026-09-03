@@ -1,12 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 import { createUsuario } from '@/lib/actions-usuarios';
 
 export default function Form() {
   const initialState = { message: '', errors: {} };
   const [state, dispatch, isPending] = useActionState(createUsuario, initialState);
+  const [rol, setRol] = useState('');
 
   return (
     <form action={dispatch}>
@@ -109,6 +110,7 @@ export default function Form() {
               defaultValue=""
               aria-describedby="role-error"
               required
+              onChange={(e) => setRol(e.target.value)}
             >
               <option value="" disabled>
                 Seleccione un rol
@@ -130,124 +132,136 @@ export default function Form() {
           </div>
         </div>
 
-        {/* Permisos */}
-        <div className="mb-4">
-          <span className="mb-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
-            Permisos de Acceso
-          </span>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="flex items-center">
-              <input
-                id="permisoSocios"
-                name="permisoSocios"
-                type="checkbox"
-                className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-              />
-              <label htmlFor="permisoSocios" className="ml-2 block text-sm text-gray-900 dark:text-gray-100">
-                Gestión de Socios
-              </label>
+            {/* Permisos */}
+            <div className="mb-4">
+              <span className="mb-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
+                Permisos de Acceso
+              </span>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="flex items-center">
+                  <input
+                    id="permisoSocios"
+                    name="permisoSocios"
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+                  />
+                  <label htmlFor="permisoSocios" className="ml-2 block text-sm text-gray-900 dark:text-gray-100">
+                    Gestión de Socios
+                  </label>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    id="permisoPlanes"
+                    name="permisoPlanes"
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+                  />
+                  <label htmlFor="permisoPlanes" className="ml-2 block text-sm text-gray-900 dark:text-gray-100">
+                    Gestión de Planes
+                  </label>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    id="permisoSuscripciones"
+                    name="permisoSuscripciones"
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+                  />
+                  <label htmlFor="permisoSuscripciones" className="ml-2 block text-sm text-gray-900 dark:text-gray-100">
+                    Gestión de Suscripciones
+                  </label>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    id="permisoAsistencias"
+                    name="permisoAsistencias"
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+                  />
+                  <label htmlFor="permisoAsistencias" className="ml-2 block text-sm text-gray-900 dark:text-gray-100">
+                    Control de Asistencias
+                  </label>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    id="permisoTransacciones"
+                    name="permisoTransacciones"
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+                  />
+                  <label htmlFor="permisoTransacciones" className="ml-2 block text-sm text-gray-900 dark:text-gray-100">
+                    Caja y Transacciones
+                  </label>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    id="permisoReportes"
+                    name="permisoReportes"
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+                  />
+                  <label htmlFor="permisoReportes" className="ml-2 block text-sm text-gray-900 dark:text-gray-100">
+                    Ver Reportes
+                  </label>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    id="permisoConfiguracion"
+                    name="permisoConfiguracion"
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+                  />
+                  <label htmlFor="permisoConfiguracion" className="ml-2 block text-sm text-gray-900 dark:text-gray-100">
+                    Configuración del Sistema
+                  </label>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    id="permisoUsuarios"
+                    name="permisoUsuarios"
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+                  />
+                  <label htmlFor="permisoUsuarios" className="ml-2 block text-sm text-gray-900 dark:text-gray-100">
+                    Gestión de Usuarios
+                  </label>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center">
-              <input
-                id="permisoPlanes"
-                name="permisoPlanes"
-                type="checkbox"
-                className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-              />
-              <label htmlFor="permisoPlanes" className="ml-2 block text-sm text-gray-900 dark:text-gray-100">
-                Gestión de Planes
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                id="permisoSuscripciones"
-                name="permisoSuscripciones"
-                type="checkbox"
-                className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-              />
-              <label htmlFor="permisoSuscripciones" className="ml-2 block text-sm text-gray-900 dark:text-gray-100">
-                Gestión de Suscripciones
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                id="permisoAsistencias"
-                name="permisoAsistencias"
-                type="checkbox"
-                className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-              />
-              <label htmlFor="permisoAsistencias" className="ml-2 block text-sm text-gray-900 dark:text-gray-100">
-                Control de Asistencias
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                id="permisoTransacciones"
-                name="permisoTransacciones"
-                type="checkbox"
-                className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-              />
-              <label htmlFor="permisoTransacciones" className="ml-2 block text-sm text-gray-900 dark:text-gray-100">
-                Caja y Transacciones
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                id="permisoReportes"
-                name="permisoReportes"
-                type="checkbox"
-                className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-              />
-              <label htmlFor="permisoReportes" className="ml-2 block text-sm text-gray-900 dark:text-gray-100">
-                Ver Reportes
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                id="permisoConfiguracion"
-                name="permisoConfiguracion"
-                type="checkbox"
-                className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-              />
-              <label htmlFor="permisoConfiguracion" className="ml-2 block text-sm text-gray-900 dark:text-gray-100">
-                Configuración del Sistema
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                id="permisoUsuarios"
-                name="permisoUsuarios"
-                type="checkbox"
-                className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-              />
-              <label htmlFor="permisoUsuarios" className="ml-2 block text-sm text-gray-900 dark:text-gray-100">
-                Gestión de Usuarios
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                id="esProfesorCrossfit"
-                name="esProfesorCrossfit"
-                type="checkbox"
-                className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-              />
-              <label htmlFor="esProfesorCrossfit" className="ml-2 block text-sm text-gray-900 dark:text-gray-100">
-                Profesor de Crossfit
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                id="esProfesorMusculacion"
-                name="esProfesorMusculacion"
-                type="checkbox"
-                className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-              />
-              <label htmlFor="esProfesorMusculacion" className="ml-2 block text-sm text-gray-900 dark:text-gray-100">
-                Profesor de Musculación
-              </label>
-            </div>
-          </div>
-        </div>
+
+            {/* Disciplina del Profesor */}
+            {(rol === 'PROFESOR_CROSSFIT' || rol === 'PROFESOR_MUSCULACION' || rol === 'PROFESOR_FUNCIONAL') && (
+              <div className="mb-4">
+                <label htmlFor="disciplina" className="mb-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
+                  Disciplina <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    id="disciplina"
+                    name="disciplina"
+                    className="peer block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                    defaultValue=""
+                    aria-describedby="disciplina-error"
+                    required
+                  >
+                    <option value="" disabled>
+                      Seleccione una disciplina
+                    </option>
+                    <option value="crossfit">CrossFit / Funcional</option>
+                    <option value="musculacion">Musculación</option>
+                    <option value="ambos">Ambos (CrossFit y Musculación)</option>
+                  </select>
+                </div>
+                <div id="disciplina-error" aria-live="polite" aria-atomic="true">
+                  {state.errors?.disciplina &&
+                    state.errors.disciplina.map((error: string) => (
+                      <p className="mt-2 text-sm text-red-500" key={error}>
+                        {error}
+                      </p>
+                    ))}
+                </div>
+              </div>
+            )}
       </div>
       <div className="mt-6 flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
         <Link
