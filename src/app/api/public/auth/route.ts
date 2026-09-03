@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import crypto from 'crypto';
-import { getProfesoresEnTurno } from '@/lib/horarios';
+import { getProfesoresEnTurno, type Horarios } from '@/lib/horarios';
 import { getCorsHeaders } from '@/lib/cors';
 
 export async function OPTIONS(request: NextRequest) {
@@ -180,15 +180,36 @@ export async function POST(request: NextRequest) {
       exp: Date.now() + TOKEN_EXPIRY_MS,
     });
 
-    // Fetch professor name for response
-    let profesorNombre: string | null = null;
+    // Fetch professor info for response (name + today's schedule)
+    const DAY_MAP: Record<number, string> = {
+      0: 'domingo', 1: 'lunes', 2: 'martes', 3: 'miercoles',
+      4: 'jueves', 5: 'viernes', 6: 'sabado',
+    };
+    let profesorData: { id: string; nombre: string; horario: string | null } | null = null;
     if (profesorIdEnTurno) {
       try {
         const profesor = await prisma.usuario.findUnique({
           where: { id: profesorIdEnTurno },
-          select: { nombre: true },
+          select: { nombre: true, horarios: true, esProfesorCrossfit: true, esProfesorMusculacion: true },
         });
-        profesorNombre = profesor?.nombre || null;
+        if (profesor) {
+          const now = new Date();
+          const dayName = DAY_MAP[now.getDay()];
+          const horarios = profesor.horarios as Horarios | null;
+          let horarioHoy: string | null = null;
+
+          if (horarios && dayName !== 'domingo') {
+            if (profesor.esProfesorCrossfit && horarios.crossfit?.[dayName]) {
+              const slot = horarios.crossfit[dayName];
+              horarioHoy = `${slot!.inicio} - ${slot!.fin}`;
+            } else if (profesor.esProfesorMusculacion && horarios.musculacion?.[dayName]) {
+              const slot = horarios.musculacion[dayName];
+              horarioHoy = `${slot!.inicio} - ${slot!.fin}`;
+            }
+          }
+
+          profesorData = { id: profesorIdEnTurno, nombre: profesor.nombre, horario: horarioHoy };
+        }
       } catch {
         // Ignore
       }
@@ -202,8 +223,7 @@ export async function POST(request: NextRequest) {
         apellido: socio.apellido,
       },
       tiposAcceso,
-      profesor: profesorNombre ? { id: profesorIdEnTurno, nombre: profesorNombre } : null,
-      checkInTime: checkInFecha?.toISOString() || null,
+      profesor: profesorData,
     }, { headers: getCorsHeaders(request) });
   } catch (error) {
     console.error('Error en auth pública:', error instanceof Error ? error.message : String(error));

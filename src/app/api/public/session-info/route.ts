@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { verifyToken } from '../auth/route';
 import { getCorsHeaders } from '@/lib/cors';
+import { isProfesorEnTurno, type Horarios } from '@/lib/horarios';
+
+const DAY_MAP: Record<number, string> = {
+  0: 'domingo', 1: 'lunes', 2: 'martes', 3: 'miercoles',
+  4: 'jueves', 5: 'viernes', 6: 'sabado',
+};
 
 export async function OPTIONS(request: NextRequest) {
   return new NextResponse(null, { status: 204, headers: getCorsHeaders(request) });
@@ -26,9 +32,28 @@ export async function GET(request: NextRequest) {
       try {
         const prof = await prisma.usuario.findUnique({
           where: { id: tokenData.profesorId },
-          select: { id: true, nombre: true },
+          select: { id: true, nombre: true, horarios: true, esProfesorCrossfit: true, esProfesorMusculacion: true },
         });
-        profesor = prof || null;
+        if (prof) {
+          // Get today's schedule for the professor
+          const now = new Date();
+          const dayName = DAY_MAP[now.getDay()];
+          const horarios = prof.horarios as Horarios | null;
+
+          let horarioHoy: string | null = null;
+          if (horarios && dayName !== 'domingo') {
+            // Check which discipline is active and get the time slot
+            if (prof.esProfesorCrossfit && horarios.crossfit?.[dayName]) {
+              const slot = horarios.crossfit[dayName];
+              horarioHoy = `${slot.inicio} - ${slot.fin}`;
+            } else if (prof.esProfesorMusculacion && horarios.musculacion?.[dayName]) {
+              const slot = horarios.musculacion[dayName];
+              horarioHoy = `${slot.inicio} - ${slot.fin}`;
+            }
+          }
+
+          profesor = { id: prof.id, nombre: prof.nombre, horario: horarioHoy };
+        }
       } catch {
         // Ignore
       }
@@ -36,7 +61,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       profesor,
-      checkInTime: tokenData.checkInTime || null,
     }, { headers: getCorsHeaders(request) });
   } catch (error) {
     console.error('Error al obtener info de sesión:', error);
