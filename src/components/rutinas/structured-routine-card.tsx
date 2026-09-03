@@ -25,12 +25,24 @@ const DAYS = [
   { key: 'sabado', label: 'Sáb' },
 ];
 
-const SECTION_TITLES: Record<string, string> = {
+const SECTION_TITLES_CROSSFIT: Record<string, string> = {
   activacion: 'Activación',
   entrada_calor: 'Entrada en calor',
   trabajos_dia: 'Trabajos del día',
   wod_dia: 'WOD del día',
 };
+
+const SECTION_TITLES_MUSCULACION: Record<string, string> = {
+  activacion: 'Activación',
+  entrada_calor: 'Entrada en calor',
+  superiores: 'Tren Superior',
+  zona_media: 'Zona Media',
+  inferiores: 'Tren Inferior',
+};
+
+function getSectionTitles(tipo: string): Record<string, string> {
+  return tipo === 'musculacion' ? SECTION_TITLES_MUSCULACION : SECTION_TITLES_CROSSFIT;
+}
 
 export default function StructuredRoutineCard({ rutina }: { rutina: StructuredRutina }) {
   const [eliminando, setEliminando] = useState(false);

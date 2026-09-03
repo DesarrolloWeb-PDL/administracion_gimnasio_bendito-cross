@@ -1,17 +1,34 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState } from 'react';
+import { useActionState, useState, useRef } from 'react';
 import { updateUsuario } from '@/lib/actions-usuarios';
 import { Usuario } from '@prisma/client';
+import ScheduleEditor from './schedule-editor';
 
 export default function EditForm({ usuario }: { usuario: Usuario }) {
   const initialState = { message: '', errors: {} };
   const updateUserWithId = updateUsuario.bind(null, usuario.id);
   const [state, dispatch, isPending] = useActionState(updateUserWithId, initialState);
+  const [horariosJson, setHorariosJson] = useState<string>(
+    usuario.horarios ? JSON.stringify(usuario.horarios) : ''
+  );
+  const horariosInputRef = useRef<HTMLInputElement>(null);
+
+  const isProfesor = usuario.rol === 'PROFESOR_CROSSFIT' || usuario.rol === 'PROFESOR_MUSCULACION' || usuario.rol === 'PROFESOR_FUNCIONAL';
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleScheduleSave = (horarios: any) => {
+    const json = JSON.stringify(horarios);
+    setHorariosJson(json);
+    if (horariosInputRef.current) {
+      horariosInputRef.current.value = json;
+    }
+  };
 
   return (
     <form action={dispatch}>
+      <input type="hidden" name="horarios" ref={horariosInputRef} value={horariosJson} />
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Nombre */}
         <div className="mb-4">
@@ -208,6 +225,20 @@ export default function EditForm({ usuario }: { usuario: Usuario }) {
             )}
         </div>
       </div>
+
+      {/* Schedule Editor for professors */}
+      {isProfesor && (
+        <div className="mt-6">
+          <ScheduleEditor
+            usuarioId={usuario.id}
+            horarios={usuario.horarios as Record<string, unknown> || null}
+            esProfesorCrossfit={usuario.rol === 'PROFESOR_CROSSFIT' || usuario.rol === 'PROFESOR_FUNCIONAL'}
+            esProfesorMusculacion={usuario.rol === 'PROFESOR_MUSCULACION'}
+            onSave={handleScheduleSave}
+          />
+        </div>
+      )}
+
       <div className="mt-6 flex justify-end gap-4">
         <Link
           href="/admin/usuarios"

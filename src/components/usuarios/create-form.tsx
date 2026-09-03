@@ -1,15 +1,33 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState } from 'react';
+import { useActionState, useState, useRef } from 'react';
 import { createUsuario } from '@/lib/actions-usuarios';
+import ScheduleEditor from './schedule-editor';
 
 export default function Form() {
   const initialState = { message: '', errors: {} };
   const [state, dispatch, isPending] = useActionState(createUsuario, initialState);
+  const [selectedRol, setSelectedRol] = useState('');
+  const [horariosJson, setHorariosJson] = useState('');
+  const horariosInputRef = useRef<HTMLInputElement>(null);
+
+  const isProfesor = selectedRol === 'PROFESOR_CROSSFIT' || selectedRol === 'PROFESOR_MUSCULACION' || selectedRol === 'PROFESOR_FUNCIONAL';
+  const isCrossfit = selectedRol === 'PROFESOR_CROSSFIT' || selectedRol === 'PROFESOR_FUNCIONAL';
+  const isMusculacion = selectedRol === 'PROFESOR_MUSCULACION';
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleScheduleSave = (horarios: any) => {
+    const json = JSON.stringify(horarios);
+    setHorariosJson(json);
+    if (horariosInputRef.current) {
+      horariosInputRef.current.value = json;
+    }
+  };
 
   return (
     <form action={dispatch}>
+      <input type="hidden" name="horarios" ref={horariosInputRef} value={horariosJson} />
       <div className="rounded-md bg-gray-50 dark:bg-gray-800 p-4 md:p-6">
         {/* Mostrar mensaje de error general */}
         {state.message && (
@@ -109,6 +127,7 @@ export default function Form() {
               defaultValue=""
               aria-describedby="role-error"
               required
+              onChange={(e) => setSelectedRol(e.target.value)}
             >
               <option value="" disabled>
                 Seleccione un rol
@@ -226,6 +245,19 @@ export default function Form() {
                 </div>
               </div>
             </div>
+
+            {/* Schedule Editor for professors */}
+            {isProfesor && (
+              <div className="mt-4">
+                <ScheduleEditor
+                  usuarioId=""
+                  horarios={null}
+                  esProfesorCrossfit={isCrossfit}
+                  esProfesorMusculacion={isMusculacion}
+                  onSave={handleScheduleSave}
+                />
+              </div>
+            )}
       </div>
       <div className="mt-6 flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
         <Link
