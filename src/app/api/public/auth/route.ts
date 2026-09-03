@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import crypto from 'crypto';
+import { getProfesoresEnTurno } from '@/lib/horarios';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': 'https://benditocross.vercel.app',
@@ -16,7 +17,7 @@ export async function OPTIONS() {
 const TOKEN_SECRET = process.env.TOKEN_SECRET || process.env.NEXTAUTH_SECRET || 'benditocross-default-secret-change-me';
 const TOKEN_EXPIRY_MS = 12 * 60 * 60 * 1000; // 12 hours
 
-function signToken(payload: { socioId: string; exp: number }): string {
+function signToken(payload: { socioId: string; profesorId?: string; checkInTime?: string; exp: number }): string {
   const data = Buffer.from(JSON.stringify(payload)).toString('base64url');
   const signature = crypto
     .createHmac('sha256', TOKEN_SECRET)
@@ -25,7 +26,7 @@ function signToken(payload: { socioId: string; exp: number }): string {
   return `${data}.${signature}`;
 }
 
-export function verifyToken(token: string): string | null {
+export function verifyToken(token: string): { socioId: string; profesorId?: string; checkInTime?: string } | null {
   try {
     const [data, signature] = token.split('.');
     if (!data || !signature) return null;
@@ -40,7 +41,11 @@ export function verifyToken(token: string): string | null {
     const payload = JSON.parse(Buffer.from(data, 'base64url').toString());
     if (payload.exp < Date.now()) return null;
 
-    return payload.socioId;
+    return {
+      socioId: payload.socioId,
+      profesorId: payload.profesorId,
+      checkInTime: payload.checkInTime,
+    };
   } catch {
     return null;
   }
@@ -79,6 +84,7 @@ export async function POST(request: NextRequest) {
     tomorrow.setDate(tomorrow.getDate() + 1);
 
     let asistenciaHoy = false;
+    let checkInFecha: Date | null = null;
     try {
       const asistencia = await prisma.asistencia.findFirst({
         where: {
@@ -90,9 +96,42 @@ export async function POST(request: NextRequest) {
         },
       });
       asistenciaHoy = !!asistencia;
+      checkInFecha = asistencia?.fecha || null;
     } catch {
       // If attendance check fails, allow access (resilient fallback)
       asistenciaHoy = true;
+    }
+
+    // Determine which professor was on shift at check-in time
+    let profesorIdEnTurno: string | undefined;
+    if (checkInFecha) {
+      try {
+        const profesores = await prisma.usuario.findMany({
+          where: {
+            OR: [
+              { esProfesorCrossfit: true },
+              { esProfesorMusculacion: true },
+            ],
+          },
+          select: {
+            id: true,
+            horarios: true,
+            esProfesorCrossfit: true,
+            esProfesorMusculacion: true,
+          },
+        });
+
+        // Check both disciplines at check-in time
+        const cfIds = getProfesoresEnTurno(profesores, 'crossfit', checkInFecha);
+        const muscIds = getProfesoresEnTurno(profesores, 'musculacion', checkInFecha);
+        const allIds = [...cfIds, ...muscIds];
+
+        if (allIds.length > 0) {
+          profesorIdEnTurno = allIds[0]; // first professor on shift
+        }
+      } catch {
+        // If schedule lookup fails, leave profesorId undefined (fallback to all)
+      }
     }
 
     if (!asistenciaHoy) {
@@ -141,6 +180,8 @@ export async function POST(request: NextRequest) {
     // Generate HMAC-signed stateless token
     const token = signToken({
       socioId: socio.id,
+      profesorId: profesorIdEnTurno,
+      checkInTime: checkInFecha?.toISOString(),
       exp: Date.now() + TOKEN_EXPIRY_MS,
     });
 

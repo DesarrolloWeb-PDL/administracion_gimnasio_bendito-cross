@@ -24,8 +24,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Token requerido' }, { status: 401, headers: CORS_HEADERS });
     }
 
-    const socioId = verifyToken(token);
-    if (!socioId) {
+    const tokenData = verifyToken(token);
+    if (!tokenData) {
       return NextResponse.json({ error: 'Token inválido o expirado' }, { status: 401, headers: CORS_HEADERS });
     }
 
@@ -44,36 +44,40 @@ export async function GET(request: NextRequest) {
       whereClause.semanaInicio = new Date(semana);
     }
 
-    // Determinar qué profesores están en turno ahora mismo
-    const now = new Date();
-    const profesores = await prisma.usuario.findMany({
-      where: {
-        OR: [
-          { esProfesorCrossfit: true },
-          { esProfesorMusculacion: true },
-        ],
-      },
-      select: {
-        id: true,
-        horarios: true,
-        esProfesorCrossfit: true,
-        esProfesorMusculacion: true,
-      },
-    });
+    // Usar el profesor del token (quien estaba en turno al momento del check-in)
+    if (tokenData.profesorId) {
+      whereClause.profesorId = tokenData.profesorId;
+    } else {
+      // Fallback: usar horario actual
+      const now = new Date();
+      const profesores = await prisma.usuario.findMany({
+        where: {
+          OR: [
+            { esProfesorCrossfit: true },
+            { esProfesorMusculacion: true },
+          ],
+        },
+        select: {
+          id: true,
+          horarios: true,
+          esProfesorCrossfit: true,
+          esProfesorMusculacion: true,
+        },
+      });
 
-    const disciplinas: Array<'crossfit' | 'musculacion'> = tipo === 'crossfit' || tipo === 'musculacion'
-      ? [tipo]
-      : ['crossfit', 'musculacion'];
+      const disciplinas: Array<'crossfit' | 'musculacion'> = tipo === 'crossfit' || tipo === 'musculacion'
+        ? [tipo]
+        : ['crossfit', 'musculacion'];
 
-    const profesorIdsEnTurno = new Set<string>();
-    for (const disc of disciplinas) {
-      const ids = getProfesoresEnTurno(profesores, disc, now);
-      ids.forEach((id) => profesorIdsEnTurno.add(id));
-    }
+      const profesorIdsEnTurno = new Set<string>();
+      for (const disc of disciplinas) {
+        const ids = getProfesoresEnTurno(profesores, disc, now);
+        ids.forEach((id) => profesorIdsEnTurno.add(id));
+      }
 
-    // Si hay profesores en turno, filtrar solo sus rutinas
-    if (profesorIdsEnTurno.size > 0) {
-      whereClause.profesorId = { in: Array.from(profesorIdsEnTurno) };
+      if (profesorIdsEnTurno.size > 0) {
+        whereClause.profesorId = { in: Array.from(profesorIdsEnTurno) };
+      }
     }
 
     // Fetch structured routines
