@@ -1,31 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { translateExerciseName, translateBodyPart, translateMuscle, translateEquipment, BODY_PART_ES } from '@/lib/exercise-translations';
 
-// CrossFit exercises (local)
+// CrossFit exercises (local) — GIFs from ExerciseGymGifsDB
+const GIF_CDN = 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0';
 const CROSSFIT_EXERCISES = [
-  { id: 'cf-001', name: 'Air Squat', esName: 'Sentadilla al aire', videoUrl: 'https://www.youtube.com/embed/C_VtOYc6j5c' },
-  { id: 'cf-002', name: 'Back Squat', esName: 'Sentadilla trasera', videoUrl: 'https://www.youtube.com/embed/ultWZbUMPL8' },
-  { id: 'cf-003', name: 'Thruster', esName: 'Thrusters', videoUrl: 'https://www.youtube.com/embed/tZkUDLNNY40' },
-  { id: 'cf-004', name: 'Wall Ball', esName: 'Wall balls', videoUrl: 'https://www.youtube.com/embed/EqjGKsiIMCE' },
-  { id: 'cf-005', name: 'Box Jump', esName: 'Salto al cajón', videoUrl: 'https://www.youtube.com/embed/hxldG9FX4j4' },
-  { id: 'cf-006', name: 'Front Squat', esName: 'Sentadilla frontal', videoUrl: 'https://www.youtube.com/embed/m4ytaCJZpl0' },
-  { id: 'cf-007', name: 'Clean', esName: 'Cargada', videoUrl: 'https://www.youtube.com/embed/8miqQQJEsO0' },
-  { id: 'cf-008', name: 'Snatch', esName: 'Arrancada', videoUrl: 'https://www.youtube.com/embed/z7DU830K2SM' },
-  { id: 'cf-009', name: 'Deadlift', esName: 'Peso muerto', videoUrl: 'https://www.youtube.com/embed/Vj4NP-oqAZ8' },
-  { id: 'cf-010', name: 'Clean and Jerk', esName: 'Cargada y jerk', videoUrl: 'https://www.youtube.com/embed/9HyWjAk7fhY' },
-  { id: 'cf-011', name: 'Overhead Squat', esName: 'Sentadilla por encima', videoUrl: 'https://www.youtube.com/embed/uabFHXlyQpI' },
-  { id: 'cf-012', name: 'Push Press', esName: 'Press con impulso', videoUrl: 'https://www.youtube.com/embed/Wqq4JBOJeKQ' },
-  { id: 'cf-013', name: 'Shoulder Press', esName: 'Press de hombros', videoUrl: 'https://www.youtube.com/embed/Q0M-VXJtVUI' },
-  { id: 'cf-014', name: 'Push Jerk', esName: 'Push jerk', videoUrl: 'https://www.youtube.com/embed/v_0E1udYSnQ' },
-  { id: 'cf-015', name: 'Split Jerk', esName: 'Split jerk', videoUrl: 'https://www.youtube.com/embed/WhqUzVtVQI4' },
-  { id: 'cf-016', name: 'Sumo Deadlift', esName: 'Peso muerto sumo', videoUrl: 'https://www.youtube.com/embed/GZIfh5DPaJM' },
-  { id: 'cf-017', name: 'Burpee', esName: 'Burpees', gifUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/cardio/burpee.gif', videoUrl: 'https://www.youtube.com/embed/7mj1pP0Xds8' },
-  { id: 'cf-018', name: 'Pull-up', esName: 'Dominadas', gifUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/pull-up.gif', videoUrl: 'https://www.youtube.com/embed/lzRo-4pq_AY' },
-  { id: 'cf-019', name: 'Push-up', esName: 'Flexiones', gifUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/pectorals/push-up.gif', videoUrl: 'https://www.youtube.com/embed/_l3ySVKYVJ8' },
-  { id: 'cf-020', name: 'Toes-to-Bar', esName: 'Dedos a la barra', videoUrl: 'https://www.youtube.com/embed/_03pCKOv4l4' },
-  { id: 'cf-021', name: 'Muscle-up', esName: 'Muscle up', gifUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/muscle-up.gif', videoUrl: 'https://www.youtube.com/embed/7r-RNDu3dIc' },
-  { id: 'cf-022', name: 'Handstand Push-up', esName: 'Flexiones en parada de manos', gifUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/triceps/handstand-push-up.gif', videoUrl: 'https://www.youtube.com/embed/YdBSefJNbB8' },
-  { id: 'cf-023', name: 'Kettlebell Swing', esName: 'Balanceo con kettlebell', gifUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/kettlebell-swing.gif', videoUrl: 'https://www.youtube.com/embed/YSxHifyx6-s' },
+  { id: 'cf-001', name: 'Air Squat', esName: 'Sentadilla al aire', gifUrl: `${GIF_CDN}/quads/barbell-squat-on-knees.gif` },
+  { id: 'cf-002', name: 'Back Squat', esName: 'Sentadilla trasera', gifUrl: `${GIF_CDN}/glutes/barbell-front-squat.gif` },
+  { id: 'cf-003', name: 'Thruster', esName: 'Thrusters', gifUrl: `${GIF_CDN}/delts/barbell-thruster.gif` },
+  { id: 'cf-004', name: 'Wall Ball', esName: 'Wall balls', gifUrl: `${GIF_CDN}/delts/kettlebell-thruster.gif` },
+  { id: 'cf-005', name: 'Box Jump', esName: 'Salto al cajón', gifUrl: `${GIF_CDN}/calves/box-jump-down-with-one-leg-stabilization.gif` },
+  { id: 'cf-006', name: 'Front Squat', esName: 'Sentadilla frontal', gifUrl: `${GIF_CDN}/glutes/barbell-front-squat.gif` },
+  { id: 'cf-007', name: 'Clean', esName: 'Cargada', gifUrl: `${GIF_CDN}/quads/barbell-clean-and-press.gif` },
+  { id: 'cf-008', name: 'Snatch', esName: 'Arrancada', gifUrl: `${GIF_CDN}/delts/barbell-thruster.gif` },
+  { id: 'cf-009', name: 'Deadlift', esName: 'Peso muerto', gifUrl: `${GIF_CDN}/glutes/barbell-deadlift.gif` },
+  { id: 'cf-010', name: 'Clean and Jerk', esName: 'Cargada y jerk', gifUrl: `${GIF_CDN}/quads/barbell-clean-and-press.gif` },
+  { id: 'cf-011', name: 'Overhead Squat', esName: 'Sentadilla por encima', gifUrl: `${GIF_CDN}/quads/barbell-overhead-squat.gif` },
+  { id: 'cf-012', name: 'Push Press', esName: 'Press con impulso', gifUrl: `${GIF_CDN}/delts/dumbbell-push-press.gif` },
+  { id: 'cf-013', name: 'Shoulder Press', esName: 'Press de hombros', gifUrl: `${GIF_CDN}/delts/dumbbell-seated-shoulder-press.gif` },
+  { id: 'cf-014', name: 'Push Jerk', esName: 'Push jerk', gifUrl: `${GIF_CDN}/delts/kettlebell-double-push-press.gif` },
+  { id: 'cf-015', name: 'Split Jerk', esName: 'Split jerk', gifUrl: `${GIF_CDN}/delts/dumbbell-push-press.gif` },
+  { id: 'cf-016', name: 'Sumo Deadlift', esName: 'Peso muerto sumo', gifUrl: `${GIF_CDN}/glutes/barbell-sumo-deadlift.gif` },
+  { id: 'cf-017', name: 'Burpee', esName: 'Burpees', gifUrl: `${GIF_CDN}/cardio/burpee.gif` },
+  { id: 'cf-018', name: 'Pull-up', esName: 'Dominadas', gifUrl: `${GIF_CDN}/lats/pull-up.gif` },
+  { id: 'cf-019', name: 'Push-up', esName: 'Flexiones', gifUrl: `${GIF_CDN}/pectorals/push-up.gif` },
+  { id: 'cf-020', name: 'Toes-to-Bar', esName: 'Dedos a la barra', gifUrl: `${GIF_CDN}/lats/l-pull-up.gif` },
+  { id: 'cf-021', name: 'Muscle-up', esName: 'Muscle up', gifUrl: `${GIF_CDN}/lats/muscle-up.gif` },
+  { id: 'cf-022', name: 'Handstand Push-up', esName: 'Flexiones en parada de manos', gifUrl: `${GIF_CDN}/triceps/handstand-push-up.gif` },
+  { id: 'cf-023', name: 'Kettlebell Swing', esName: 'Balanceo con kettlebell', gifUrl: `${GIF_CDN}/glutes/kettlebell-swing.gif` },
 ];
 
 const CSV_URL = 'https://raw.githubusercontent.com/omercotkd/exercises-gifs/main/exercises.csv';
@@ -227,8 +228,7 @@ export async function GET(request: NextRequest) {
         equipmentEs: '',
         bodyPart: '',
         bodyPartEs: '',
-        gifUrl: '',
-        videoUrl: ex.videoUrl,
+        gifUrl: ex.gifUrl || '',
         source: 'crossfit' as const,
       }));
     results.push(...matches);
