@@ -181,10 +181,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Fetch professor info for response (name + today's schedule)
-    const DAY_MAP: Record<number, string> = {
-      0: 'domingo', 1: 'lunes', 2: 'martes', 3: 'miercoles',
-      4: 'jueves', 5: 'viernes', 6: 'sabado',
-    };
+    // Use Argentina local time (UTC-3) for schedule matching
     let profesorData: { id: string; nombre: string; horario: string | null } | null = null;
     if (profesorIdEnTurno) {
       try {
@@ -194,7 +191,13 @@ export async function POST(request: NextRequest) {
         });
         if (profesor) {
           const now = new Date();
-          const dayName = DAY_MAP[now.getDay()];
+          const utcH = now.getUTCHours();
+          const utcM = now.getUTCMinutes();
+          const localM = utcH * 60 + utcM + (-3 * 60);
+          const adj = localM < 0 ? localM + 1440 : localM >= 1440 ? localM - 1440 : localM;
+          const dayIdx = (now.getUTCDay() + (localM < 0 ? -1 : localM >= 1440 ? 1 : 0) + 7) % 7;
+          const dayNames = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+          const dayName = dayNames[dayIdx];
           const horarios = profesor.horarios as Horarios | null;
           let horarioHoy: string | null = null;
 

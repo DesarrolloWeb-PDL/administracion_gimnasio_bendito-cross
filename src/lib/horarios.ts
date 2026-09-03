@@ -6,17 +6,9 @@
  *   crossfit?: { lunes?: { inicio: "08:00", fin: "10:00" }, ... },
  *   musculacion?: { lunes?: { inicio: "14:00", fin: "16:00" }, ... }
  * }
+ *
+ * All schedule matching uses Argentina local time (UTC-3).
  */
-
-const DAY_MAP: Record<number, string> = {
-  0: 'domingo',
-  1: 'lunes',
-  2: 'martes',
-  3: 'miercoles',
-  4: 'jueves',
-  5: 'viernes',
-  6: 'sabado',
-};
 
 interface TimeSlot {
   inicio: string; // "HH:MM"
@@ -43,7 +35,39 @@ function timeToMinutes(time: string): number {
 }
 
 /**
+ * Get local date components from a Date (Argentina: UTC-3)
+ */
+function getLocalDate(date: Date): { hours: number; minutes: number; dayName: string } {
+  // Argentina is UTC-3 (no DST)
+  const UTC_OFFSET = -3;
+  const utcHours = date.getUTCHours();
+  const utcMinutes = date.getUTCMinutes();
+  const localMinutes = utcHours * 60 + utcMinutes + (UTC_OFFSET * 60);
+  
+  // Handle day rollover
+  let dayOffset = 0;
+  let adjustedMinutes = localMinutes;
+  if (adjustedMinutes < 0) {
+    adjustedMinutes += 24 * 60;
+    dayOffset = -1;
+  } else if (adjustedMinutes >= 24 * 60) {
+    adjustedMinutes -= 24 * 60;
+    dayOffset = 1;
+  }
+  
+  const hours = Math.floor(adjustedMinutes / 60);
+  const minutes = adjustedMinutes % 60;
+  
+  // Get day name in Argentina timezone
+  const dayIndex = (date.getUTCDay() + dayOffset + 7) % 7;
+  const dayNames = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+  
+  return { hours, minutes, dayName: dayNames[dayIndex] };
+}
+
+/**
  * Check if a professor is on shift right now for a given discipline.
+ * Uses Argentina local time (UTC-3) for schedule matching.
  */
 export function isProfesorEnTurno(
   horarios: Horarios | null | undefined,
@@ -55,13 +79,13 @@ export function isProfesorEnTurno(
   const schedule = horarios[disciplina];
   if (!schedule) return false;
 
-  const dayName = DAY_MAP[now.getDay()] as DayName;
-  if (dayName === 'domingo') return false; // no hay clases domingo
+  const local = getLocalDate(now);
+  if (local.dayName === 'domingo') return false;
 
-  const slot = schedule[dayName];
+  const slot = schedule[local.dayName];
   if (!slot) return false;
 
-  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  const currentMinutes = local.hours * 60 + local.minutes;
   const inicio = timeToMinutes(slot.inicio);
   const fin = timeToMinutes(slot.fin);
 

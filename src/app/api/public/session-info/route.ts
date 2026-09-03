@@ -2,12 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { verifyToken } from '../auth/route';
 import { getCorsHeaders } from '@/lib/cors';
-import { isProfesorEnTurno, type Horarios } from '@/lib/horarios';
-
-const DAY_MAP: Record<number, string> = {
-  0: 'domingo', 1: 'lunes', 2: 'martes', 3: 'miercoles',
-  4: 'jueves', 5: 'viernes', 6: 'sabado',
-};
 
 export async function OPTIONS(request: NextRequest) {
   return new NextResponse(null, { status: 204, headers: getCorsHeaders(request) });
@@ -35,19 +29,26 @@ export async function GET(request: NextRequest) {
           select: { id: true, nombre: true, horarios: true, esProfesorCrossfit: true, esProfesorMusculacion: true },
         });
         if (prof) {
-          // Get today's schedule for the professor
+          const horarios = prof.horarios as { crossfit?: Record<string, { inicio: string; fin: string } | null>; musculacion?: Record<string, { inicio: string; fin: string } | null> } | null;
+
+          // Use Argentina local time (UTC-3)
           const now = new Date();
-          const dayName = DAY_MAP[now.getDay()];
-          const horarios = prof.horarios as Horarios | null;
+          const utcHours = now.getUTCHours();
+          const utcMinutes = now.getUTCMinutes();
+          const localMinutes = utcHours * 60 + utcMinutes + (-3 * 60);
+          const adjustedMinutes = localMinutes < 0 ? localMinutes + 1440 : localMinutes >= 1440 ? localMinutes - 1440 : localMinutes;
+          const localHour = Math.floor(adjustedMinutes / 60);
+          const dayIndex = (now.getUTCDay() + (localMinutes < 0 ? -1 : localMinutes >= 1440 ? 1 : 0) + 7) % 7;
+          const dayNames = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+          const dayName = dayNames[dayIndex];
 
           let horarioHoy: string | null = null;
           if (horarios && dayName !== 'domingo') {
-            // Check which discipline is active and get the time slot
             if (prof.esProfesorCrossfit && horarios.crossfit?.[dayName]) {
-              const slot = horarios.crossfit[dayName];
+              const slot = horarios.crossfit[dayName]!;
               horarioHoy = `${slot.inicio} - ${slot.fin}`;
             } else if (prof.esProfesorMusculacion && horarios.musculacion?.[dayName]) {
-              const slot = horarios.musculacion[dayName];
+              const slot = horarios.musculacion[dayName]!;
               horarioHoy = `${slot.inicio} - ${slot.fin}`;
             }
           }
