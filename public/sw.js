@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bendito-cross-v2';
+const CACHE_NAME = 'bendito-cross-v3';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -25,14 +25,21 @@ self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (request.method !== 'GET') return;
 
-  // Skip API routes and navigation requests (HTML pages)
+  // Skip API routes, navigation requests, and external URLs
   if (request.url.includes('/api/') || request.mode === 'navigate') {
+    return;
+  }
+
+  // Only cache same-origin requests
+  if (!request.url.startsWith(self.location.origin)) {
     return;
   }
 
   event.respondWith(
     caches.match(request).then((cached) => {
-      const fetched = fetch(request).then((response) => {
+      if (cached) return cached;
+
+      return fetch(request).then((response) => {
         if (response && response.status === 200) {
           const responseClone = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -40,9 +47,10 @@ self.addEventListener('fetch', (event) => {
           });
         }
         return response;
-      }).catch(() => cached);
-
-      return cached || fetched;
+      }).catch(() => {
+        // Return a proper offline response instead of rejecting
+        return new Response('', { status: 503, statusText: 'Offline' });
+      });
     })
   );
 });
