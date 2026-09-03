@@ -19,13 +19,13 @@ const CROSSFIT_EXERCISES = [
   { id: 'cf-014', name: 'Push Jerk', esName: 'Push jerk', videoUrl: 'https://www.youtube.com/embed/v_0E1udYSnQ' },
   { id: 'cf-015', name: 'Split Jerk', esName: 'Split jerk', videoUrl: 'https://www.youtube.com/embed/WhqUzVtVQI4' },
   { id: 'cf-016', name: 'Sumo Deadlift', esName: 'Peso muerto sumo', videoUrl: 'https://www.youtube.com/embed/GZIfh5DPaJM' },
-  { id: 'cf-017', name: 'Burpee', esName: 'Burpees', videoUrl: 'https://www.youtube.com/embed/7mj1pP0Xds8' },
-  { id: 'cf-018', name: 'Pull-up', esName: 'Dominadas', videoUrl: 'https://www.youtube.com/embed/lzRo-4pq_AY' },
-  { id: 'cf-019', name: 'Push-up', esName: 'Flexiones', videoUrl: 'https://www.youtube.com/embed/_l3ySVKYVJ8' },
+  { id: 'cf-017', name: 'Burpee', esName: 'Burpees', gifUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/cardio/burpee.gif', videoUrl: 'https://www.youtube.com/embed/7mj1pP0Xds8' },
+  { id: 'cf-018', name: 'Pull-up', esName: 'Dominadas', gifUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/pull-up.gif', videoUrl: 'https://www.youtube.com/embed/lzRo-4pq_AY' },
+  { id: 'cf-019', name: 'Push-up', esName: 'Flexiones', gifUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/pectorals/push-up.gif', videoUrl: 'https://www.youtube.com/embed/_l3ySVKYVJ8' },
   { id: 'cf-020', name: 'Toes-to-Bar', esName: 'Dedos a la barra', videoUrl: 'https://www.youtube.com/embed/_03pCKOv4l4' },
-  { id: 'cf-021', name: 'Muscle-up', esName: 'Muscle up', videoUrl: 'https://www.youtube.com/embed/7r-RNDu3dIc' },
-  { id: 'cf-022', name: 'Handstand Push-up', esName: 'Flexiones en parada de manos', videoUrl: 'https://www.youtube.com/embed/YdBSefJNbB8' },
-  { id: 'cf-023', name: 'Kettlebell Swing', esName: 'Balanceo con kettlebell', videoUrl: 'https://www.youtube.com/embed/YSxHifyx6-s' },
+  { id: 'cf-021', name: 'Muscle-up', esName: 'Muscle up', gifUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/muscle-up.gif', videoUrl: 'https://www.youtube.com/embed/7r-RNDu3dIc' },
+  { id: 'cf-022', name: 'Handstand Push-up', esName: 'Flexiones en parada de manos', gifUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/triceps/handstand-push-up.gif', videoUrl: 'https://www.youtube.com/embed/YdBSefJNbB8' },
+  { id: 'cf-023', name: 'Kettlebell Swing', esName: 'Balanceo con kettlebell', gifUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/kettlebell-swing.gif', videoUrl: 'https://www.youtube.com/embed/YSxHifyx6-s' },
 ];
 
 const CSV_URL = 'https://raw.githubusercontent.com/omercotkd/exercises-gifs/main/exercises.csv';
