@@ -1,14 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { getCorsHeaders } from '@/lib/cors';
 
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': 'https://benditocross.vercel.app',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-};
-
-export async function OPTIONS() {
-  return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
+export async function OPTIONS(request: NextRequest) {
+  return new NextResponse(null, { status: 204, headers: getCorsHeaders(request) });
 }
 
 export async function GET(request: NextRequest) {
@@ -17,7 +12,7 @@ export async function GET(request: NextRequest) {
     const query = searchParams.get('q');
 
     if (!query || query.length < 2) {
-      return NextResponse.json([], { headers: CORS_HEADERS });
+      return NextResponse.json([], { headers: getCorsHeaders(request) });
     }
 
     // Only show socios who registered attendance in the last 3 hours
@@ -50,9 +45,9 @@ export async function GET(request: NextRequest) {
       take: 10,
     });
 
-    return NextResponse.json(socios, { headers: CORS_HEADERS });
+    return NextResponse.json(socios, { headers: getCorsHeaders(request) });
   } catch (error) {
     console.error('Error al buscar socios:', error);
-    return NextResponse.json({ error: 'Error al buscar socios' }, { status: 500, headers: CORS_HEADERS });
+    return NextResponse.json({ error: 'Error al buscar socios' }, { status: 500, headers: getCorsHeaders(request) });
   }
 }

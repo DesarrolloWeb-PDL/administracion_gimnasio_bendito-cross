@@ -2,15 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import crypto from 'crypto';
 import { getProfesoresEnTurno } from '@/lib/horarios';
+import { getCorsHeaders } from '@/lib/cors';
 
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': 'https://benditocross.vercel.app',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-};
-
-export async function OPTIONS() {
-  return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
+export async function OPTIONS(request: NextRequest) {
+  return new NextResponse(null, { status: 204, headers: getCorsHeaders(request) });
 }
 
 // HMAC-signed token (stateless - works across serverless instances)
@@ -57,7 +52,7 @@ export async function POST(request: NextRequest) {
     const { socioId, dni } = body;
 
     if (!socioId || !dni) {
-      return NextResponse.json({ error: 'Faltan socioId y dni' }, { status: 400, headers: CORS_HEADERS });
+      return NextResponse.json({ error: 'Faltan socioId y dni' }, { status: 400, headers: getCorsHeaders(request) });
     }
 
     // Find the socio
@@ -66,15 +61,15 @@ export async function POST(request: NextRequest) {
     });
 
     if (!socio) {
-      return NextResponse.json({ error: 'Socio no encontrado' }, { status: 404, headers: CORS_HEADERS });
+      return NextResponse.json({ error: 'Socio no encontrado' }, { status: 404, headers: getCorsHeaders(request) });
     }
 
     if (!socio.activo) {
-      return NextResponse.json({ error: 'Socio inactivo' }, { status: 403, headers: CORS_HEADERS });
+      return NextResponse.json({ error: 'Socio inactivo' }, { status: 403, headers: getCorsHeaders(request) });
     }
 
     if (socio.dni !== dni) {
-      return NextResponse.json({ error: 'DNI incorrecto' }, { status: 401, headers: CORS_HEADERS });
+      return NextResponse.json({ error: 'DNI incorrecto' }, { status: 401, headers: getCorsHeaders(request) });
     }
 
     // Check attendance for today (required to see routines)
@@ -137,7 +132,7 @@ export async function POST(request: NextRequest) {
     if (!asistenciaHoy) {
       return NextResponse.json(
         { error: 'No tenés registro de asistencia para hoy. Registrate en la recepción del gimnasio.' },
-        { status: 403, headers: CORS_HEADERS }
+        { status: 403, headers: getCorsHeaders(request) }
       );
     }
 
@@ -173,7 +168,7 @@ export async function POST(request: NextRequest) {
     if (!tieneAcceso) {
       return NextResponse.json(
         { error: 'No tiene suscripción activa para acceder a rutinas' },
-        { status: 403, headers: CORS_HEADERS }
+        { status: 403, headers: getCorsHeaders(request) }
       );
     }
 
@@ -209,9 +204,9 @@ export async function POST(request: NextRequest) {
       tiposAcceso,
       profesor: profesorNombre ? { id: profesorIdEnTurno, nombre: profesorNombre } : null,
       checkInTime: checkInFecha?.toISOString() || null,
-    }, { headers: CORS_HEADERS });
+    }, { headers: getCorsHeaders(request) });
   } catch (error) {
     console.error('Error en auth pública:', error instanceof Error ? error.message : String(error));
-    return NextResponse.json({ error: 'Error al autenticar' }, { status: 500, headers: CORS_HEADERS });
+    return NextResponse.json({ error: 'Error al autenticar' }, { status: 500, headers: getCorsHeaders(request) });
   }
 }

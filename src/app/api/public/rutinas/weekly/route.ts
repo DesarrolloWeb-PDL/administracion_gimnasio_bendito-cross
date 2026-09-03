@@ -2,15 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { verifyToken } from '../../auth/route';
 import { getProfesoresEnTurno } from '@/lib/horarios';
+import { getCorsHeaders } from '@/lib/cors';
 
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': 'https://benditocross.vercel.app',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-};
-
-export async function OPTIONS() {
-  return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
+export async function OPTIONS(request: NextRequest) {
+  return new NextResponse(null, { status: 204, headers: getCorsHeaders(request) });
 }
 
 export async function GET(request: NextRequest) {
@@ -21,12 +16,12 @@ export async function GET(request: NextRequest) {
     const semana = searchParams.get('semana');
 
     if (!token) {
-      return NextResponse.json({ error: 'Token requerido' }, { status: 401, headers: CORS_HEADERS });
+      return NextResponse.json({ error: 'Token requerido' }, { status: 401, headers: getCorsHeaders(request) });
     }
 
     const tokenData = verifyToken(token);
     if (!tokenData) {
-      return NextResponse.json({ error: 'Token inválido o expirado' }, { status: 401, headers: CORS_HEADERS });
+      return NextResponse.json({ error: 'Token inválido o expirado' }, { status: 401, headers: getCorsHeaders(request) });
     }
 
     // Build where clause for structured routines
@@ -90,9 +85,9 @@ export async function GET(request: NextRequest) {
     });
 
     // Return flat array - the client groups by day
-    return NextResponse.json(rutinas, { headers: CORS_HEADERS });
+    return NextResponse.json(rutinas, { headers: getCorsHeaders(request) });
   } catch (error) {
     console.error('Error al obtener rutinas semanales públicas:', error);
-    return NextResponse.json({ error: 'Error al obtener rutinas semanales' }, { status: 500, headers: CORS_HEADERS });
+    return NextResponse.json({ error: 'Error al obtener rutinas semanales' }, { status: 500, headers: getCorsHeaders(request) });
   }
 }
