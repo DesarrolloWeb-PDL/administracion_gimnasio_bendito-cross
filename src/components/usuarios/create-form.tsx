@@ -1,13 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState, useState } from 'react';
+import { useActionState } from 'react';
 import { createUsuario } from '@/lib/actions-usuarios';
 
 export default function Form() {
   const initialState = { message: '', errors: {} };
   const [state, dispatch, isPending] = useActionState(createUsuario, initialState);
-  const [rol, setRol] = useState('');
 
   return (
     <form action={dispatch}>
@@ -110,7 +109,6 @@ export default function Form() {
               defaultValue=""
               aria-describedby="role-error"
               required
-              onChange={(e) => setRol(e.target.value)}
             >
               <option value="" disabled>
                 Seleccione un rol
@@ -228,40 +226,6 @@ export default function Form() {
                 </div>
               </div>
             </div>
-
-            {/* Disciplina del Profesor */}
-            {(rol === 'PROFESOR_CROSSFIT' || rol === 'PROFESOR_MUSCULACION' || rol === 'PROFESOR_FUNCIONAL') && (
-              <div className="mb-4">
-                <label htmlFor="disciplina" className="mb-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
-                  Disciplina <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <select
-                    id="disciplina"
-                    name="disciplina"
-                    className="peer block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500 dark:placeholder:text-gray-400"
-                    defaultValue=""
-                    aria-describedby="disciplina-error"
-                    required
-                  >
-                    <option value="" disabled>
-                      Seleccione una disciplina
-                    </option>
-                    <option value="crossfit">CrossFit / Funcional</option>
-                    <option value="musculacion">Musculación</option>
-                    <option value="ambos">Ambos (CrossFit y Musculación)</option>
-                  </select>
-                </div>
-                <div id="disciplina-error" aria-live="polite" aria-atomic="true">
-                  {state.errors?.disciplina &&
-                    state.errors.disciplina.map((error: string) => (
-                      <p className="mt-2 text-sm text-red-500" key={error}>
-                        {error}
-                      </p>
-                    ))}
-                </div>
-              </div>
-            )}
       </div>
       <div className="mt-6 flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
         <Link
