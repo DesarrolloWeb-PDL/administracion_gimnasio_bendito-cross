@@ -30,6 +30,7 @@ const CROSSFIT_EXERCISES = [
 
 const CSV_URL = 'https://raw.githubusercontent.com/omercotkd/exercises-gifs/main/exercises.csv';
 const GIF_BASE = 'https://raw.githubusercontent.com/omercotkd/exercises-gifs/main/assets/';
+const CSTR_URL = 'https://raw.githubusercontent.com/DaveG7/CostruTrain/main/assets/seed/exercises.json';
 
 interface CsvExercise {
   id: string;
@@ -41,6 +42,15 @@ interface CsvExercise {
   equipmentEs: string;
   target: string;
   targetEs: string;
+  gifUrl: string;
+}
+
+interface CstrExercise {
+  id: string;
+  name: string;
+  bodyPart: string;
+  target: string;
+  equipment: string;
   gifUrl: string;
 }
 
@@ -69,15 +79,16 @@ async function loadExercises(): Promise<CsvExercise[]> {
   }
 
   try {
-    const res = await fetch(CSV_URL, { next: { revalidate: 300 } });
-    if (!res.ok) throw new Error(`CSV fetch failed: ${res.status}`);
+    // Load CSV exercises
+    const csvRes = await fetch(CSV_URL, { next: { revalidate: 300 } });
+    if (!csvRes.ok) throw new Error(`CSV fetch failed: ${csvRes.status}`);
     
-    const text = await res.text();
-    const lines = text.split('\n');
+    const csvText = await csvRes.text();
+    const csvLines = csvText.split('\n');
     
-    const exercises: CsvExercise[] = [];
-    for (let i = 1; i < lines.length; i++) {
-      const line = lines[i].trim();
+    const csvExercises: CsvExercise[] = [];
+    for (let i = 1; i < csvLines.length; i++) {
+      const line = csvLines[i].trim();
       if (!line) continue;
       
       const fields = parseCsvLine(line);
@@ -85,7 +96,7 @@ async function loadExercises(): Promise<CsvExercise[]> {
       
       const [bodyPart, equipment, id, name, target] = fields;
       
-      exercises.push({
+      csvExercises.push({
         id,
         name,
         esName: translateExerciseName(name),
@@ -99,11 +110,47 @@ async function loadExercises(): Promise<CsvExercise[]> {
       });
     }
 
-    cachedExercises = exercises;
+    // Load CostruTrain exercises
+    let cstrExercises: CsvExercise[] = [];
+    try {
+      const cstrRes = await fetch(CSTR_URL, { next: { revalidate: 300 } });
+      if (cstrRes.ok) {
+        const cstrData: CstrExercise[] = await cstrRes.json();
+        cstrExercises = cstrData.map(ex => ({
+          id: `cstr-${ex.id}`,
+          name: ex.name,
+          esName: translateExerciseName(ex.name),
+          bodyPart: ex.bodyPart || '',
+          bodyPartEs: translateBodyPart(ex.bodyPart || ''),
+          equipment: ex.equipment || '',
+          equipmentEs: translateEquipment(ex.equipment || ''),
+          target: ex.target || '',
+          targetEs: translateMuscle(ex.target || ''),
+          gifUrl: ex.gifUrl,
+        }));
+      }
+    } catch (cstrError) {
+      console.error('Failed to load CostruTrain exercises:', cstrError);
+    }
+
+    // Merge and deduplicate by name (case-insensitive)
+    const allExercises = [...csvExercises, ...cstrExercises];
+    const seen = new Set<string>();
+    const merged: CsvExercise[] = [];
+    
+    for (const ex of allExercises) {
+      const key = ex.name.toLowerCase().trim();
+      if (!seen.has(key)) {
+        seen.add(key);
+        merged.push(ex);
+      }
+    }
+
+    cachedExercises = merged;
     cacheTime = Date.now();
-    return exercises;
+    return merged;
   } catch (error) {
-    console.error('Failed to load exercises CSV:', error);
+    console.error('Failed to load exercises:', error);
     return cachedExercises || [];
   }
 }

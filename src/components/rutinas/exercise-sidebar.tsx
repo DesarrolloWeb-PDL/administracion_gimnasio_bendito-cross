@@ -47,7 +47,6 @@ export default function ExerciseSidebar({ onSelect, tipo = 'musculacion' }: Exer
   const [search, setSearch] = useState('');
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(false);
-  const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
   const [draggedExercise, setDraggedExercise] = useState<Exercise | null>(null);
 
   const performSearch = useCallback(async (q: string) => {
@@ -110,6 +109,12 @@ export default function ExerciseSidebar({ onSelect, tipo = 'musculacion' }: Exer
     return keys;
   }, [grouped, tipo]);
 
+  // Flat list for search results (when searching, show all matched exercises)
+  const flatResults = useMemo(() => {
+    if (!search) return [];
+    return exercises.slice(0, 100); // Limit to 100 for performance when no search
+  }, [exercises, search]);
+
   // Drag handlers
   const handleDragStart = (e: React.DragEvent, exercise: Exercise) => {
     setDraggedExercise(exercise);
@@ -138,7 +143,7 @@ export default function ExerciseSidebar({ onSelect, tipo = 'musculacion' }: Exer
           {/* Header */}
           <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
             <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-              Ejercicios
+              Ejercicios ({exercises.length})
             </h3>
             <input
               type="text"
@@ -162,57 +167,85 @@ export default function ExerciseSidebar({ onSelect, tipo = 'musculacion' }: Exer
               </div>
             ) : (
               <div className="p-2 space-y-1">
-                {sortedGroups.map(group => {
+                {/* When no search, show grouped with all expanded */}
+                {!search && sortedGroups.map(group => {
                   const items = grouped[group] || [];
-                  const isExpanded = expandedGroup === group || sortedGroups.length === 1;
                   return (
                     <div key={group}>
-                      <button
-                        onClick={() => setExpandedGroup(isExpanded && sortedGroups.length > 1 ? null : group)}
-                        className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                      >
-                        <span>{group}</span>
-                        <span className="text-xs text-gray-400">{items.length}</span>
-                      </button>
-                      {isExpanded && (
-                        <div className="pl-2 space-y-1">
-                          {items.map(ex => (
-                            <div
-                              key={ex.id}
-                              draggable
-                              onDragStart={(e) => handleDragStart(e, ex)}
-                              onClick={() => handleClick(ex)}
-                              className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-grab active:cursor-grabbing"
-                              title="Arrastrar a una sección"
-                            >
-                              {ex.gifUrl ? (
-                                <img
-                                  src={ex.gifUrl}
-                                  alt={ex.esName || ex.name}
-                                  className="h-8 w-8 rounded object-cover flex-shrink-0 bg-gray-200 dark:bg-gray-700"
-                                  loading="lazy"
-                                  draggable={false}
-                                />
-                              ) : (
-                                <div className="h-8 w-8 rounded bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
-                                  <span className="text-[10px] text-gray-400">📹</span>
-                                </div>
-                              )}
-                              <div className="flex-1 min-w-0">
-                                <p className="text-xs font-medium text-gray-800 dark:text-white truncate">
-                                  {ex.esName || ex.name}
-                                </p>
-                                {ex.muscleGroupEs && (
-                                  <p className="text-[10px] text-gray-400 truncate">{ex.muscleGroupEs}</p>
-                                )}
+                      <div className="px-3 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        {group} ({items.length})
+                      </div>
+                      <div className="space-y-0.5">
+                        {items.map(ex => (
+                          <div
+                            key={ex.id}
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, ex)}
+                            onClick={() => handleClick(ex)}
+                            className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-grab active:cursor-grabbing"
+                            title="Arrastrar a una sección"
+                          >
+                            {ex.gifUrl ? (
+                              <img
+                                src={ex.gifUrl}
+                                alt={ex.esName || ex.name}
+                                className="h-8 w-8 rounded object-cover flex-shrink-0 bg-gray-200 dark:bg-gray-700"
+                                loading="lazy"
+                                draggable={false}
+                              />
+                            ) : (
+                              <div className="h-8 w-8 rounded bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                                <span className="text-[10px] text-gray-400">📹</span>
                               </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-medium text-gray-800 dark:text-white truncate">
+                                {ex.esName || ex.name}
+                              </p>
+                              {ex.muscleGroupEs && (
+                                <p className="text-[10px] text-gray-400 truncate">{ex.muscleGroupEs}</p>
+                              )}
                             </div>
-                          ))}
-                        </div>
-                      )}
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   );
                 })}
+
+                {/* When searching, show flat list */}
+                {search && flatResults.map(ex => (
+                  <div
+                    key={ex.id}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, ex)}
+                    onClick={() => handleClick(ex)}
+                    className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-grab active:cursor-grabbing"
+                    title="Arrastrar a una sección"
+                  >
+                    {ex.gifUrl ? (
+                      <img
+                        src={ex.gifUrl}
+                        alt={ex.esName || ex.name}
+                        className="h-8 w-8 rounded object-cover flex-shrink-0 bg-gray-200 dark:bg-gray-700"
+                        loading="lazy"
+                        draggable={false}
+                      />
+                    ) : (
+                      <div className="h-8 w-8 rounded bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                        <span className="text-[10px] text-gray-400">📹</span>
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-gray-800 dark:text-white truncate">
+                        {ex.esName || ex.name}
+                      </p>
+                      {ex.muscleGroupEs && (
+                        <p className="text-[10px] text-gray-400 truncate">{ex.muscleGroupEs}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
