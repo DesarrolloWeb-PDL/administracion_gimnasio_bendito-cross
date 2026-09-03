@@ -185,6 +185,20 @@ export async function POST(request: NextRequest) {
       exp: Date.now() + TOKEN_EXPIRY_MS,
     });
 
+    // Fetch professor name for response
+    let profesorNombre: string | null = null;
+    if (profesorIdEnTurno) {
+      try {
+        const profesor = await prisma.usuario.findUnique({
+          where: { id: profesorIdEnTurno },
+          select: { nombre: true },
+        });
+        profesorNombre = profesor?.nombre || null;
+      } catch {
+        // Ignore
+      }
+    }
+
     return NextResponse.json({
       token,
       socio: {
@@ -192,7 +206,9 @@ export async function POST(request: NextRequest) {
         nombre: socio.nombre,
         apellido: socio.apellido,
       },
-      tiposAcceso, // e.g. ['crossfit'] or ['musculacion'] or ['crossfit', 'musculacion']
+      tiposAcceso,
+      profesor: profesorNombre ? { id: profesorIdEnTurno, nombre: profesorNombre } : null,
+      checkInTime: checkInFecha?.toISOString() || null,
     }, { headers: CORS_HEADERS });
   } catch (error) {
     console.error('Error en auth pública:', error instanceof Error ? error.message : String(error));
