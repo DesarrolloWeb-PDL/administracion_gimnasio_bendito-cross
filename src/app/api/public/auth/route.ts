@@ -10,7 +10,7 @@ export async function OPTIONS(request: NextRequest) {
 
 // HMAC-signed token (stateless - works across serverless instances)
 const TOKEN_SECRET = process.env.TOKEN_SECRET || process.env.NEXTAUTH_SECRET || 'benditocross-default-secret-change-me';
-const TOKEN_EXPIRY_MS = 12 * 60 * 60 * 1000; // 12 hours
+const TOKEN_EXPIRY_MS = 2 * 60 * 60 * 1000; // 2 hours
 
 function signToken(payload: { socioId: string; profesorId?: string; checkInTime?: string; exp: number }): string {
   const data = Buffer.from(JSON.stringify(payload)).toString('base64url');
