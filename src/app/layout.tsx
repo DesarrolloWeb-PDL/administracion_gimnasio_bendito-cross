@@ -19,21 +19,21 @@ const openSans = Open_Sans({
 export const metadata: Metadata = {
   title: "Administración de Gimnasios",
   description: "Sistema de Gestión de Gimnasio",
-  manifest: "/manifest",
-  themeColor: "#000000",
+  manifest: "/manifest.json",
+  themeColor: "#DC2626",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Gym Manager",
+    title: "Bendito Cross",
   },
   icons: {
     icon: [
       { url: '/favicon.svg', type: 'image/svg+xml' },
-      { url: '/api/icon?size=192', sizes: '192x192', type: 'image/png' },
-      { url: '/api/icon?size=512', sizes: '512x512', type: 'image/png' },
+      { url: '/logo-bendito.png', sizes: '192x192', type: 'image/png' },
+      { url: '/logo-bendito.png', sizes: '512x512', type: 'image/png' },
     ],
     apple: [
-      { url: '/api/icon?size=180', sizes: '180x180', type: 'image/png' },
+      { url: '/logo-bendito.png', sizes: '180x180', type: 'image/png' },
     ],
   },
 };
