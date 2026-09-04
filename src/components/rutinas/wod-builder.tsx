@@ -160,12 +160,12 @@ export default function WodBuilder({ rutina, tipo, onSave }: WodBuilderProps) {
   };
 
   return (
-    <div className="flex h-[calc(100vh-120px)] overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-      {/* Sidebar */}
+    <div className="flex flex-col md:flex-row h-[calc(100dvh-120px)] md:h-[calc(100vh-120px)] overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+      {/* Sidebar - drawer on mobile, fixed on desktop */}
       <ExerciseSidebar onSelect={handleSidebarSelect} tipo={tipo} />
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Header */}
         <div className="flex items-center justify-between gap-4 px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
           <input

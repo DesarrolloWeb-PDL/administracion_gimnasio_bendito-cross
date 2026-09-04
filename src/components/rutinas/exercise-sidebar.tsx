@@ -43,11 +43,21 @@ function bodyPartToSection(bodyPartEs: string): string {
 }
 
 export default function ExerciseSidebar({ onSelect, tipo = 'musculacion' }: ExerciseSidebarProps) {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false); // Closed by default on mobile
   const [search, setSearch] = useState('');
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(false);
   const [draggedExercise, setDraggedExercise] = useState<Exercise | null>(null);
+
+  // Auto-open on desktop (md+)
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(min-width: 768px)');
+    setIsOpen(mediaQuery.matches);
+    
+    const handleChange = (e: MediaQueryListEvent) => setIsOpen(e.matches);
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
 
   const performSearch = useCallback(async (q: string) => {
     if (!q || q.length < 1) {
@@ -128,23 +138,47 @@ export default function ExerciseSidebar({ onSelect, tipo = 'musculacion' }: Exer
   };
 
   return (
-    <div className={`flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex flex-col transition-all ${isOpen ? 'w-72' : 'w-10'}`}>
-      {/* Toggle button */}
+    <>
+      {/* Mobile toggle button - always visible */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="h-10 flex items-center justify-center border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-        title={isOpen ? 'Colapsar' : 'Expandir'}
+        className="md:hidden fixed bottom-20 right-4 z-40 h-12 w-12 rounded-full bg-[var(--primary-color)] text-white shadow-lg flex items-center justify-center hover:brightness-110 transition-all"
+        title={isOpen ? 'Cerrar ejercicios' : 'Abrir ejercicios'}
       >
-        <span className={`text-gray-500 transition-transform ${isOpen ? '' : 'rotate-180'}`}>◀</span>
+        <span className="text-lg">{isOpen ? '✕' : '🏋️'}</span>
       </button>
 
+      {/* Backdrop for mobile */}
+      {isOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-30 bg-black/50 transition-opacity"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* Sidebar container */}
+      <div className={`
+        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        md:translate-x-0
+        fixed md:relative inset-y-0 left-0 z-40
+        w-72 md:w-72
+        flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex flex-col transition-transform duration-300
+      `}>
       {isOpen && (
         <>
           {/* Header */}
           <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-              Ejercicios ({exercises.length})
-            </h3>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                Ejercicios ({exercises.length})
+              </h3>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="md:hidden text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-1"
+              >
+                ✕
+              </button>
+            </div>
             <input
               type="text"
               placeholder="Buscar..."
@@ -251,6 +285,7 @@ export default function ExerciseSidebar({ onSelect, tipo = 'musculacion' }: Exer
           </div>
         </>
       )}
-    </div>
+      </div>
+    </>
   );
 }
