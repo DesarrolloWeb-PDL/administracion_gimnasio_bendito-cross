@@ -29,11 +29,11 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: '/favicon.svg', type: 'image/svg+xml' },
-      { url: '/logo-bendito.png', sizes: '192x192', type: 'image/png' },
-      { url: '/logo-bendito.png', sizes: '512x512', type: 'image/png' },
+      { url: '/api/icon?size=192', sizes: '192x192', type: 'image/png' },
+      { url: '/api/icon?size=512', sizes: '512x512', type: 'image/png' },
     ],
     apple: [
-      { url: '/logo-bendito.png', sizes: '180x180', type: 'image/png' },
+      { url: '/api/icon?size=180', sizes: '180x180', type: 'image/png' },
     ],
   },
 };

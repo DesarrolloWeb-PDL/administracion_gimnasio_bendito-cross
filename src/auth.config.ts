@@ -10,9 +10,10 @@ export const authConfig = {
       const isOnAdmin = nextUrl.pathname.startsWith('/admin');
       const isOnKiosco = nextUrl.pathname.startsWith('/kiosco');
       const isApiPublic = nextUrl.pathname.startsWith('/api/public');
+      const isIcon = nextUrl.pathname.startsWith('/api/icon');
 
-      // Las API públicas no requieren autenticación
-      if (isApiPublic) {
+      // Las API públicas y los íconos no requieren autenticación
+      if (isApiPublic || isIcon) {
         return true;
       }
 
