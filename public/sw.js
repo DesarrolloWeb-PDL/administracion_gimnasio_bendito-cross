@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bendito-cross-v3';
+const CACHE_NAME = 'bendito-cross-v4';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -25,8 +25,8 @@ self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (request.method !== 'GET') return;
 
-  // Skip API routes, navigation requests, and external URLs
-  if (request.url.includes('/api/') || request.mode === 'navigate') {
+  // Skip API routes, navigation requests, manifest, and external URLs
+  if (request.url.includes('/api/') || request.mode === 'navigate' || request.url.includes('manifest')) {
     return;
   }
 
