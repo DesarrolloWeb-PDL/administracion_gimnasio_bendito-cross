@@ -1,5 +1,14 @@
 import prisma from '@/lib/prisma';
 import { unstable_noStore as noStore } from 'next/cache';
+import { Prisma } from '@prisma/client';
+import {
+  FiltrosReportes,
+  clasificarEstadoPago,
+  disciplinaPredicate,
+  estadoPagoPredicate,
+  getEstadoSuscripcion,
+  toDateBounds,
+} from '@/lib/filtros-reportes';
 
 type HistorialPago = {
   id: string;
@@ -19,12 +28,53 @@ type ResumenEstadoHistorial = {
   total: number;
 };
 
-function getEstadoSuscripcion(activa: boolean, fechaFin: Date, now: Date) {
-  if (!activa) return 'Suspendida';
-  return fechaFin < now ? 'Vencida' : 'Activa';
+function buildDateFilter(
+  defaultGte: Date,
+  filtros?: FiltrosReportes
+): { gte: Date; lte?: Date } {
+  const bounds = toDateBounds(filtros ?? {});
+  return {
+    gte: bounds.gte ?? defaultGte,
+    lte: bounds.lte,
+  };
 }
 
-export async function fetchIngresosPorMes() {
+function intersectDateBounds(
+  defaultBounds: { gte: Date; lte: Date },
+  filtros?: FiltrosReportes
+): { gte: Date; lte: Date } | null {
+  const bounds = toDateBounds(filtros ?? {});
+  const gte = bounds.gte
+    ? new Date(Math.max(bounds.gte.getTime(), defaultBounds.gte.getTime()))
+    : defaultBounds.gte;
+  const lte = bounds.lte
+    ? new Date(Math.min(bounds.lte.getTime(), defaultBounds.lte.getTime()))
+    : defaultBounds.lte;
+
+  if (gte > lte) return null;
+  return { gte, lte };
+}
+
+function suscripcionFilter(
+  filtros?: FiltrosReportes
+): Prisma.SuscripcionWhereInput | undefined {
+  if (!filtros?.estadoPago && !filtros?.disciplina) return undefined;
+
+  const now = new Date();
+  const where: Prisma.SuscripcionWhereInput = {};
+
+  if (filtros.estadoPago) {
+    Object.assign(where, estadoPagoPredicate(filtros.estadoPago, now));
+  }
+
+  if (filtros.disciplina) {
+    where.plan = disciplinaPredicate(filtros.disciplina);
+  }
+
+  return where;
+}
+
+export async function fetchIngresosPorMes(filtros?: FiltrosReportes) {
   noStore();
   try {
     const oneYearAgo = new Date();
@@ -32,9 +82,8 @@ export async function fetchIngresosPorMes() {
 
     const transacciones = await prisma.transaccion.findMany({
       where: {
-        fecha: {
-          gte: oneYearAgo,
-        },
+        fecha: buildDateFilter(oneYearAgo, filtros),
+        suscripcion: suscripcionFilter(filtros),
       },
       select: {
         fecha: true,
@@ -70,7 +119,7 @@ export async function fetchIngresosPorMes() {
   }
 }
 
-export async function fetchNuevosSociosPorMes() {
+export async function fetchNuevosSociosPorMes(filtros?: FiltrosReportes) {
   noStore();
   try {
     const oneYearAgo = new Date();
@@ -78,9 +127,7 @@ export async function fetchNuevosSociosPorMes() {
 
     const socios = await prisma.socio.findMany({
       where: {
-        createdAt: {
-          gte: oneYearAgo,
-        },
+        createdAt: buildDateFilter(oneYearAgo, filtros),
       },
       select: {
         createdAt: true,
@@ -113,7 +160,7 @@ export async function fetchNuevosSociosPorMes() {
   }
 }
 
-export async function fetchAsistenciasPorDia() {
+export async function fetchAsistenciasPorDia(filtros?: FiltrosReportes) {
   noStore();
   try {
     const treintaDiasAtras = new Date();
@@ -121,9 +168,7 @@ export async function fetchAsistenciasPorDia() {
 
     const asistencias = await prisma.asistencia.findMany({
       where: {
-        fecha: {
-          gte: treintaDiasAtras,
-        },
+        fecha: buildDateFilter(treintaDiasAtras, filtros),
       },
       select: {
         fecha: true,
@@ -163,7 +208,7 @@ export async function fetchAsistenciasPorDia() {
   }
 }
 
-export async function fetchIngresosPorTipo() {
+export async function fetchIngresosPorTipo(filtros?: FiltrosReportes) {
   noStore();
   try {
     const treintaDiasAtras = new Date();
@@ -171,9 +216,8 @@ export async function fetchIngresosPorTipo() {
 
     const transacciones = await prisma.transaccion.findMany({
       where: {
-        fecha: {
-          gte: treintaDiasAtras,
-        },
+        fecha: buildDateFilter(treintaDiasAtras, filtros),
+        suscripcion: suscripcionFilter(filtros),
       },
       select: {
         monto: true,
@@ -213,19 +257,22 @@ export async function fetchIngresosPorTipo() {
   }
 }
 
-export async function fetchIngresosPorDia(año: number, mes: number) {
+export async function fetchIngresosPorDia(año: number, mes: number, filtros?: FiltrosReportes) {
   noStore();
   try {
     // Crear fecha de inicio y fin del mes
     const fechaInicio = new Date(año, mes - 1, 1);
     const fechaFin = new Date(año, mes, 0, 23, 59, 59, 999);
 
+    const fechaBounds = intersectDateBounds({ gte: fechaInicio, lte: fechaFin }, filtros);
+    if (!fechaBounds) {
+      return [];
+    }
+
     const transacciones = await prisma.transaccion.findMany({
       where: {
-        fecha: {
-          gte: fechaInicio,
-          lte: fechaFin,
-        },
+        fecha: fechaBounds,
+        suscripcion: suscripcionFilter(filtros),
       },
       select: {
         fecha: true,
@@ -263,19 +310,22 @@ export async function fetchIngresosPorDia(año: number, mes: number) {
   }
 }
 
-export async function fetchTransaccionesPorDia(año: number, mes: number, dia: number) {
+export async function fetchTransaccionesPorDia(año: number, mes: number, dia: number, filtros?: FiltrosReportes) {
   noStore();
   try {
     // Crear fecha de inicio y fin del día
     const fechaInicio = new Date(año, mes - 1, dia, 0, 0, 0, 0);
     const fechaFin = new Date(año, mes - 1, dia, 23, 59, 59, 999);
 
+    const fechaBounds = intersectDateBounds({ gte: fechaInicio, lte: fechaFin }, filtros);
+    if (!fechaBounds) {
+      return [];
+    }
+
     const transacciones = await prisma.transaccion.findMany({
       where: {
-        fecha: {
-          gte: fechaInicio,
-          lte: fechaFin,
-        },
+        fecha: fechaBounds,
+        suscripcion: suscripcionFilter(filtros),
       },
       select: {
         id: true,
@@ -337,7 +387,7 @@ export async function fetchSociosParaHistorialPagos() {
   }
 }
 
-export async function fetchHistorialPagosPorSocio(socioId: string, estadoSuscripcion?: string) {
+export async function fetchHistorialPagosPorSocio(socioId: string, filtros?: FiltrosReportes) {
   noStore();
   try {
     const socio = await prisma.socio.findUnique({
@@ -368,42 +418,84 @@ export async function fetchHistorialPagosPorSocio(socioId: string, estadoSuscrip
     }
 
     const now = new Date();
+    const bounds = toDateBounds(filtros ?? {});
 
-    const historial: HistorialPago[] = socio.suscripciones.flatMap((suscripcion) =>
+    let items = socio.suscripciones.flatMap((suscripcion) =>
       suscripcion.transacciones.map((transaccion) => ({
+        transaccion,
+        suscripcion,
+        plan: suscripcion.plan,
+      }))
+    );
+
+    if (bounds.gte || bounds.lte) {
+      items = items.filter(({ transaccion }) => {
+        if (bounds.gte && transaccion.fecha < bounds.gte) return false;
+        if (bounds.lte && transaccion.fecha > bounds.lte) return false;
+        return true;
+      });
+    }
+
+    if (filtros?.estadoPago) {
+      items = items.filter(
+        ({ suscripcion }) =>
+          clasificarEstadoPago(suscripcion.activa, suscripcion.fechaFin, now) ===
+          filtros.estadoPago
+      );
+    }
+
+    if (filtros?.disciplina) {
+      const predicate = disciplinaPredicate(filtros.disciplina);
+      items = items.filter(({ plan }) =>
+        predicate.allowsCrossfit ? plan.allowsCrossfit : plan.allowsMusculacion
+      );
+    }
+
+    const historial: HistorialPago[] = items
+      .map(({ transaccion, suscripcion, plan }) => ({
         id: transaccion.id,
         fecha: transaccion.fecha,
         monto: Number(transaccion.monto),
         metodoPago: transaccion.metodoPago,
         notas: transaccion.notas || '',
         tipoPago: transaccion.tipoPago,
-        planNombre: suscripcion.plan.nombre,
-        suscripcionEstado: getEstadoSuscripcion(suscripcion.activa, suscripcion.fechaFin, now),
+        planNombre: plan.nombre,
+        suscripcionEstado: getEstadoSuscripcion(
+          suscripcion.activa,
+          suscripcion.fechaFin,
+          now
+        ),
         suscripcionFechaFin: suscripcion.fechaFin,
       }))
-    ).sort((a, b) => b.fecha.getTime() - a.fecha.getTime());
+      .sort((a, b) => b.fecha.getTime() - a.fecha.getTime());
 
-    const historialFiltrado = estadoSuscripcion
-      ? historial.filter((item) => item.suscripcionEstado === estadoSuscripcion)
-      : historial;
-
-    const resumenPorEstado: ResumenEstadoHistorial[] = ['Activa', 'Vencida', 'Suspendida'].map((estado) => {
-      const items = historial.filter((item) => item.suscripcionEstado === estado);
+    const resumenPorEstado: ResumenEstadoHistorial[] = (
+      ['pagas', 'inpagas'] as const
+    ).map((estado) => {
+      const resumenItems = items.filter(
+        ({ suscripcion }) =>
+          clasificarEstadoPago(suscripcion.activa, suscripcion.fechaFin, now) ===
+          estado
+      );
       return {
         estado,
-        cantidad: items.length,
-        total: items.reduce((acc, item) => acc + item.monto, 0),
+        cantidad: resumenItems.length,
+        total: resumenItems.reduce(
+          (acc, { transaccion }) => acc + Number(transaccion.monto),
+          0
+        ),
       };
     });
 
-    const totalPagado = historialFiltrado.reduce((acc, item) => acc + item.monto, 0);
+    const totalPagado = historial.reduce((acc, item) => acc + item.monto, 0);
+    const cantidadPagos = historial.length;
 
     return {
       socio,
-      historial: historialFiltrado,
+      historial,
       resumenPorEstado,
       totalPagado,
-      cantidadPagos: historialFiltrado.length,
+      cantidadPagos,
     };
   } catch (error) {
     console.error('Database Error:', error);
