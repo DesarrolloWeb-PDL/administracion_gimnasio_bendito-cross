@@ -112,11 +112,7 @@ export default function WodBuilder({ rutina, tipo, onSave }: WodBuilderProps) {
     setSaved(false);
   };
 
-  const handleSidebarSelect = (exercise: Exercise, section?: string) => {
-    // Add to the first day (Lunes) by default
-    const targetDay = 'lunes';
-    const isMusculacion = tipo === 'musculacion';
-    const targetSection = section || (isMusculacion ? 'superiores' : 'wod_dia');
+  const handleSidebarSelect = (exercise: Exercise, day: string, section: string) => {
     const entry: ExerciseEntry = {
       exerciseId: exercise.id,
       nombre: exercise.esName || exercise.name,
@@ -124,9 +120,9 @@ export default function WodBuilder({ rutina, tipo, onSave }: WodBuilderProps) {
       videoUrl: exercise.videoUrl,
       muscleGroup: exercise.muscleGroupEs || exercise.muscleGroup,
       equipment: exercise.equipmentEs || exercise.equipment,
-      orden: (week[targetDay][targetSection as keyof RoutineDay] || []).length,
+      orden: (week[day][section as keyof RoutineDay] || []).length,
     };
-    handleAddExercise(targetDay, targetSection, entry);
+    handleAddExercise(day, section, entry);
   };
 
   const handleSave = async () => {

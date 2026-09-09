@@ -3,8 +3,32 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { type Exercise } from './exercise-card';
 
+const DAYS = [
+  { key: 'lunes', label: 'Lun' },
+  { key: 'martes', label: 'Mar' },
+  { key: 'miercoles', label: 'Mié' },
+  { key: 'jueves', label: 'Jue' },
+  { key: 'viernes', label: 'Vie' },
+  { key: 'sabado', label: 'Sáb' },
+];
+
+const CROSSFIT_SECTIONS = [
+  { key: 'activacion', label: 'Activación' },
+  { key: 'entrada_calor', label: 'Entrada en calor' },
+  { key: 'trabajos_dia', label: 'Trabajos del día' },
+  { key: 'wod_dia', label: 'WOD del día' },
+];
+
+const MUSCULACION_SECTIONS = [
+  { key: 'activacion', label: 'Activación' },
+  { key: 'entrada_calor', label: 'Entrada en calor' },
+  { key: 'superiores', label: 'Superiores' },
+  { key: 'zona_media', label: 'Zona Media' },
+  { key: 'inferiores', label: 'Inferiores' },
+];
+
 interface ExerciseSidebarProps {
-  onSelect: (exercise: Exercise, section?: string) => void;
+  onSelect: (exercise: Exercise, day: string, section: string) => void;
   tipo?: 'crossfit' | 'musculacion';
 }
 
@@ -26,29 +50,14 @@ function getMusculacionGroup(bodyPartEs: string): string {
   return 'Otros';
 }
 
-function bodyPartToSection(bodyPartEs: string): string {
-  const lower = (bodyPartEs || '').toLowerCase();
-  if (lower.includes('pecho') || lower.includes('espalda') || lower.includes('hombro') || 
-      lower.includes('brazo') || lower.includes('bíceps') || lower.includes('tríceps')) {
-    return 'superiores';
-  }
-  if (lower.includes('abdomen') || lower.includes('abdominales') || lower.includes('oblicuo') || lower.includes('cintura')) {
-    return 'zona_media';
-  }
-  if (lower.includes('pierna') || lower.includes('muslo') || lower.includes('pantorrilla') || 
-      lower.includes('cuádriceps') || lower.includes('isquio') || lower.includes('glúteo')) {
-    return 'inferiores';
-  }
-  return 'superiores';
-}
-
 export default function ExerciseSidebar({ onSelect, tipo = 'musculacion' }: ExerciseSidebarProps) {
-  const [isOpen, setIsOpen] = useState(false); // Closed by default on mobile
+  const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(false);
   const [draggedExercise, setDraggedExercise] = useState<Exercise | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
 
   // Auto-open on desktop (md+)
   useEffect(() => {
@@ -61,21 +70,6 @@ export default function ExerciseSidebar({ onSelect, tipo = 'musculacion' }: Exer
   }, []);
 
   const performSearch = useCallback(async (q: string) => {
-    if (!q || q.length < 1) {
-      setLoading(true);
-      try {
-        const typeParam = tipo === 'crossfit' ? 'crossfit' : 'exerciseDB';
-        const res = await fetch(`/api/exercises/search?q=${encodeURIComponent(q)}&type=${typeParam}&limit=2000&groupBy=bodyPart`);
-        const data = await res.json();
-        setExercises(data.results || []);
-      } catch (err) {
-        console.error('Exercise search error:', err);
-        setExercises([]);
-      }
-      setLoading(false);
-      return;
-    }
-
     setLoading(true);
     try {
       const typeParam = tipo === 'crossfit' ? 'crossfit' : 'exerciseDB';
@@ -120,11 +114,23 @@ export default function ExerciseSidebar({ onSelect, tipo = 'musculacion' }: Exer
     return keys;
   }, [grouped, tipo]);
 
-  // Flat list for search results (when searching, show all matched exercises)
   const flatResults = useMemo(() => {
     if (!search) return [];
-    return exercises.slice(0, 100); // Limit to 100 for performance when no search
+    return exercises.slice(0, 100);
   }, [exercises, search]);
+
+  // Click handler — opens destination picker
+  const handleClick = (exercise: Exercise) => {
+    setSelectedExercise(exercise);
+  };
+
+  // Confirm destination from picker
+  const handleConfirmDestination = (day: string, section: string) => {
+    if (selectedExercise) {
+      onSelect(selectedExercise, day, section);
+      setSelectedExercise(null);
+    }
+  };
 
   // Drag handlers
   const handleDragStart = (e: React.DragEvent, exercise: Exercise) => {
@@ -139,14 +145,11 @@ export default function ExerciseSidebar({ onSelect, tipo = 'musculacion' }: Exer
     setIsDragging(false);
   };
 
-  const handleClick = (exercise: Exercise) => {
-    const section = tipo === 'musculacion' ? bodyPartToSection(exercise.bodyPartEs || '') : undefined;
-    onSelect(exercise, section);
-  };
+  const sections = tipo === 'crossfit' ? CROSSFIT_SECTIONS : MUSCULACION_SECTIONS;
 
   return (
     <>
-      {/* Mobile toggle button - always visible */}
+      {/* Mobile toggle button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="md:hidden fixed bottom-20 right-4 z-40 h-12 w-12 rounded-full bg-[var(--primary-color)] text-white shadow-lg flex items-center justify-center hover:brightness-110 transition-all"
@@ -155,7 +158,7 @@ export default function ExerciseSidebar({ onSelect, tipo = 'musculacion' }: Exer
         <span className="text-lg">{isOpen ? '✕' : '🏋️'}</span>
       </button>
 
-      {/* Backdrop for mobile — hidden during drag so drop targets are reachable */}
+      {/* Backdrop for mobile — hidden during drag */}
       {isOpen && !isDragging && (
         <div
           className="md:hidden fixed inset-0 z-30 bg-black/50 transition-opacity"
@@ -172,130 +175,194 @@ export default function ExerciseSidebar({ onSelect, tipo = 'musculacion' }: Exer
         flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex flex-col transition-transform duration-300
         ${isDragging ? 'pointer-events-none opacity-70' : ''}
       `}>
-      {isOpen && (
-        <>
-          {/* Header */}
-          <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200">
-                Ejercicios ({exercises.length})
-              </h3>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="md:hidden text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-1"
-              >
-                ✕
-              </button>
-            </div>
-            <input
-              type="text"
-              placeholder="Buscar..."
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                performSearch(e.target.value);
-              }}
-              className="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-1.5 text-sm text-gray-800 dark:text-white placeholder-gray-500 focus:outline-none focus:border-[var(--primary-color)]"
-            />
+        {/* Header */}
+        <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+              Ejercicios ({exercises.length})
+            </h3>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="md:hidden text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-1"
+            >
+              ✕
+            </button>
           </div>
+          <input
+            type="text"
+            placeholder="Buscar..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              performSearch(e.target.value);
+            }}
+            className="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-1.5 text-sm text-gray-800 dark:text-white placeholder-gray-500 focus:outline-none focus:border-[var(--primary-color)]"
+          />
+        </div>
 
-          {/* Exercise list */}
-          <div className="flex-1 overflow-y-auto">
-            {loading ? (
-              <div className="p-4 text-center text-sm text-gray-500">Cargando...</div>
-            ) : exercises.length === 0 ? (
-              <div className="p-4 text-center text-sm text-gray-500">
-                {search ? 'Sin resultados' : 'Escribí para buscar'}
-              </div>
-            ) : (
-              <div className="p-2 space-y-1">
-                {/* When no search, show grouped with all expanded */}
-                {!search && sortedGroups.map(group => {
-                  const items = grouped[group] || [];
-                  return (
-                    <div key={group}>
-                      <div className="px-3 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        {group} ({items.length})
-                      </div>
-                      <div className="space-y-0.5">
-                        {items.map(ex => (
-                          <div
-                            key={ex.id}
-                            draggable
-                            onDragStart={(e) => handleDragStart(e, ex)}
-                            onDragEnd={handleDragEnd}
-                            onClick={() => handleClick(ex)}
-                            className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-grab active:cursor-grabbing"
-                            title="Arrastrar a una sección"
-                          >
-                            {ex.gifUrl ? (
-                              <img
-                                src={ex.gifUrl}
-                                alt={ex.esName || ex.name}
-                                className="h-8 w-8 rounded object-cover flex-shrink-0 bg-gray-200 dark:bg-gray-700"
-                                loading="lazy"
-                                draggable={false}
-                              />
-                            ) : (
-                              <div className="h-8 w-8 rounded bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
-                                <span className="text-[10px] text-gray-400">📹</span>
-                              </div>
-                            )}
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs font-medium text-gray-800 dark:text-white truncate">
-                                {ex.esName || ex.name}
-                              </p>
-                              {ex.muscleGroupEs && (
-                                <p className="text-[10px] text-gray-400 truncate">{ex.muscleGroupEs}</p>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+        {/* Exercise list */}
+        <div className="flex-1 overflow-y-auto">
+          {loading ? (
+            <div className="p-4 text-center text-sm text-gray-500">Cargando...</div>
+          ) : exercises.length === 0 ? (
+            <div className="p-4 text-center text-sm text-gray-500">
+              {search ? 'Sin resultados' : 'Escribí para buscar'}
+            </div>
+          ) : (
+            <div className="p-2 space-y-1">
+              {!search && sortedGroups.map(group => {
+                const items = grouped[group] || [];
+                return (
+                  <div key={group}>
+                    <div className="px-3 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      {group} ({items.length})
                     </div>
-                  );
-                })}
-
-                {/* When searching, show flat list */}
-                {search && flatResults.map(ex => (
-                  <div
-                    key={ex.id}
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, ex)}
-                    onDragEnd={handleDragEnd}
-                    onClick={() => handleClick(ex)}
-                    className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-grab active:cursor-grabbing"
-                    title="Arrastrar a una sección"
-                  >
-                    {ex.gifUrl ? (
-                      <img
-                        src={ex.gifUrl}
-                        alt={ex.esName || ex.name}
-                        className="h-8 w-8 rounded object-cover flex-shrink-0 bg-gray-200 dark:bg-gray-700"
-                        loading="lazy"
-                        draggable={false}
-                      />
-                    ) : (
-                      <div className="h-8 w-8 rounded bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
-                        <span className="text-[10px] text-gray-400">📹</span>
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-gray-800 dark:text-white truncate">
-                        {ex.esName || ex.name}
-                      </p>
-                      {ex.muscleGroupEs && (
-                        <p className="text-[10px] text-gray-400 truncate">{ex.muscleGroupEs}</p>
-                      )}
+                    <div className="space-y-0.5">
+                      {items.map(ex => (
+                        <div
+                          key={ex.id}
+                          draggable
+                          onDragStart={(e) => handleDragStart(e, ex)}
+                          onDragEnd={handleDragEnd}
+                          onClick={() => handleClick(ex)}
+                          className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer active:cursor-grabbing"
+                          title="Tocá para elegir destino"
+                        >
+                          {ex.gifUrl ? (
+                            <img
+                              src={ex.gifUrl}
+                              alt={ex.esName || ex.name}
+                              className="h-8 w-8 rounded object-cover flex-shrink-0 bg-gray-200 dark:bg-gray-700"
+                              loading="lazy"
+                              draggable={false}
+                            />
+                          ) : (
+                            <div className="h-8 w-8 rounded bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                              <span className="text-[10px] text-gray-400">📹</span>
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium text-gray-800 dark:text-white truncate">
+                              {ex.esName || ex.name}
+                            </p>
+                            {ex.muscleGroupEs && (
+                              <p className="text-[10px] text-gray-400 truncate">{ex.muscleGroupEs}</p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </>
-      )}
+                );
+              })}
+
+              {search && flatResults.map(ex => (
+                <div
+                  key={ex.id}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, ex)}
+                  onDragEnd={handleDragEnd}
+                  onClick={() => handleClick(ex)}
+                  className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer active:cursor-grabbing"
+                  title="Tocá para elegir destino"
+                >
+                  {ex.gifUrl ? (
+                    <img
+                      src={ex.gifUrl}
+                      alt={ex.esName || ex.name}
+                      className="h-8 w-8 rounded object-cover flex-shrink-0 bg-gray-200 dark:bg-gray-700"
+                      loading="lazy"
+                      draggable={false}
+                    />
+                  ) : (
+                    <div className="h-8 w-8 rounded bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                      <span className="text-[10px] text-gray-400">📹</span>
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-gray-800 dark:text-white truncate">
+                      {ex.esName || ex.name}
+                    </p>
+                    {ex.muscleGroupEs && (
+                      <p className="text-[10px] text-gray-400 truncate">{ex.muscleGroupEs}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Destination picker modal */}
+      {selectedExercise && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-sm rounded-lg bg-white dark:bg-gray-800 p-5 shadow-xl mx-4">
+            <div className="flex items-center gap-3 mb-4">
+              {selectedExercise.gifUrl && (
+                <img
+                  src={selectedExercise.gifUrl}
+                  alt={selectedExercise.esName || selectedExercise.name}
+                  className="h-12 w-12 rounded object-cover bg-gray-200 dark:bg-gray-700"
+                />
+              )}
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-gray-800 dark:text-white truncate">
+                  {selectedExercise.esName || selectedExercise.name}
+                </p>
+                {selectedExercise.muscleGroupEs && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{selectedExercise.muscleGroupEs}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Day picker */}
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">Día</p>
+            <div className="grid grid-cols-6 gap-1 mb-4">
+              {DAYS.map(d => (
+                <button
+                  key={d.key}
+                  onClick={() => {
+                    // Store day temporarily, show sections next
+                    setSelectedExercise(prev => prev ? { ...prev, _targetDay: d.key } as Exercise : null);
+                  }}
+                  className={`px-1 py-2 rounded-lg text-xs font-medium transition-colors ${
+                    (selectedExercise as any)._targetDay === d.key
+                      ? 'bg-[var(--primary-color)] text-white'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  }`}
+                >
+                  {d.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Section picker */}
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">Sección</p>
+            <div className="grid grid-cols-2 gap-1 mb-4">
+              {sections.map(s => (
+                <button
+                  key={s.key}
+                  onClick={() => {
+                    const day = (selectedExercise as any)._targetDay || 'lunes';
+                    handleConfirmDestination(day, s.key);
+                  }}
+                  className="px-3 py-2.5 rounded-lg text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-[var(--primary-color)] hover:text-white transition-colors text-left"
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setSelectedExercise(null)}
+              className="w-full text-center text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
