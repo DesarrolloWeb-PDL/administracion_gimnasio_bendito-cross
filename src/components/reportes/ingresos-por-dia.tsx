@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { parseFiltrosReportesLenient } from '@/lib/filtros-reportes';
 
 type IngresosPorDiaData = {
   dia: number;
@@ -16,6 +18,19 @@ type TransaccionDetallada = {
   socioNombre: string;
 };
 
+function useFilterQuery() {
+  const searchParams = useSearchParams();
+  const filtros = parseFiltrosReportesLenient(searchParams);
+
+  const params = new URLSearchParams();
+  if (filtros.disciplina) params.set('disciplina', filtros.disciplina);
+  if (filtros.desde) params.set('desde', filtros.desde);
+  if (filtros.hasta) params.set('hasta', filtros.hasta);
+  if (filtros.estadoPago) params.set('estadoPago', filtros.estadoPago);
+
+  return params.toString();
+}
+
 export function IngresosPorDia() {
   const [año, setAño] = useState<number>(new Date().getFullYear());
   const [mes, setMes] = useState<number>(new Date().getMonth() + 1);
@@ -24,6 +39,7 @@ export function IngresosPorDia() {
   const [diaSeleccionado, setDiaSeleccionado] = useState<number | null>(null);
   const [transacciones, setTransacciones] = useState<TransaccionDetallada[]>([]);
   const [cargandoDetalle, setCargandoDetalle] = useState(false);
+  const filterQuery = useFilterQuery();
 
   const meses = [
     { num: 1, nombre: 'Enero' },
@@ -45,24 +61,30 @@ export function IngresosPorDia() {
     const fetchIngresos = async () => {
       setLoading(true);
       try {
+        const query = `año=${año}&mes=${mes}${filterQuery ? `&${filterQuery}` : ''}`;
         const response = await fetch(
-          `/api/reportes/ingresos-por-dia?año=${año}&mes=${mes}`
+          `/api/reportes/ingresos-por-dia?${query}`
         );
         if (response.ok) {
           const data = await response.json();
           setIngresos(data);
           setDiaSeleccionado(null);
           setTransacciones([]);
+        } else {
+          setIngresos([]);
+          setDiaSeleccionado(null);
+          setTransacciones([]);
         }
       } catch (error) {
         console.error('Error al obtener ingresos:', error);
+        setIngresos([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchIngresos();
-  }, [año, mes]);
+  }, [año, mes, filterQuery]);
 
   // Obtener transacciones del día seleccionado
   const handleSelectDia = async (dia: number) => {
@@ -75,15 +97,19 @@ export function IngresosPorDia() {
     setDiaSeleccionado(dia);
     setCargandoDetalle(true);
     try {
+      const query = `año=${año}&mes=${mes}&dia=${dia}${filterQuery ? `&${filterQuery}` : ''}`;
       const response = await fetch(
-        `/api/reportes/transacciones-por-dia?año=${año}&mes=${mes}&dia=${dia}`
+        `/api/reportes/transacciones-por-dia?${query}`
       );
       if (response.ok) {
         const data = await response.json();
         setTransacciones(data);
+      } else {
+        setTransacciones([]);
       }
     } catch (error) {
       console.error('Error al obtener transacciones:', error);
+      setTransacciones([]);
     } finally {
       setCargandoDetalle(false);
     }

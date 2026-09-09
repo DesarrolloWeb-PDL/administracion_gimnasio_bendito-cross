@@ -1,28 +1,47 @@
-import { fetchIngresosPorMes, fetchNuevosSociosPorMes, fetchAsistenciasPorDia, fetchIngresosPorTipo, fetchSociosParaHistorialPagos, fetchHistorialPagosPorSocio } from '@/lib/data-reportes';
+import {
+  fetchIngresosPorMes,
+  fetchNuevosSociosPorMes,
+  fetchAsistenciasPorDia,
+  fetchIngresosPorTipo,
+  fetchSociosParaHistorialPagos,
+  fetchHistorialPagosPorSocio,
+} from '@/lib/data-reportes';
 import { IngresosPorDia } from '@/components/reportes/ingresos-por-dia';
 import { formatFechaBuenosAires } from '@/lib/date-utils';
 import SocioHistorialSearchSelect from '@/components/reportes/socio-historial-search-select';
 import StatusFilter from '@/components/ui/status-filter';
+import DisciplinaFilter from '@/components/reportes/disciplina-filter';
+import DateRangeFilter from '@/components/reportes/date-range-filter';
 import HistorialPagosActions from '@/components/reportes/historial-pagos-actions';
+import {
+  parseFiltrosReportesLenient,
+  describeRango,
+} from '@/lib/filtros-reportes';
 
 export default async function Page({
   searchParams,
 }: {
   searchParams?: Promise<{
     socioId?: string;
+    disciplina?: string;
+    desde?: string;
+    hasta?: string;
+    estadoPago?: string;
     estadoSuscripcion?: string;
   }>;
 }) {
   const params = await searchParams;
   const socioId = params?.socioId || '';
-  const estadoSuscripcion = params?.estadoSuscripcion || '';
+  const filtros = parseFiltrosReportesLenient(params ?? {});
 
-  const ingresos = await fetchIngresosPorMes();
-  const nuevosSocios = await fetchNuevosSociosPorMes();
-  const asistenciasPorDia = await fetchAsistenciasPorDia();
-  const ingresosPorTipo = await fetchIngresosPorTipo();
+  const ingresos = await fetchIngresosPorMes(filtros);
+  const nuevosSocios = await fetchNuevosSociosPorMes(filtros);
+  const asistenciasPorDia = await fetchAsistenciasPorDia(filtros);
+  const ingresosPorTipo = await fetchIngresosPorTipo(filtros);
   const sociosPagos = await fetchSociosParaHistorialPagos();
-  const historialPagos = socioId ? await fetchHistorialPagosPorSocio(socioId, estadoSuscripcion || undefined) : null;
+  const historialPagos = socioId
+    ? await fetchHistorialPagosPorSocio(socioId, filtros)
+    : null;
 
   const historialExportable = historialPagos
     ? {
@@ -44,7 +63,26 @@ export default async function Page({
   return (
     <main className="w-full">
       <div className="print:hidden">
-        <h1 className="mb-8 text-2xl font-bold text-gray-800 dark:text-white">Reportes y Estadísticas</h1>
+        <h1 className="mb-8 text-2xl font-bold text-gray-800 dark:text-white">
+          Reportes y Estadísticas
+        </h1>
+
+        <div className="mb-6 rounded-xl bg-white p-4 shadow-sm">
+          <div className="flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-end">
+            <DisciplinaFilter />
+            <DateRangeFilter />
+            <StatusFilter
+              filterKey="estadoPago"
+              placeholder="Estado de pago"
+              options={[
+                { value: 'pagas', label: 'Pagas' },
+                { value: 'inpagas', label: 'Inpagas' },
+              ]}
+              helperText="Inpagas agrupa Vencida y Suspendida; no representa deuda real, solo estado de membresía."
+              resetPage={false}
+            />
+          </div>
+        </div>
 
         <div className="mb-6 rounded-xl bg-white p-6 shadow-sm">
           <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
@@ -57,15 +95,6 @@ export default async function Page({
 
             <div className="flex flex-col gap-3 md:flex-row md:items-end">
               <SocioHistorialSearchSelect socios={sociosPagos} />
-              <StatusFilter
-                filterKey="estadoSuscripcion"
-                placeholder="Estado"
-                options={[
-                  { value: 'Activa', label: 'Activa' },
-                  { value: 'Vencida', label: 'Vencida' },
-                  { value: 'Suspendida', label: 'Suspendida' },
-                ]}
-              />
             </div>
           </div>
 
@@ -104,28 +133,26 @@ export default async function Page({
                 </div>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-3">
+              <div className="grid gap-4 md:grid-cols-2">
                 {historialPagos.resumenPorEstado.map((item) => (
                   <div
                     key={item.estado}
                     className={`rounded-lg p-4 ${
-                      item.estado === 'Activa'
+                      item.estado === 'pagas'
                         ? 'bg-green-50'
-                        : item.estado === 'Vencida'
-                        ? 'bg-red-50'
-                        : 'bg-gray-50'
+                        : 'bg-red-50'
                     }`}
                   >
                     <p
                       className={`text-sm font-medium ${
-                        item.estado === 'Activa'
+                        item.estado === 'pagas'
                           ? 'text-green-700'
-                          : item.estado === 'Vencida'
-                          ? 'text-red-700'
-                          : 'text-gray-700'
+                          : 'text-red-700'
                       }`}
                     >
-                      {item.estado}
+                      {item.estado === 'pagas'
+                        ? 'Pagas'
+                        : 'Inpagas (Vencida / Suspendida)'}
                     </p>
                     <p className="text-lg font-semibold text-gray-900">{item.cantidad} pagos</p>
                     <p className="text-sm text-gray-700">
@@ -201,7 +228,9 @@ export default async function Page({
 
         <div className="grid gap-6 mb-6 md:grid-cols-2">
           <div className="rounded-xl bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-semibold text-gray-700">Ingresos (Últimos 30 días)</h2>
+            <h2 className="mb-4 text-lg font-semibold text-gray-700">
+              Ingresos ({describeRango(filtros, 'Últimos 30 días')})
+            </h2>
             <div className="space-y-4">
               {ingresosPorTipo.length === 0 ? (
                 <p className="text-center text-gray-500">No hay datos disponibles</p>
@@ -225,7 +254,9 @@ export default async function Page({
           </div>
 
           <div className="rounded-xl bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-semibold text-gray-700">Asistencias por Día (Últimos 30 días)</h2>
+            <h2 className="mb-4 text-lg font-semibold text-gray-700">
+              Asistencias por Día ({describeRango(filtros, 'Últimos 30 días')})
+            </h2>
             <div className="overflow-x-auto">
               <table className="min-w-full text-left text-sm">
                 <thead className="border-b font-medium text-gray-900">
@@ -257,7 +288,9 @@ export default async function Page({
 
         <div className="grid gap-6 md:grid-cols-2">
           <div className="rounded-xl bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-semibold text-gray-700">Ingresos Mensuales (Último Año)</h2>
+            <h2 className="mb-4 text-lg font-semibold text-gray-700">
+              Ingresos Mensuales ({describeRango(filtros, 'Último Año')})
+            </h2>
             <div className="overflow-x-auto">
               <table className="min-w-full text-left text-sm">
                 <thead className="border-b font-medium text-gray-900">
@@ -292,7 +325,9 @@ export default async function Page({
           </div>
 
           <div className="rounded-xl bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-semibold text-gray-700">Nuevos Socios (Último Año)</h2>
+            <h2 className="mb-4 text-lg font-semibold text-gray-700">
+              Nuevos Socios ({describeRango(filtros, 'Último Año')})
+            </h2>
             <div className="overflow-x-auto">
               <table className="min-w-full text-left text-sm">
                 <thead className="border-b font-medium text-gray-900">
@@ -356,10 +391,14 @@ export default async function Page({
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 text-sm">
+            <div className="grid grid-cols-2 gap-3 text-sm">
               {historialPagos.resumenPorEstado.map((item) => (
                 <div key={item.estado} className="rounded border border-gray-300 p-3">
-                  <p className="text-xs uppercase text-gray-500">{item.estado}</p>
+                  <p className="text-xs uppercase text-gray-500">
+                    {item.estado === 'pagas'
+                      ? 'Pagas'
+                      : 'Inpagas (Vencida / Suspendida)'}
+                  </p>
                   <p className="font-semibold">{item.cantidad} pagos</p>
                   <p className="text-gray-600">
                     {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(item.total)}
