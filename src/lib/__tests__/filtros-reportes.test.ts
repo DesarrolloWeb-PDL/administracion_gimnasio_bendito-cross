@@ -8,7 +8,6 @@ import {
   clasificarEstadoPago,
   estadoPagoPredicate,
   disciplinaPredicate,
-  type FiltrosReportes,
 } from '@/lib/filtros-reportes';
 
 describe('parseFiltrosReportesLenient', () => {
