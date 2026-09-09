@@ -60,6 +60,7 @@ export default function WodBuilder({ rutina, tipo, onSave }: WodBuilderProps) {
   });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
 
   const handleAddExercise = (dia: string, section: string, entry: ExerciseEntry) => {
     setWeek((prev) => ({
@@ -112,7 +113,29 @@ export default function WodBuilder({ rutina, tipo, onSave }: WodBuilderProps) {
     setSaved(false);
   };
 
-  const handleSidebarSelect = (exercise: Exercise, day: string, section: string) => {
+  // Click-to-place: select exercise from sidebar
+  const handleSidebarSelect = (exercise: Exercise) => {
+    setSelectedExercise(prev => prev?.id === exercise.id ? null : exercise);
+  };
+
+  // Place selected exercise into a day+section
+  const handlePlaceExercise = (dia: string, section: string) => {
+    if (!selectedExercise) return;
+    const entry: ExerciseEntry = {
+      exerciseId: selectedExercise.id,
+      nombre: selectedExercise.esName || selectedExercise.name,
+      gifUrl: selectedExercise.gifUrl,
+      videoUrl: selectedExercise.videoUrl,
+      muscleGroup: selectedExercise.muscleGroupEs || selectedExercise.muscleGroup,
+      equipment: selectedExercise.equipmentEs || selectedExercise.equipment,
+      orden: (week[dia][section as keyof RoutineDay] || []).length,
+    };
+    handleAddExercise(dia, section, entry);
+    // Keep selected so user can place in multiple sections
+  };
+
+  // Drag & drop (desktop bonus)
+  const handleSidebarDrop = (dia: string, section: string, exercise: Exercise) => {
     const entry: ExerciseEntry = {
       exerciseId: exercise.id,
       nombre: exercise.esName || exercise.name,
@@ -120,9 +143,9 @@ export default function WodBuilder({ rutina, tipo, onSave }: WodBuilderProps) {
       videoUrl: exercise.videoUrl,
       muscleGroup: exercise.muscleGroupEs || exercise.muscleGroup,
       equipment: exercise.equipmentEs || exercise.equipment,
-      orden: (week[day][section as keyof RoutineDay] || []).length,
+      orden: (week[dia][section as keyof RoutineDay] || []).length,
     };
-    handleAddExercise(day, section, entry);
+    handleAddExercise(dia, section, entry);
   };
 
   const handleSave = async () => {
@@ -157,8 +180,8 @@ export default function WodBuilder({ rutina, tipo, onSave }: WodBuilderProps) {
 
   return (
     <div className="flex flex-col md:flex-row h-[calc(100dvh-120px)] md:h-[calc(100vh-120px)] overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-      {/* Sidebar - drawer on mobile, fixed on desktop */}
-      <ExerciseSidebar onSelect={handleSidebarSelect} tipo={tipo} />
+      {/* Sidebar */}
+      <ExerciseSidebar onSelect={handleSidebarSelect} selectedId={selectedExercise?.id} tipo={tipo} />
 
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
@@ -176,21 +199,32 @@ export default function WodBuilder({ rutina, tipo, onSave }: WodBuilderProps) {
             disabled={saving}
             className="flex-shrink-0 flex items-center gap-2 rounded-lg bg-[var(--primary-color)] px-4 py-2 text-sm font-medium text-white transition-colors hover:brightness-110 disabled:opacity-50"
           >
-            {saving ? (
-              <>
-                <span className="animate-spin">⟳</span> Guardando...
-              </>
-            ) : saved ? (
-              <>
-                <span>✓</span> Guardado
-              </>
-            ) : (
-              'Guardar'
-            )}
+            {saving ? (<><span className="animate-spin">⟳</span> Guardando...</>) : saved ? (<><span>✓</span> Guardado</>) : ('Guardar')}
           </button>
         </div>
 
-        {/* Days - vertical accordion list */}
+        {/* Selected exercise banner */}
+        {selectedExercise && (
+          <div className="flex items-center justify-between gap-3 px-4 py-2 bg-[var(--primary-color)]/10 border-b border-[var(--primary-color)]/30">
+            <div className="flex items-center gap-2 min-w-0">
+              {selectedExercise.gifUrl && (
+                <img src={selectedExercise.gifUrl} alt="" className="h-8 w-8 rounded object-cover flex-shrink-0" />
+              )}
+              <span className="text-sm font-medium text-gray-800 dark:text-white truncate">
+                {selectedExercise.esName || selectedExercise.name}
+              </span>
+              <span className="text-xs text-[var(--primary-color)]">← Tocá una sección para colocarlo</span>
+            </div>
+            <button
+              onClick={() => setSelectedExercise(null)}
+              className="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 flex-shrink-0"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
+        {/* Days */}
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
           {DAYS.map((d) => (
             <DayColumn
@@ -199,7 +233,9 @@ export default function WodBuilder({ rutina, tipo, onSave }: WodBuilderProps) {
               diaLabel={d.label}
               routineDay={week[d.key]}
               tipo={tipo}
-              onAddExercise={handleAddExercise}
+              selectedExercise={selectedExercise}
+              onPlaceExercise={handlePlaceExercise}
+              onDropExercise={handleSidebarDrop}
               onRemoveExercise={handleRemoveExercise}
               onReorderExercise={handleReorderExercise}
               onUpdateExercise={handleUpdateExercise}

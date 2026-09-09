@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import RoutineSection, { type ExerciseEntry } from './routine-section';
+import type { Exercise } from './exercise-card';
 
 export interface RoutineDay {
   activacion: ExerciseEntry[];
@@ -45,7 +46,9 @@ interface DayColumnProps {
   diaLabel: string;
   routineDay?: RoutineDay;
   tipo: 'crossfit' | 'musculacion';
-  onAddExercise: (dia: string, section: string, entry: ExerciseEntry) => void;
+  selectedExercise?: Exercise | null;
+  onPlaceExercise: (dia: string, section: string) => void;
+  onDropExercise: (dia: string, section: string, exercise: Exercise) => void;
   onRemoveExercise: (dia: string, section: string, index: number) => void;
   onReorderExercise: (dia: string, section: string, fromIndex: number, toIndex: number) => void;
   onUpdateExercise: (dia: string, section: string, index: number, updates: Partial<ExerciseEntry>) => void;
@@ -56,7 +59,9 @@ export default function DayColumn({
   diaLabel,
   routineDay,
   tipo,
-  onAddExercise,
+  selectedExercise,
+  onPlaceExercise,
+  onDropExercise,
   onRemoveExercise,
   onReorderExercise,
   onUpdateExercise,
@@ -69,42 +74,27 @@ export default function DayColumn({
   const sections = isCrossfit ? CROSSFIT_SECTIONS : MUSCULACION_SECTIONS;
   const titles = isCrossfit ? CROSSFIT_TITLES : MUSCULACION_TITLES;
 
-  // Count total exercises in this day
   const totalExercises = sections.reduce((sum, key) => {
     const exerciseKey = key as keyof RoutineDay;
     return sum + (day[exerciseKey]?.length || 0);
   }, 0);
 
-  // Handle drop on the entire day — routes to first section with exercises, or first section
+  // Drop from sidebar (desktop drag)
   const handleDayDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setDragOver(false);
-
     try {
       const data = JSON.parse(e.dataTransfer.getData('application/json'));
       if (data && data.id) {
-        // Find first section with fewer exercises, or first section
+        // Place in first section with fewest exercises
         let targetSection: string = sections[0];
         let minCount = Infinity;
         for (const s of sections) {
           const count = (day[s as keyof RoutineDay] || []).length;
-          if (count < minCount) {
-            minCount = count;
-            targetSection = s;
-          }
+          if (count < minCount) { minCount = count; targetSection = s; }
         }
-
-        const entry: ExerciseEntry = {
-          exerciseId: data.id,
-          nombre: data.esName || data.name,
-          gifUrl: data.gifUrl,
-          videoUrl: data.videoUrl,
-          muscleGroup: data.muscleGroupEs || data.muscleGroup,
-          equipment: data.equipmentEs || data.equipment,
-          orden: (day[targetSection as keyof RoutineDay] || []).length,
-        };
-        onAddExercise(dia, targetSection, entry);
+        onDropExercise(dia, targetSection, data);
       }
     } catch (err) {
       console.error('Drop error:', err);
@@ -122,59 +112,73 @@ export default function DayColumn({
     setDragOver(false);
   };
 
+  // Click-to-place: tapping the day banner places exercise in first section
+  const handleDayClick = () => {
+    if (selectedExercise) {
+      // Find section with fewest exercises
+      let targetSection: string = sections[0];
+      let minCount = Infinity;
+      for (const s of sections) {
+        const count = (day[s as keyof RoutineDay] || []).length;
+        if (count < minCount) { minCount = count; targetSection = s; }
+      }
+      onPlaceExercise(dia, targetSection);
+    } else {
+      setExpanded(!expanded);
+    }
+  };
+
   return (
     <div className={`rounded-xl border transition-all overflow-hidden ${
       expanded
         ? dragOver
           ? 'border-[var(--primary-color)] shadow-lg ring-2 ring-[var(--primary-color)] ring-opacity-50'
           : 'border-[var(--primary-color)] shadow-lg'
-        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+        : selectedExercise
+          ? 'border-[var(--primary-color)]/50 hover:border-[var(--primary-color)] cursor-pointer'
+          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
     } bg-white dark:bg-gray-800`}>
-      {/* Day header - clickable button */}
+      {/* Day header */}
       <button
-        onClick={() => setExpanded(!expanded)}
+        onClick={handleDayClick}
         className={`w-full flex items-center justify-between px-4 py-3 text-left transition-colors ${
           expanded
             ? 'bg-[var(--primary-color)]'
-            : 'bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800'
+            : selectedExercise
+              ? 'bg-[var(--primary-color)]/5 hover:bg-[var(--primary-color)]/10'
+              : 'bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800'
         }`}
       >
         <div className="flex items-center gap-2">
-          <span className={`text-lg transition-transform ${expanded ? 'rotate-90' : ''}`}>
-            ▶
-          </span>
+          <span className={`text-lg transition-transform ${expanded ? 'rotate-90' : ''}`}>▶</span>
           <h3 className={`text-sm font-bold ${expanded ? 'text-white' : 'text-gray-800 dark:text-white'}`}>
             {diaLabel}
           </h3>
+          {selectedExercise && !expanded && (
+            <span className="text-[10px] bg-[var(--primary-color)] text-white px-1.5 py-0.5 rounded-full font-medium">
+              Tocá para colocar
+            </span>
+          )}
         </div>
         {totalExercises > 0 && (
           <span className={`text-xs px-2 py-0.5 rounded-full ${
-            expanded
-              ? 'bg-white/20 text-white'
-              : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+            expanded ? 'bg-white/20 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
           }`}>
             {totalExercises}
           </span>
         )}
       </button>
 
-      {/* Expanded content — entire area is drop target */}
+      {/* Expanded content — drop target */}
       {expanded && (
         <div
           onDrop={handleDayDrop}
           onDragOver={handleDayDragOver}
           onDragLeave={handleDayDragLeave}
           className={`p-3 space-y-2 border-t transition-colors ${
-            dragOver
-              ? 'border-[var(--primary-color)] bg-[var(--primary-color)]/5'
-              : 'border-gray-200 dark:border-gray-700'
+            dragOver ? 'border-[var(--primary-color)] bg-[var(--primary-color)]/5' : 'border-gray-200 dark:border-gray-700'
           }`}
         >
-          {dragOver && (
-            <div className="text-center text-xs text-[var(--primary-color)] font-medium py-1 border border-dashed border-[var(--primary-color)] rounded-lg bg-[var(--primary-color)]/5">
-              Soltá aquí para agregar a {diaLabel}
-            </div>
-          )}
           {sections.map((key) => {
             const exerciseKey = key as keyof RoutineDay;
             return (
@@ -183,7 +187,8 @@ export default function DayColumn({
                 title={titles[key]}
                 exercises={day[exerciseKey] || []}
                 tipo={tipo}
-                onAdd={(entry) => onAddExercise(dia, key, entry)}
+                selectedExercise={selectedExercise}
+                onPlace={() => onPlaceExercise(dia, key)}
                 onRemove={(index) => onRemoveExercise(dia, key, index)}
                 onReorder={(from, to) => onReorderExercise(dia, key, from, to)}
                 onUpdate={(index, updates) => onUpdateExercise(dia, key, index, updates)}
