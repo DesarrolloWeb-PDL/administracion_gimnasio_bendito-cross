@@ -48,6 +48,7 @@ export default function ExerciseSidebar({ onSelect, tipo = 'musculacion' }: Exer
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(false);
   const [draggedExercise, setDraggedExercise] = useState<Exercise | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   // Auto-open on desktop (md+)
   useEffect(() => {
@@ -128,8 +129,14 @@ export default function ExerciseSidebar({ onSelect, tipo = 'musculacion' }: Exer
   // Drag handlers
   const handleDragStart = (e: React.DragEvent, exercise: Exercise) => {
     setDraggedExercise(exercise);
+    setIsDragging(true);
     e.dataTransfer.setData('application/json', JSON.stringify(exercise));
     e.dataTransfer.effectAllowed = 'copy';
+  };
+
+  const handleDragEnd = () => {
+    setDraggedExercise(null);
+    setIsDragging(false);
   };
 
   const handleClick = (exercise: Exercise) => {
@@ -148,8 +155,8 @@ export default function ExerciseSidebar({ onSelect, tipo = 'musculacion' }: Exer
         <span className="text-lg">{isOpen ? '✕' : '🏋️'}</span>
       </button>
 
-      {/* Backdrop for mobile */}
-      {isOpen && (
+      {/* Backdrop for mobile — hidden during drag so drop targets are reachable */}
+      {isOpen && !isDragging && (
         <div
           className="md:hidden fixed inset-0 z-30 bg-black/50 transition-opacity"
           onClick={() => setIsOpen(false)}
@@ -163,6 +170,7 @@ export default function ExerciseSidebar({ onSelect, tipo = 'musculacion' }: Exer
         fixed md:relative inset-y-0 left-0 z-40
         w-72 md:w-72
         flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex flex-col transition-transform duration-300
+        ${isDragging ? 'pointer-events-none opacity-70' : ''}
       `}>
       {isOpen && (
         <>
@@ -215,6 +223,7 @@ export default function ExerciseSidebar({ onSelect, tipo = 'musculacion' }: Exer
                             key={ex.id}
                             draggable
                             onDragStart={(e) => handleDragStart(e, ex)}
+                            onDragEnd={handleDragEnd}
                             onClick={() => handleClick(ex)}
                             className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-grab active:cursor-grabbing"
                             title="Arrastrar a una sección"
@@ -253,6 +262,7 @@ export default function ExerciseSidebar({ onSelect, tipo = 'musculacion' }: Exer
                     key={ex.id}
                     draggable
                     onDragStart={(e) => handleDragStart(e, ex)}
+                    onDragEnd={handleDragEnd}
                     onClick={() => handleClick(ex)}
                     className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-grab active:cursor-grabbing"
                     title="Arrastrar a una sección"

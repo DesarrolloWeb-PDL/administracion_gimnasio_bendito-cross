@@ -70,7 +70,11 @@ export default function RoutineSection({
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
-      className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 p-3 transition-all"
+      className={`rounded-lg border bg-gray-50 dark:bg-gray-900/50 p-3 transition-all ${
+        exercises.length === 0
+          ? 'border-dashed border-2 border-gray-300 dark:border-gray-600 min-h-[48px]'
+          : 'border-gray-200 dark:border-gray-700'
+      }`}
     >
       <div className="flex items-center justify-between mb-2">
         <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-200">{title}</h4>
