@@ -1,6 +1,6 @@
 import {
   fetchIngresosPorMes,
-  fetchNuevosSociosPorMes,
+  fetchNuevasSuscripcionesPorMes,
   fetchAsistenciasPorDia,
   fetchIngresosPorTipo,
   fetchSociosParaHistorialPagos,
@@ -35,7 +35,7 @@ export default async function Page({
   const filtros = parseFiltrosReportesLenient(params ?? {});
 
   const ingresos = await fetchIngresosPorMes(filtros);
-  const nuevosSocios = await fetchNuevosSociosPorMes(filtros);
+  const nuevasSuscripciones = await fetchNuevasSuscripcionesPorMes(filtros);
   const asistenciasPorDia = await fetchAsistenciasPorDia(filtros);
   const ingresosPorTipo = await fetchIngresosPorTipo(filtros);
   const sociosPagos = await fetchSociosParaHistorialPagos();
@@ -326,7 +326,7 @@ export default async function Page({
 
           <div className="rounded-xl bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-lg font-semibold text-gray-700">
-              Nuevos Socios ({describeRango(filtros, 'Último Año')})
+              Nuevas Suscripciones ({describeRango(filtros, 'Último Año')})
             </h2>
             <div className="overflow-x-auto">
               <table className="min-w-full text-left text-sm">
@@ -337,14 +337,14 @@ export default async function Page({
                   </tr>
                 </thead>
                 <tbody>
-                  {nuevosSocios.length === 0 ? (
+                  {nuevasSuscripciones.length === 0 ? (
                     <tr>
                       <td colSpan={2} className="px-4 py-4 text-center text-gray-500">
                         No hay datos disponibles
                       </td>
                     </tr>
                   ) : (
-                    nuevosSocios.map((item) => (
+                    nuevasSuscripciones.map((item) => (
                       <tr key={item.fecha} className="border-b last:border-0 hover:bg-gray-50">
                         <td className="px-4 py-3 text-gray-600">{item.fecha}</td>
                         <td className="px-4 py-3 text-right font-medium text-gray-900">{item.cantidad}</td>

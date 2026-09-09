@@ -119,16 +119,23 @@ export async function fetchIngresosPorMes(filtros?: FiltrosReportes) {
   }
 }
 
-export async function fetchNuevosSociosPorMes(filtros?: FiltrosReportes) {
+export async function fetchNuevasSuscripcionesPorMes(filtros?: FiltrosReportes) {
   noStore();
   try {
     const oneYearAgo = new Date();
     oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
 
-    const socios = await prisma.socio.findMany({
-      where: {
-        createdAt: buildDateFilter(oneYearAgo, filtros),
-      },
+    const where: Prisma.SuscripcionWhereInput = {
+      createdAt: buildDateFilter(oneYearAgo, filtros),
+    };
+
+    // Filtro por disciplina: joinea con Plan
+    if (filtros?.disciplina) {
+      where.plan = disciplinaPredicate(filtros.disciplina);
+    }
+
+    const suscripciones = await prisma.suscripcion.findMany({
+      where,
       select: {
         createdAt: true,
       },
@@ -137,26 +144,26 @@ export async function fetchNuevosSociosPorMes(filtros?: FiltrosReportes) {
       },
     });
 
-    const sociosPorMes: Record<string, number> = {};
+    const porMes: Record<string, number> = {};
 
-    socios.forEach((s) => {
+    suscripciones.forEach((s) => {
       const date = new Date(s.createdAt);
       const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
       
-      if (!sociosPorMes[key]) {
-        sociosPorMes[key] = 0;
+      if (!porMes[key]) {
+        porMes[key] = 0;
       }
-      sociosPorMes[key] += 1;
+      porMes[key] += 1;
     });
 
-    return Object.entries(sociosPorMes).map(([fecha, cantidad]) => ({
+    return Object.entries(porMes).map(([fecha, cantidad]) => ({
       fecha,
       cantidad,
     }));
 
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Error al obtener reporte de socios.');
+    throw new Error('Error al obtener reporte de suscripciones.');
   }
 }
 
