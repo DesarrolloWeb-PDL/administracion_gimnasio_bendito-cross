@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchTransaccionesPorDia } from '@/lib/data-reportes';
+import { parseFiltrosReportesStrict } from '@/lib/filtros-reportes';
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,7 +16,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const transacciones = await fetchTransaccionesPorDia(año, mes, dia);
+    const parseResult = parseFiltrosReportesStrict(searchParams);
+    if (!parseResult.ok) {
+      return NextResponse.json(
+        { error: 'Filtros inválidos' },
+        { status: 400 }
+      );
+    }
+
+    const transacciones = await fetchTransaccionesPorDia(año, mes, dia, parseResult.filtros);
     return NextResponse.json(transacciones);
   } catch (error) {
     console.error('API Error:', error);
