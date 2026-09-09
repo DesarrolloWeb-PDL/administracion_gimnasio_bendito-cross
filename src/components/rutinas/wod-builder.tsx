@@ -60,7 +60,6 @@ export default function WodBuilder({ rutina, tipo, onSave }: WodBuilderProps) {
   });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
 
   const handleAddExercise = (dia: string, section: string, entry: ExerciseEntry) => {
     setWeek((prev) => ({
@@ -113,41 +112,6 @@ export default function WodBuilder({ rutina, tipo, onSave }: WodBuilderProps) {
     setSaved(false);
   };
 
-  // Click-to-place: select exercise from sidebar
-  const handleSidebarSelect = (exercise: Exercise) => {
-    setSelectedExercise(prev => prev?.id === exercise.id ? null : exercise);
-  };
-
-  // Place selected exercise into a day+section
-  const handlePlaceExercise = (dia: string, section: string) => {
-    if (!selectedExercise) return;
-    const entry: ExerciseEntry = {
-      exerciseId: selectedExercise.id,
-      nombre: selectedExercise.esName || selectedExercise.name,
-      gifUrl: selectedExercise.gifUrl,
-      videoUrl: selectedExercise.videoUrl,
-      muscleGroup: selectedExercise.muscleGroupEs || selectedExercise.muscleGroup,
-      equipment: selectedExercise.equipmentEs || selectedExercise.equipment,
-      orden: (week[dia][section as keyof RoutineDay] || []).length,
-    };
-    handleAddExercise(dia, section, entry);
-    // Keep selected so user can place in multiple sections
-  };
-
-  // Drag & drop (desktop bonus)
-  const handleSidebarDrop = (dia: string, section: string, exercise: Exercise) => {
-    const entry: ExerciseEntry = {
-      exerciseId: exercise.id,
-      nombre: exercise.esName || exercise.name,
-      gifUrl: exercise.gifUrl,
-      videoUrl: exercise.videoUrl,
-      muscleGroup: exercise.muscleGroupEs || exercise.muscleGroup,
-      equipment: exercise.equipmentEs || exercise.equipment,
-      orden: (week[dia][section as keyof RoutineDay] || []).length,
-    };
-    handleAddExercise(dia, section, entry);
-  };
-
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -181,7 +145,7 @@ export default function WodBuilder({ rutina, tipo, onSave }: WodBuilderProps) {
   return (
     <div className="flex flex-col md:flex-row h-[calc(100dvh-120px)] md:h-[calc(100vh-120px)] overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
       {/* Sidebar */}
-      <ExerciseSidebar onSelect={handleSidebarSelect} selectedId={selectedExercise?.id} tipo={tipo} />
+      <ExerciseSidebar tipo={tipo} />
 
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
@@ -203,27 +167,6 @@ export default function WodBuilder({ rutina, tipo, onSave }: WodBuilderProps) {
           </button>
         </div>
 
-        {/* Selected exercise banner */}
-        {selectedExercise && (
-          <div className="flex items-center justify-between gap-3 px-4 py-2 bg-[var(--primary-color)]/10 border-b border-[var(--primary-color)]/30">
-            <div className="flex items-center gap-2 min-w-0">
-              {selectedExercise.gifUrl && (
-                <img src={selectedExercise.gifUrl} alt="" className="h-8 w-8 rounded object-cover flex-shrink-0" />
-              )}
-              <span className="text-sm font-medium text-gray-800 dark:text-white truncate">
-                {selectedExercise.esName || selectedExercise.name}
-              </span>
-              <span className="text-xs text-[var(--primary-color)]">← Tocá una sección para colocarlo</span>
-            </div>
-            <button
-              onClick={() => setSelectedExercise(null)}
-              className="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 flex-shrink-0"
-            >
-              ✕
-            </button>
-          </div>
-        )}
-
         {/* Days */}
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
           {DAYS.map((d) => (
@@ -233,9 +176,7 @@ export default function WodBuilder({ rutina, tipo, onSave }: WodBuilderProps) {
               diaLabel={d.label}
               routineDay={week[d.key]}
               tipo={tipo}
-              selectedExercise={selectedExercise}
-              onPlaceExercise={handlePlaceExercise}
-              onDropExercise={handleSidebarDrop}
+              onAddExercise={handleAddExercise}
               onRemoveExercise={handleRemoveExercise}
               onReorderExercise={handleReorderExercise}
               onUpdateExercise={handleUpdateExercise}

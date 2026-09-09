@@ -1,11 +1,9 @@
 'use client';
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { type Exercise } from './exercise-card';
 
 interface ExerciseSidebarProps {
-  onSelect: (exercise: Exercise) => void;
-  selectedId?: string | null;
   tipo?: 'crossfit' | 'musculacion';
 }
 
@@ -27,14 +25,14 @@ function getMusculacionGroup(bodyPartEs: string): string {
   return 'Otros';
 }
 
-export default function ExerciseSidebar({ onSelect, selectedId, tipo = 'musculacion' }: ExerciseSidebarProps) {
+export default function ExerciseSidebar({ tipo = 'musculacion' }: ExerciseSidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
+  const dragCloneRef = useRef<HTMLDivElement | null>(null);
+  const dragExerciseRef = useRef<Exercise | null>(null);
 
-  // Auto-open on desktop (md+)
   useEffect(() => {
     const mediaQuery = window.matchMedia('(min-width: 768px)');
     setIsOpen(mediaQuery.matches);
@@ -83,35 +81,90 @@ export default function ExerciseSidebar({ onSelect, selectedId, tipo = 'musculac
     return exercises.slice(0, 100);
   }, [exercises, search]);
 
-  // Click — toggle selection
-  const handleClick = (exercise: Exercise) => {
-    onSelect(exercise);
-  };
-
-  // Drag handlers (desktop bonus)
+  // HTML5 Drag & Drop — desktop
   const handleDragStart = (e: React.DragEvent, exercise: Exercise) => {
-    setIsDragging(true);
     e.dataTransfer.setData('application/json', JSON.stringify(exercise));
     e.dataTransfer.effectAllowed = 'copy';
   };
 
-  const handleDragEnd = () => {
-    setIsDragging(false);
-  };
+  // Touch Drag — mobile
+  const handleTouchStart = useCallback((e: React.TouchEvent, exercise: Exercise) => {
+    const touch = e.touches[0];
+    dragExerciseRef.current = exercise;
+
+    // Create floating clone
+    const clone = document.createElement('div');
+    clone.className = 'fixed z-[9999] pointer-events-none bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-[var(--primary-color)] px-3 py-2 flex items-center gap-2 max-w-[200px]';
+    clone.style.left = `${touch.clientX - 60}px`;
+    clone.style.top = `${touch.clientY - 20}px`;
+    clone.innerHTML = `
+      <span style="font-size:11px;font-weight:600;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+        ${exercise.esName || exercise.name}
+      </span>
+    `;
+    document.body.appendChild(clone);
+    dragCloneRef.current = clone;
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    const clone = dragCloneRef.current;
+    if (!clone) return;
+    const touch = e.touches[0];
+    clone.style.left = `${touch.clientX - 60}px`;
+    clone.style.top = `${touch.clientY - 20}px`;
+
+    // Highlight element under finger
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    // Remove previous highlights
+    document.querySelectorAll('.touch-drop-highlight').forEach(e => e.classList.remove('touch-drop-highlight'));
+    // Find closest drop target
+    const dropTarget = el?.closest('[data-drop-section]');
+    if (dropTarget) {
+      dropTarget.classList.add('touch-drop-highlight');
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    const clone = dragCloneRef.current;
+    const exercise = dragExerciseRef.current;
+    if (clone) {
+      document.body.removeChild(clone);
+      dragCloneRef.current = null;
+    }
+    if (!exercise) return;
+
+    // Remove highlights
+    document.querySelectorAll('.touch-drop-highlight').forEach(e => e.classList.remove('touch-drop-highlight'));
+
+    // Find drop target under finger
+    const touch = e.changedTouches[0];
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    const dropTarget = el?.closest('[data-drop-section]');
+
+    if (dropTarget) {
+      const dia = dropTarget.getAttribute('data-drop-dia');
+      const section = dropTarget.getAttribute('data-drop-section');
+      if (dia && section) {
+        // Dispatch custom event that DayColumn will listen to
+        window.dispatchEvent(new CustomEvent('exercise-drop', {
+          detail: { exercise, dia, section }
+        }));
+      }
+    }
+
+    dragExerciseRef.current = null;
+  }, []);
 
   const renderExerciseItem = (ex: Exercise) => (
     <div
       key={ex.id}
       draggable
       onDragStart={(e) => handleDragStart(e, ex)}
-      onDragEnd={handleDragEnd}
-      onClick={() => handleClick(ex)}
-      className={`flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors cursor-pointer ${
-        selectedId === ex.id
-          ? 'bg-[var(--primary-color)]/10 ring-2 ring-[var(--primary-color)]'
-          : 'hover:bg-gray-100 dark:hover:bg-gray-800'
-      }`}
-      title={selectedId === ex.id ? 'Tocá una sección para colocarlo' : 'Tocá para seleccionar'}
+      onTouchStart={(e) => handleTouchStart(e, ex)}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-grab active:cursor-grabbing"
+      title="Arrastrá a una sección"
     >
       {ex.gifUrl ? (
         <img src={ex.gifUrl} alt={ex.esName || ex.name} className="h-8 w-8 rounded object-cover flex-shrink-0 bg-gray-200 dark:bg-gray-700" loading="lazy" draggable={false} />
@@ -124,7 +177,6 @@ export default function ExerciseSidebar({ onSelect, selectedId, tipo = 'musculac
         <p className="text-xs font-medium text-gray-800 dark:text-white truncate">{ex.esName || ex.name}</p>
         {ex.muscleGroupEs && <p className="text-[10px] text-gray-400 truncate">{ex.muscleGroupEs}</p>}
       </div>
-      {selectedId === ex.id && <span className="text-[var(--primary-color)] text-xs font-bold">✓</span>}
     </div>
   );
 
@@ -148,7 +200,6 @@ export default function ExerciseSidebar({ onSelect, selectedId, tipo = 'musculac
         fixed md:relative inset-y-0 left-0 z-40 md:z-auto
         w-72 md:w-72
         flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex flex-col transition-transform duration-300
-        ${isDragging ? 'pointer-events-none opacity-70' : ''}
       `}>
         <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between mb-2">
@@ -191,6 +242,15 @@ export default function ExerciseSidebar({ onSelect, selectedId, tipo = 'musculac
           )}
         </div>
       </div>
+
+      {/* Touch drop highlight style */}
+      <style>{`
+        .touch-drop-highlight {
+          outline: 2px solid var(--primary-color);
+          outline-offset: -2px;
+          background-color: color-mix(in srgb, var(--primary-color) 10%, transparent) !important;
+        }
+      `}</style>
     </>
   );
 }
