@@ -64,6 +64,7 @@ export default function DayColumn({
   const day = routineDay || EMPTY_DAY;
   const isCrossfit = tipo === 'crossfit';
   const [expanded, setExpanded] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
 
   const sections = isCrossfit ? CROSSFIT_SECTIONS : MUSCULACION_SECTIONS;
   const titles = isCrossfit ? CROSSFIT_TITLES : MUSCULACION_TITLES;
@@ -74,10 +75,59 @@ export default function DayColumn({
     return sum + (day[exerciseKey]?.length || 0);
   }, 0);
 
+  // Handle drop on the entire day — routes to first section with exercises, or first section
+  const handleDayDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOver(false);
+
+    try {
+      const data = JSON.parse(e.dataTransfer.getData('application/json'));
+      if (data && data.id) {
+        // Find first section with fewer exercises, or first section
+        let targetSection: string = sections[0];
+        let minCount = Infinity;
+        for (const s of sections) {
+          const count = (day[s as keyof RoutineDay] || []).length;
+          if (count < minCount) {
+            minCount = count;
+            targetSection = s;
+          }
+        }
+
+        const entry: ExerciseEntry = {
+          exerciseId: data.id,
+          nombre: data.esName || data.name,
+          gifUrl: data.gifUrl,
+          videoUrl: data.videoUrl,
+          muscleGroup: data.muscleGroupEs || data.muscleGroup,
+          equipment: data.equipmentEs || data.equipment,
+          orden: (day[targetSection as keyof RoutineDay] || []).length,
+        };
+        onAddExercise(dia, targetSection, entry);
+      }
+    } catch (err) {
+      console.error('Drop error:', err);
+    }
+  };
+
+  const handleDayDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOver(true);
+  };
+
+  const handleDayDragLeave = (e: React.DragEvent) => {
+    e.stopPropagation();
+    setDragOver(false);
+  };
+
   return (
     <div className={`rounded-xl border transition-all overflow-hidden ${
       expanded
-        ? 'border-[var(--primary-color)] shadow-lg'
+        ? dragOver
+          ? 'border-[var(--primary-color)] shadow-lg ring-2 ring-[var(--primary-color)] ring-opacity-50'
+          : 'border-[var(--primary-color)] shadow-lg'
         : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
     } bg-white dark:bg-gray-800`}>
       {/* Day header - clickable button */}
@@ -108,9 +158,23 @@ export default function DayColumn({
         )}
       </button>
 
-      {/* Expanded content */}
+      {/* Expanded content — entire area is drop target */}
       {expanded && (
-        <div className="p-3 space-y-2 border-t border-gray-200 dark:border-gray-700">
+        <div
+          onDrop={handleDayDrop}
+          onDragOver={handleDayDragOver}
+          onDragLeave={handleDayDragLeave}
+          className={`p-3 space-y-2 border-t transition-colors ${
+            dragOver
+              ? 'border-[var(--primary-color)] bg-[var(--primary-color)]/5'
+              : 'border-gray-200 dark:border-gray-700'
+          }`}
+        >
+          {dragOver && (
+            <div className="text-center text-xs text-[var(--primary-color)] font-medium py-1 border border-dashed border-[var(--primary-color)] rounded-lg bg-[var(--primary-color)]/5">
+              Soltá aquí para agregar a {diaLabel}
+            </div>
+          )}
           {sections.map((key) => {
             const exerciseKey = key as keyof RoutineDay;
             return (

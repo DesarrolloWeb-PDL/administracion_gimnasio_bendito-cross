@@ -167,7 +167,7 @@ export default function ExerciseSidebar({ onSelect, tipo = 'musculacion' }: Exer
       <div className={`
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         md:translate-x-0
-        fixed md:relative inset-y-0 left-0 z-40
+        fixed md:relative inset-y-0 left-0 z-40 md:z-auto
         w-72 md:w-72
         flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex flex-col transition-transform duration-300
         ${isDragging ? 'pointer-events-none opacity-70' : ''}
