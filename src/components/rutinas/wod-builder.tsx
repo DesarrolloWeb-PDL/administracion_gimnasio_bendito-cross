@@ -145,7 +145,18 @@ export default function WodBuilder({ rutina, tipo, onSave }: WodBuilderProps) {
   return (
     <div className="flex flex-col md:flex-row h-[calc(100dvh-120px)] md:h-[calc(100vh-120px)] overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
       {/* Sidebar */}
-      <ExerciseSidebar tipo={tipo} />
+      <ExerciseSidebar tipo={tipo} onDropExercise={(exercise, dia, section) => {
+        const entry: ExerciseEntry = {
+          exerciseId: exercise.id,
+          nombre: exercise.esName || exercise.name,
+          gifUrl: exercise.gifUrl,
+          videoUrl: exercise.videoUrl,
+          muscleGroup: exercise.muscleGroupEs || exercise.muscleGroup,
+          equipment: exercise.equipmentEs || exercise.equipment,
+          orden: (week[dia][section as keyof RoutineDay] || []).length,
+        };
+        handleAddExercise(dia, section, entry);
+      }} />
 
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">

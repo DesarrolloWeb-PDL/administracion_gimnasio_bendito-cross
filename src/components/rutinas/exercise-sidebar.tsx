@@ -3,8 +3,33 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { type Exercise } from './exercise-card';
 
+const DAYS = [
+  { key: 'lunes', label: 'Lun' },
+  { key: 'martes', label: 'Mar' },
+  { key: 'miercoles', label: 'Mié' },
+  { key: 'jueves', label: 'Jue' },
+  { key: 'viernes', label: 'Vie' },
+  { key: 'sabado', label: 'Sáb' },
+];
+
+const CROSSFIT_SECTIONS = [
+  { key: 'activacion', label: 'Act.' },
+  { key: 'entrada_calor', label: 'E.C.' },
+  { key: 'trabajos_dia', label: 'Trab.' },
+  { key: 'wod_dia', label: 'WOD' },
+];
+
+const MUSCULACION_SECTIONS = [
+  { key: 'activacion', label: 'Act.' },
+  { key: 'entrada_calor', label: 'E.C.' },
+  { key: 'superiores', label: 'Sup.' },
+  { key: 'zona_media', label: 'Z.M.' },
+  { key: 'inferiores', label: 'Inf.' },
+];
+
 interface ExerciseSidebarProps {
   tipo?: 'crossfit' | 'musculacion';
+  onDropExercise: (exercise: Exercise, dia: string, section: string) => void;
 }
 
 const MUSCULACION_GROUPS = [
@@ -25,13 +50,12 @@ function getMusculacionGroup(bodyPartEs: string): string {
   return 'Otros';
 }
 
-export default function ExerciseSidebar({ tipo = 'musculacion' }: ExerciseSidebarProps) {
+export default function ExerciseSidebar({ tipo = 'musculacion', onDropExercise }: ExerciseSidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(false);
-  const dragCloneRef = useRef<HTMLDivElement | null>(null);
-  const dragExerciseRef = useRef<Exercise | null>(null);
+  const [dropTarget, setDropTarget] = useState<Exercise | null>(null);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(min-width: 768px)');
@@ -87,84 +111,28 @@ export default function ExerciseSidebar({ tipo = 'musculacion' }: ExerciseSideba
     e.dataTransfer.effectAllowed = 'copy';
   };
 
-  // Touch Drag — mobile
-  const handleTouchStart = useCallback((e: React.TouchEvent, exercise: Exercise) => {
-    const touch = e.touches[0];
-    dragExerciseRef.current = exercise;
-
-    // Create floating clone
-    const clone = document.createElement('div');
-    clone.className = 'fixed z-[9999] pointer-events-none bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-[var(--primary-color)] px-3 py-2 flex items-center gap-2 max-w-[200px]';
-    clone.style.left = `${touch.clientX - 60}px`;
-    clone.style.top = `${touch.clientY - 20}px`;
-    clone.innerHTML = `
-      <span style="font-size:11px;font-weight:600;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-        ${exercise.esName || exercise.name}
-      </span>
-    `;
-    document.body.appendChild(clone);
-    dragCloneRef.current = clone;
+  // Touch — open destination picker
+  const handleTouchEnd = useCallback((exercise: Exercise) => {
+    setDropTarget(exercise);
   }, []);
 
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    const clone = dragCloneRef.current;
-    if (!clone) return;
-    const touch = e.touches[0];
-    clone.style.left = `${touch.clientX - 60}px`;
-    clone.style.top = `${touch.clientY - 20}px`;
-
-    // Highlight element under finger
-    const el = document.elementFromPoint(touch.clientX, touch.clientY);
-    // Remove previous highlights
-    document.querySelectorAll('.touch-drop-highlight').forEach(e => e.classList.remove('touch-drop-highlight'));
-    // Find closest drop target
-    const dropTarget = el?.closest('[data-drop-section]');
+  const handleConfirmDrop = (dia: string, section: string) => {
     if (dropTarget) {
-      dropTarget.classList.add('touch-drop-highlight');
+      onDropExercise(dropTarget, dia, section);
+      setDropTarget(null);
     }
-  }, []);
+  };
 
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    const clone = dragCloneRef.current;
-    const exercise = dragExerciseRef.current;
-    if (clone) {
-      document.body.removeChild(clone);
-      dragCloneRef.current = null;
-    }
-    if (!exercise) return;
-
-    // Remove highlights
-    document.querySelectorAll('.touch-drop-highlight').forEach(e => e.classList.remove('touch-drop-highlight'));
-
-    // Find drop target under finger
-    const touch = e.changedTouches[0];
-    const el = document.elementFromPoint(touch.clientX, touch.clientY);
-    const dropTarget = el?.closest('[data-drop-section]');
-
-    if (dropTarget) {
-      const dia = dropTarget.getAttribute('data-drop-dia');
-      const section = dropTarget.getAttribute('data-drop-section');
-      if (dia && section) {
-        // Dispatch custom event that DayColumn will listen to
-        window.dispatchEvent(new CustomEvent('exercise-drop', {
-          detail: { exercise, dia, section }
-        }));
-      }
-    }
-
-    dragExerciseRef.current = null;
-  }, []);
+  const sections = tipo === 'crossfit' ? CROSSFIT_SECTIONS : MUSCULACION_SECTIONS;
 
   const renderExerciseItem = (ex: Exercise) => (
     <div
       key={ex.id}
       draggable
       onDragStart={(e) => handleDragStart(e, ex)}
-      onTouchStart={(e) => handleTouchStart(e, ex)}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
+      onClick={() => handleTouchEnd(ex)}
       className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-grab active:cursor-grabbing"
-      title="Arrastrá a una sección"
+      title="Arrastrá o tocá para colocar"
     >
       {ex.gifUrl ? (
         <img src={ex.gifUrl} alt={ex.esName || ex.name} className="h-8 w-8 rounded object-cover flex-shrink-0 bg-gray-200 dark:bg-gray-700" loading="lazy" draggable={false} />
@@ -243,14 +211,70 @@ export default function ExerciseSidebar({ tipo = 'musculacion' }: ExerciseSideba
         </div>
       </div>
 
-      {/* Touch drop highlight style */}
-      <style>{`
-        .touch-drop-highlight {
-          outline: 2px solid var(--primary-color);
-          outline-offset: -2px;
-          background-color: color-mix(in srgb, var(--primary-color) 10%, transparent) !important;
-        }
-      `}</style>
+      {/* Drop destination picker — appears on tap */}
+      {dropTarget && (
+        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/50">
+          <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-t-2xl md:rounded-2xl p-5 shadow-xl mx-0 md:mx-4">
+            <div className="flex items-center gap-3 mb-4">
+              {dropTarget.gifUrl && (
+                <img src={dropTarget.gifUrl} alt="" className="h-10 w-10 rounded object-cover bg-gray-200 dark:bg-gray-700" />
+              )}
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-gray-800 dark:text-white truncate">
+                  {dropTarget.esName || dropTarget.name}
+                </p>
+                <p className="text-xs text-gray-500">¿Dónde lo querés colocar?</p>
+              </div>
+            </div>
+
+            {/* Days */}
+            <p className="text-[10px] font-bold text-gray-400 uppercase mb-1.5">Día</p>
+            <div className="grid grid-cols-6 gap-1 mb-3">
+              {DAYS.map(d => (
+                <button
+                  key={d.key}
+                  onClick={() => {
+                    // Store day, show sections
+                    setDropTarget(prev => prev ? { ...prev, _day: d.key } as any : null);
+                  }}
+                  className={`py-2 rounded-lg text-xs font-semibold transition-colors ${
+                    (dropTarget as any)?._day === d.key
+                      ? 'bg-[var(--primary-color)] text-white'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  {d.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Sections */}
+            {(dropTarget as any)?._day && (
+              <>
+                <p className="text-[10px] font-bold text-gray-400 uppercase mb-1.5">Sección</p>
+                <div className="grid grid-cols-2 gap-1 mb-3">
+                  {sections.map(s => (
+                    <button
+                      key={s.key}
+                      onClick={() => handleConfirmDrop((dropTarget as any)._day, s.key)}
+                      className="py-2.5 rounded-lg text-xs font-semibold bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-[var(--primary-color)] hover:text-white transition-colors"
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+
+            <button
+              onClick={() => setDropTarget(null)}
+              className="w-full text-center text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 py-1"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
