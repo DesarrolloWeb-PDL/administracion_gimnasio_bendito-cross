@@ -98,7 +98,7 @@ export default function EditForm({ usuario }: { usuario: Usuario }) {
               <option value="ADMIN">Administrador</option>
               <option value="RECEPCIONISTA">Recepcionista</option>
               <option value="PROFESOR_MUSCULACION">Profesor de Musculación</option>
-              <option value="PROFESOR_CROSSFIT">Profesor de Crossfit</option>
+              <option value="PROFESOR_CROSSFIT">Profesor de CrossFit / Funcional</option>
               <option value="PROFESOR_FUNCIONAL">Profesor de Funcional</option>
             </select>
           </div>

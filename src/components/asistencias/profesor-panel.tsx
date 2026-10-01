@@ -120,7 +120,7 @@ export default function ProfesorPanel({ discipline }: { discipline: string }) {
                         </span>
                         <div className="text-xs text-gray-500 mt-1">
                           {allowsMusculacion && '✓ Musculación '}
-                          {allowsCrossfit && '✓ CrossFit'}
+                          {allowsCrossfit && '✓ CrossFit / Funcional'}
                         </div>
                       </td>
                       <td className="px-2 md:px-4 py-3 md:py-4">
@@ -145,7 +145,7 @@ export default function ProfesorPanel({ discipline }: { discipline: string }) {
                                 : 'bg-gray-200 text-gray-700 hover:bg-orange-500 hover:text-white active:bg-orange-600'
                             }`}
                           >
-                            {asistencia.modalidad === 'CROSSFIT' ? '✓ ' : ''}CrossFit
+                            {asistencia.modalidad === 'CROSSFIT' ? '✓ ' : ''}CrossFit / Funcional
                           </button>
                         </div>
                       </td>

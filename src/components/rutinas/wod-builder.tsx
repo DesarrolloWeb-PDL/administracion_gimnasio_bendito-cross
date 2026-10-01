@@ -45,7 +45,7 @@ interface WodBuilderProps {
 }
 
 export default function WodBuilder({ rutina, tipo, onSave }: WodBuilderProps) {
-  const [titulo, setTitulo] = useState(rutina?.titulo || `Rutina Semanal ${tipo === 'crossfit' ? 'CrossFit' : 'Musculación'}`);
+  const [titulo, setTitulo] = useState(rutina?.titulo || `Rutina Semanal ${tipo === 'crossfit' ? 'CrossFit / Funcional' : 'Musculación'}`);
   const [week, setWeek] = useState<Record<string, RoutineDay>>(() => {
     if (rutina?.contenidoJson) {
       const loaded = emptyWeek();

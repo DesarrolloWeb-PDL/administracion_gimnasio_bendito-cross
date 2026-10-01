@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
 
     // Verificar que el profesor pueda crear el tipo de rutina
     if (tipo === 'crossfit' && user.rol !== 'ADMIN' && !user.esProfesorCrossfit) {
-      return NextResponse.json({ error: 'No es profesor de CrossFit' }, { status: 403 });
+      return NextResponse.json({ error: 'No es profesor de CrossFit / Funcional' }, { status: 403 });
     }
     if (tipo === 'musculacion' && user.rol !== 'ADMIN' && !user.esProfesorMusculacion) {
       return NextResponse.json({ error: 'No es profesor de Musculación' }, { status: 403 });

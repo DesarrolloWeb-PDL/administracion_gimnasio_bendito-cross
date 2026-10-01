@@ -84,7 +84,7 @@ export default function ExerciseSidebar({ tipo = 'musculacion', onDropExercise }
   const grouped = useMemo(() => {
     const groups: Record<string, Exercise[]> = {};
     for (const ex of exercises) {
-      const group = tipo === 'musculacion' ? getMusculacionGroup(ex.bodyPartEs || '') : 'CrossFit';
+      const group = tipo === 'musculacion' ? getMusculacionGroup(ex.bodyPartEs || '') : 'CrossFit / Funcional';
       if (!groups[group]) groups[group] = [];
       groups[group].push(ex);
     }

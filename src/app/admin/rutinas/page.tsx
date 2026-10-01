@@ -85,7 +85,7 @@ export default async function RutinasPage() {
             {weeklyCrossfit.length > 0 && (
               <div>
                 <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-2 flex items-center gap-1">
-                  <span className="text-red-500">🔥</span> CrossFit
+                  <span className="text-red-500">🔥</span> CrossFit / Funcional
                 </h3>
                 <div className="space-y-3">
                   {weeklyCrossfit.map((rutina) => (
@@ -120,10 +120,10 @@ export default async function RutinasPage() {
           {showCrossfit && (
             <div>
               <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-2 flex items-center gap-1">
-                <span className="text-red-500">🔥</span> CrossFit
+                <span className="text-red-500">🔥</span> CrossFit / Funcional
               </h3>
               {rutinasCrossfit.length === 0 ? (
-                <p className="text-gray-500 dark:text-gray-400 text-sm">No hay rutinas de CrossFit hoy</p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">No hay rutinas de CrossFit / Funcional hoy</p>
               ) : (
                 <div className="space-y-3">
                   {rutinasCrossfit.map((rutina) => (

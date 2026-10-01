@@ -131,7 +131,7 @@ export default function EditForm({ plan }: { plan: PlanSerializable }) {
                 className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
               <label htmlFor="allowsCrossfit" className="ml-2 block text-sm text-gray-900">
-                Crossfit
+                CrossFit / Funcional
               </label>
             </div>
           </div>

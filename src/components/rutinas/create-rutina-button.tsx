@@ -77,7 +77,7 @@ export default function CreateRutinaButton({ userRol, esProfesorCrossfit, esProf
                 onChange={(e) => setTipo(e.target.value)}
                 className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-1.5 text-sm text-gray-800 dark:text-white"
               >
-                {canCreateCrossfit && <option value="crossfit">CrossFit</option>}
+                {canCreateCrossfit && <option value="crossfit">CrossFit / Funcional</option>}
                 {canCreateMusculacion && <option value="musculacion">Musculación</option>}
               </select>
             </div>
@@ -156,7 +156,7 @@ export default function CreateRutinaButton({ userRol, esProfesorCrossfit, esProf
                     onChange={(e) => setTipo(e.target.value)}
                     className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-2 text-gray-800 dark:text-white"
                   >
-                    {canCreateCrossfit && <option value="crossfit">CrossFit</option>}
+                    {canCreateCrossfit && <option value="crossfit">CrossFit / Funcional</option>}
                     {canCreateMusculacion && <option value="musculacion">Musculación</option>}
                   </select>
                 </div>

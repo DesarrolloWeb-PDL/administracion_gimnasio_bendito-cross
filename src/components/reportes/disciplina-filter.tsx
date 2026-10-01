@@ -5,7 +5,7 @@ import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 const OPTIONS = [
   { value: '', label: 'Todos' },
   { value: 'musculacion', label: 'Musculación' },
-  { value: 'crossfit', label: 'Crossfit' },
+  { value: 'crossfit', label: 'CrossFit / Funcional' },
 ] as const;
 
 export default function DisciplinaFilter() {
