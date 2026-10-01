@@ -73,7 +73,7 @@ export default function ProfesorPanel({ discipline }: { discipline: string }) {
 
   return (
     <div className="w-full max-w-6xl mx-auto mt-4 md:mt-8 px-2 md:px-4">
-      <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4 px-2">Alumnos presentes hoy</h2>
+      <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4 px-2">Alumnos presentes (últimas 3 horas)</h2>
       <div className="rounded-lg bg-white shadow-sm overflow-hidden border">
         {asistencias.length === 0 ? (
           <div className="p-4 text-gray-500 text-center text-sm">No hay alumnos presentes aún.</div>

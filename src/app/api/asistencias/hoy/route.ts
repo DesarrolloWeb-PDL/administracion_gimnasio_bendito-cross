@@ -1,19 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { getStartOfTodayBuenosAires, getStartOfTomorrowBuenosAires } from '@/lib/date-utils';
+import { getStartOfTodayBuenosAires } from '@/lib/date-utils';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const discipline = searchParams.get('discipline');
 
-  // "Hoy" in Argentina (UTC-3), not server UTC.
+  // Last 3 hours, floored at start of today in Argentina (UTC-3).
+  // A class lasts at most ~3 hours; never show yesterday's attendance.
+  const now = new Date();
+  const threeHoursAgo = new Date(now.getTime() - 3 * 60 * 60 * 1000);
   const todayStart = getStartOfTodayBuenosAires();
-  const tomorrowStart = getStartOfTomorrowBuenosAires();
+  const cutoffDate = threeHoursAgo > todayStart ? threeHoursAgo : todayStart;
 
   const whereClause: any = {
     fecha: {
-      gte: todayStart,
-      lt: tomorrowStart,
+      gte: cutoffDate,
     },
   };
 

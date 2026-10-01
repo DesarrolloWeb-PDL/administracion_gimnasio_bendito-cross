@@ -1,6 +1,6 @@
 import prisma from '@/lib/prisma';
 import { unstable_noStore as noStore } from 'next/cache';
-import { getStartOfTodayBuenosAires, getStartOfTomorrowBuenosAires } from '@/lib/date-utils';
+import { getStartOfTodayBuenosAires } from '@/lib/date-utils';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -122,14 +122,16 @@ export async function fetchAsistenciasPages(query: string, discipline?: string, 
 
 export async function fetchAsistenciasHoy(discipline?: string) {
   noStore();
-  // "Hoy" in Argentina (UTC-3), not server UTC.
+  // Last 3 hours, floored at start of today in Argentina (UTC-3).
+  // A class lasts at most ~3 hours; never show yesterday's attendance.
+  const now = new Date();
+  const threeHoursAgo = new Date(now.getTime() - 3 * 60 * 60 * 1000);
   const todayStart = getStartOfTodayBuenosAires();
-  const tomorrowStart = getStartOfTomorrowBuenosAires();
+  const cutoffDate = threeHoursAgo > todayStart ? threeHoursAgo : todayStart;
 
   const whereClause: any = {
     fecha: {
-      gte: todayStart,
-      lt: tomorrowStart,
+      gte: cutoffDate,
     },
   };
 
