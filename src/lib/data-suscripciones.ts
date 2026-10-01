@@ -1,5 +1,6 @@
 import prisma from '@/lib/prisma';
 import { unstable_noStore as noStore } from 'next/cache';
+import { getStartOfTodayBuenosAires } from '@/lib/date-utils';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -47,7 +48,8 @@ function aplicarFiltroSuscripciones(suscripciones: any[], filtro?: string, now =
 export async function fetchSuscripciones(query: string, currentPage: number, filtro?: string) {
   noStore();
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
-  const now = new Date();
+  // "Hoy" in Argentina (UTC-3), not server UTC.
+  const now = getStartOfTodayBuenosAires();
 
   const whereCondition: any = {
     OR: [
@@ -99,7 +101,8 @@ export async function fetchSuscripciones(query: string, currentPage: number, fil
 
 export async function fetchSuscripcionesPages(query: string, filtro?: string) {
   noStore();
-  const now = new Date();
+  // "Hoy" in Argentina (UTC-3), not server UTC.
+  const now = getStartOfTodayBuenosAires();
 
   const whereCondition: any = {
     OR: [

@@ -1,5 +1,11 @@
 import prisma from '@/lib/prisma';
 import { unstable_noStore as noStore } from 'next/cache';
+import {
+  getStartOfTodayBuenosAires,
+  getStartOfTomorrowBuenosAires,
+  getStartOfMonthBuenosAires,
+  getStartOfNextMonthBuenosAires,
+} from '@/lib/date-utils';
 
 export async function fetchCardData() {
   noStore();
@@ -10,10 +16,9 @@ export async function fetchCardData() {
       where: { activo: true },
     });
 
-    // 2. Ingresos del Mes
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    // 2. Ingresos del Mes (Argentina)
+    const startOfMonth = getStartOfMonthBuenosAires();
+    const startOfNextMonth = getStartOfNextMonthBuenosAires();
 
     const incomePromise = prisma.transaccion.aggregate({
       _sum: {
@@ -22,28 +27,28 @@ export async function fetchCardData() {
       where: {
         fecha: {
           gte: startOfMonth,
-          lte: endOfMonth,
+          lt: startOfNextMonth,
         },
       },
     });
 
-    // 3. Vencimientos Próximos (Próximos 7 días)
-    const sevenDaysFromNow = new Date();
-    sevenDaysFromNow.setDate(now.getDate() + 7);
+    // 3. Vencimientos Próximos (desde hoy en Argentina, 7 días)
+    const todayStart = getStartOfTodayBuenosAires();
+    const sevenDaysFromNow = new Date(todayStart.getTime() + 7 * 24 * 60 * 60 * 1000);
 
     const expiringPromise = prisma.suscripcion.count({
       where: {
         activa: true,
         fechaFin: {
-          gte: now,
+          gte: todayStart,
           lte: sevenDaysFromNow,
         },
       },
     });
 
-    // 4. Asistencias Hoy
-    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    // 4. Asistencias Hoy (Argentina)
+    const startOfDay = getStartOfTodayBuenosAires();
+    const endOfDay = getStartOfTomorrowBuenosAires();
 
     const attendancePromise = prisma.asistencia.count({
       where: {

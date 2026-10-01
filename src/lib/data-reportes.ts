@@ -9,6 +9,7 @@ import {
   getEstadoSuscripcion,
   toDateBounds,
 } from '@/lib/filtros-reportes';
+import { getArgentinaYearMonth, getArgentinaDayOfWeek } from '@/lib/date-utils';
 
 type HistorialPago = {
   id: string;
@@ -94,13 +95,12 @@ export async function fetchIngresosPorMes(filtros?: FiltrosReportes) {
       },
     });
 
-    // Agrupar por mes y año
+    // Agrupar por mes y año en Argentina (UTC-3)
     const ingresosPorMes: Record<string, number> = {};
 
     transacciones.forEach((t) => {
-      const date = new Date(t.fecha);
-      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      
+      const key = getArgentinaYearMonth(new Date(t.fecha));
+
       if (!ingresosPorMes[key]) {
         ingresosPorMes[key] = 0;
       }
@@ -147,9 +147,8 @@ export async function fetchNuevasSuscripcionesPorMes(filtros?: FiltrosReportes) 
     const porMes: Record<string, number> = {};
 
     suscripciones.forEach((s) => {
-      const date = new Date(s.createdAt);
-      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      
+      const key = getArgentinaYearMonth(new Date(s.createdAt));
+
       if (!porMes[key]) {
         porMes[key] = 0;
       }
@@ -199,8 +198,7 @@ export async function fetchAsistenciasPorDia(filtros?: FiltrosReportes) {
     const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
     asistencias.forEach((a) => {
-      const date = new Date(a.fecha);
-      const diaSemana = diasSemana[date.getDay()];
+      const diaSemana = diasSemana[getArgentinaDayOfWeek(new Date(a.fecha))];
       asistenciasPorDia[diaSemana]++;
     });
 

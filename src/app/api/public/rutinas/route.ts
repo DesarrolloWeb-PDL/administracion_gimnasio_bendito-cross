@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import { verifyToken } from '../auth/route';
 import { getProfesoresEnTurno } from '@/lib/horarios';
 import { getCorsHeaders } from '@/lib/cors';
+import { getStartOfTodayBuenosAires, getStartOfTomorrowBuenosAires } from '@/lib/date-utils';
 
 export async function OPTIONS(request: NextRequest) {
   return new NextResponse(null, { status: 204, headers: getCorsHeaders(request) });
@@ -23,11 +24,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Token inválido o expirado' }, { status: 401, headers: getCorsHeaders(request) });
     }
 
-    // Obtener rutinas de hoy
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    // Obtener rutinas de hoy en Argentina (UTC-3)
+    const today = getStartOfTodayBuenosAires();
+    const tomorrow = getStartOfTomorrowBuenosAires();
 
     const whereClause: Record<string, unknown> = {
       activa: true,

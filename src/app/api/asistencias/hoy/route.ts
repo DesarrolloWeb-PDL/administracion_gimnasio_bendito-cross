@@ -1,22 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { getStartOfTodayBuenosAires, getStartOfTomorrowBuenosAires } from '@/lib/date-utils';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const discipline = searchParams.get('discipline');
 
-  const now = new Date();
-  const threeHoursAgo = new Date(now.getTime() - 3 * 60 * 60 * 1000);
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
-  const cutoffDate = threeHoursAgo > todayStart ? threeHoursAgo : todayStart;
+  // "Hoy" in Argentina (UTC-3), not server UTC.
+  const todayStart = getStartOfTodayBuenosAires();
+  const tomorrowStart = getStartOfTomorrowBuenosAires();
 
   const whereClause: any = {
     fecha: {
-      gte: cutoffDate,
+      gte: todayStart,
+      lt: tomorrowStart,
     },
   };
 
+  // CrossFit and Funcional share plans (allowsCrossfit).
   if (discipline === 'musculacion') {
     whereClause.socio = {
       suscripciones: {
@@ -26,7 +27,7 @@ export async function GET(request: NextRequest) {
         },
       },
     };
-  } else if (discipline === 'crossfit') {
+  } else if (discipline === 'crossfit' || discipline === 'funcional') {
     whereClause.socio = {
       suscripciones: {
         some: {

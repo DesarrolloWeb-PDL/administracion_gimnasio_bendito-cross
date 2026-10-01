@@ -1,11 +1,12 @@
 import prisma from '@/lib/prisma';
 import { unstable_noStore as noStore } from 'next/cache';
+import { getStartOfTodayBuenosAires, getStartOfTomorrowBuenosAires } from '@/lib/date-utils';
 
 export async function fetchAsistenciasHoy(modalidadId?: string) {
   noStore();
-  const now = new Date();
-  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  // "Hoy" in Argentina (UTC-3), not server UTC.
+  const startOfDay = getStartOfTodayBuenosAires();
+  const endOfDay = getStartOfTomorrowBuenosAires();
 
   const whereClause: any = {
     fecha: {

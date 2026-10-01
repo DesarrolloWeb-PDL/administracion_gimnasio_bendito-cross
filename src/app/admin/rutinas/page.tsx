@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import RutinaCard from '@/components/rutinas/rutina-card';
 import CreateRutinaButton from '@/components/rutinas/create-rutina-button';
 import StructuredRoutineCard from '@/components/rutinas/structured-routine-card';
+import { getStartOfTodayBuenosAires, getStartOfTomorrowBuenosAires } from '@/lib/date-utils';
 
 export default async function RutinasPage() {
   const session = await auth();
@@ -22,12 +23,10 @@ export default async function RutinasPage() {
   const showCrossfit = isAdmin || user.esProfesorCrossfit;
   const showMusculacion = isAdmin || user.esProfesorMusculacion;
 
-  // Rutinas de hoy (legacy daily)
+  // Rutinas de hoy (legacy daily) en Argentina (UTC-3)
   // Profesores solo ven sus propias rutinas; admin ve todas
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
+  const today = getStartOfTodayBuenosAires();
+  const tomorrow = getStartOfTomorrowBuenosAires();
 
   const profesorFilter = !isAdmin ? { profesorId: user.id } : {};
 

@@ -1,5 +1,6 @@
 import prisma from '@/lib/prisma';
 import { unstable_noStore as noStore } from 'next/cache';
+import { getStartOfTodayBuenosAires, getStartOfTomorrowBuenosAires } from '@/lib/date-utils';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -121,29 +122,18 @@ export async function fetchAsistenciasPages(query: string, discipline?: string, 
 
 export async function fetchAsistenciasHoy(discipline?: string) {
   noStore();
-  const now = new Date();
-  
-  // Lógica: Mostrar asistencias de hoy, pero que no tengan más de 3 horas de antigüedad.
-  // Esto asume que un entrenamiento dura como máximo 3 horas.
-  const threeHoursAgo = new Date(now.getTime() - 3 * 60 * 60 * 1000);
-  
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
-  
-  // La fecha de corte es el máximo entre "hace 3 horas" y "el inicio del día de hoy".
-  // Normalmente "hace 3 horas" será mayor que el inicio del día (salvo de madrugada),
-  // pero esto asegura que no mostremos asistencias de ayer si son las 01:00 AM.
-  const cutoffDate = threeHoursAgo > todayStart ? threeHoursAgo : todayStart;
+  // "Hoy" in Argentina (UTC-3), not server UTC.
+  const todayStart = getStartOfTodayBuenosAires();
+  const tomorrowStart = getStartOfTomorrowBuenosAires();
 
-  // Límite superior: Ahora (o fin del día, da igual, futuras no existen).
-  // Pero mantenemos "start of tomorrow" por consistencia si se prefiere, aunque "lte: now" es implícito.
-  
   const whereClause: any = {
     fecha: {
-      gte: cutoffDate,
+      gte: todayStart,
+      lt: tomorrowStart,
     },
   };
 
+  // CrossFit and Funcional share plans (allowsCrossfit).
   if (discipline === 'musculacion') {
     whereClause.socio = {
       suscripciones: {
@@ -153,7 +143,7 @@ export async function fetchAsistenciasHoy(discipline?: string) {
         },
       },
     };
-  } else if (discipline === 'crossfit') {
+  } else if (discipline === 'crossfit' || discipline === 'funcional') {
     whereClause.socio = {
       suscripciones: {
         some: {

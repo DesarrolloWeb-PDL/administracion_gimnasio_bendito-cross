@@ -3,6 +3,7 @@
 import { z } from 'zod';
 import prisma from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { getStartOfTodayBuenosAires } from '@/lib/date-utils';
 
 const CheckInSchema = z.object({
   dni: z.string().min(1, 'El DNI es obligatorio'),
@@ -66,8 +67,8 @@ export async function registrarAsistencia(prevState: CheckInState, formData: For
     let estadoSuscripcion: 'ACTIVA' | 'VENCIDA' | 'SIN_SUSCRIPCION' | 'PERSUADIDO' = 'SIN_SUSCRIPCION';
     let diasVencimiento = 0;
     let mensajeEstado = '';
-    const now = new Date();
-    now.setHours(0, 0, 0, 0); // Normalizar hoy al inicio del día
+    // "Hoy" in Argentina (UTC-3), not server UTC.
+    const now = getStartOfTodayBuenosAires();
 
     if (socio.esLibre) {
         estadoSuscripcion = 'ACTIVA';

@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import crypto from 'crypto';
 import { getProfesoresEnTurno, type Horarios } from '@/lib/horarios';
 import { getCorsHeaders } from '@/lib/cors';
+import { getStartOfTodayBuenosAires, getStartOfTomorrowBuenosAires } from '@/lib/date-utils';
 
 export async function OPTIONS(request: NextRequest) {
   return new NextResponse(null, { status: 204, headers: getCorsHeaders(request) });
@@ -72,11 +73,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'DNI incorrecto' }, { status: 401, headers: getCorsHeaders(request) });
     }
 
-    // Check attendance for today (required to see routines)
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    // Check attendance for today in Argentina (required to see routines)
+    const today = getStartOfTodayBuenosAires();
+    const tomorrow = getStartOfTomorrowBuenosAires();
 
     let asistenciaHoy = false;
     let checkInFecha: Date | null = null;

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { auth } from '@/auth';
+import { getStartOfTodayBuenosAires, getStartOfTomorrowBuenosAires } from '@/lib/date-utils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -83,11 +84,9 @@ export async function GET(request: NextRequest) {
       const semanaDate = new Date(semana);
       whereClause.semanaInicio = semanaDate;
     } else {
-      // Default: today's routines
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
+      // Default: today's routines in Argentina (UTC-3)
+      const today = getStartOfTodayBuenosAires();
+      const tomorrow = getStartOfTomorrowBuenosAires();
       whereClause.fecha = { gte: today, lt: tomorrow };
     }
 
