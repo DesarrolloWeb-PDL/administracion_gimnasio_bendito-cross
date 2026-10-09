@@ -4,6 +4,7 @@ import { z } from 'zod';
 import prisma from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { getStartOfTodayBuenosAires } from '@/lib/date-utils';
+import { abrirPuerta } from '@/lib/tuya';
 
 const CheckInSchema = z.object({
   dni: z.string().min(1, 'El DNI es obligatorio'),
@@ -22,6 +23,7 @@ export type CheckInState = {
     estadoSuscripcion: 'ACTIVA' | 'VENCIDA' | 'SIN_SUSCRIPCION' | 'PERSUADIDO';
     diasVencimiento?: number; 
   };
+  puerta?: { abierta: boolean; error?: string };
 };
 
 export async function registrarAsistencia(prevState: CheckInState, formData: FormData): Promise<CheckInState> {
@@ -143,6 +145,10 @@ export async function registrarAsistencia(prevState: CheckInState, formData: For
         statusResponse = 'success';
       }
 
+      // Abrir la puerta (Tuya). Nunca debe fallar el check-in por la puerta:
+      // la asistencia ya quedó registrada, solo se reporta el resultado.
+      const puerta = await abrirPuerta();
+
       return {
         message: mensajeEstado,
         status: statusResponse,
@@ -153,6 +159,7 @@ export async function registrarAsistencia(prevState: CheckInState, formData: For
           estadoSuscripcion,
           diasVencimiento,
         },
+        puerta: puerta.ok ? { abierta: true } : { abierta: false, error: puerta.error },
       };
     } else {
       // Bloqueo (Rojo) - Vencida o Sin Suscripción
