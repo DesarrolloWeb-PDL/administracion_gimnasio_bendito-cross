@@ -3,6 +3,7 @@
 import { z } from 'zod';
 import prisma from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { after } from 'next/server';
 import { getStartOfTodayBuenosAires } from '@/lib/date-utils';
 import { abrirPuerta } from '@/lib/tuya';
 
@@ -23,7 +24,6 @@ export type CheckInState = {
     estadoSuscripcion: 'ACTIVA' | 'VENCIDA' | 'SIN_SUSCRIPCION' | 'PERSUADIDO';
     diasVencimiento?: number; 
   };
-  puerta?: { abierta: boolean; error?: string };
 };
 
 export async function registrarAsistencia(prevState: CheckInState, formData: FormData): Promise<CheckInState> {
@@ -145,9 +145,16 @@ export async function registrarAsistencia(prevState: CheckInState, formData: For
         statusResponse = 'success';
       }
 
-      // Abrir la puerta (Tuya). Nunca debe fallar el check-in por la puerta:
-      // la asistencia ya quedó registrada, solo se reporta el resultado.
-      const puerta = await abrirPuerta();
+      // Abrir la puerta en background: after() suelta la respuesta al
+      // cliente al toque y el pulso (ON + espera + OFF) corre después de
+      // que el cartel ya apareció. Nunca debe fallar el check-in por la
+      // puerta: la asistencia ya quedó registrada.
+      after(async () => {
+        const puerta = await abrirPuerta();
+        if (!puerta.ok) {
+          console.error('abrirPuerta failed:', puerta.error);
+        }
+      });
 
       return {
         message: mensajeEstado,
@@ -159,7 +166,6 @@ export async function registrarAsistencia(prevState: CheckInState, formData: For
           estadoSuscripcion,
           diasVencimiento,
         },
-        puerta: puerta.ok ? { abierta: true } : { abierta: false, error: puerta.error },
       };
     } else {
       // Bloqueo (Rojo) - Vencida o Sin Suscripción

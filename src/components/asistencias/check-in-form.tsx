@@ -99,17 +99,6 @@ export default function CheckInForm({ logoUrl, nombreGimnasio }: { logoUrl?: str
                 {state.message}
               </h3>
 
-              {state.puerta && (
-                <p
-                  title={state.puerta.error}
-                  className={`text-sm font-semibold ${
-                    state.puerta.abierta ? 'text-green-600' : 'text-red-500'
-                  }`}
-                >
-                  {state.puerta.abierta ? 'Puerta abierta' : 'Puerta no abrió'}
-                </p>
-              )}
-
               {state.socio && (
                 <div className="mt-6 space-y-4 w-full">
                   <div className="border-t border-b border-gray-100 py-4">
