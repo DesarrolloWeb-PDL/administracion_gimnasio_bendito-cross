@@ -168,22 +168,21 @@ export async function abrirPuerta(): Promise<AbrirPuertaResult> {
   const pulseSeconds = getPulseSeconds();
 
   try {
+    // Both modes pulse from the server: send ON/OFF, wait, invert. The
+    // device-side countdown_1 command is accepted by the cloud but ignored
+    // by this hardware (verified: success=true, switch stays on forever),
+    // so auto-off must be owned by us.
     if (getPulseMode() === 'release') {
-      // Electromagnetic lock: default-powered = locked. Cut power to release,
-      // re-engage after the pulse.
+      // Electromagnetic lock: default-powered = locked. Cut power to
+      // release, re-engage after the pulse.
       await sendSwitchCommand(deviceId, false);
       await new Promise((resolve) => setTimeout(resolve, pulseSeconds * 1000));
       await sendSwitchCommand(deviceId, true);
     } else {
-      // Energize mode: single command; countdown_1 makes the device auto-off
-      // locally after N seconds.
-      const body = JSON.stringify({
-        commands: [
-          { code: 'switch_1', value: true },
-          { code: 'countdown_1', value: pulseSeconds },
-        ],
-      });
-      await request(`/v1.0/devices/${deviceId}/commands`, { method: 'POST', body });
+      // Energize mode: power the strike to open, cut after the pulse.
+      await sendSwitchCommand(deviceId, true);
+      await new Promise((resolve) => setTimeout(resolve, pulseSeconds * 1000));
+      await sendSwitchCommand(deviceId, false);
     }
     return { ok: true };
   } catch (error) {
