@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useActionState } from 'react';
 // import SearchInput from '@/components/ui/search-input';
+import SocioSearchSelect from '@/components/suscripciones/socio-search-select';
 import { createSuscripcion } from '@/lib/actions-suscripciones';
 import { Socio, Plan } from '@prisma/client';
 
@@ -23,22 +24,12 @@ type PlanSerializable = Omit<Plan, 'precio'> & { precio: number };
               Seleccionar Socio
             </label>
             <div className="relative">
-              <select
+              <SocioSearchSelect
+                socios={socios}
                 id="socioId"
-                name="socioId"
-                className="peer block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500 dark:placeholder:text-gray-400"
-                defaultValue=""
-                aria-describedby="socio-error"
-              >
-                <option value="" disabled>
-                  Seleccione un socio
-                </option>
-                {socios.map((socio) => (
-                  <option key={socio.id} value={socio.id}>
-                    {socio.nombre} {socio.apellido} - {socio.dni}
-                  </option>
-                ))}
-              </select>
+                invalid={Boolean(state.errors?.socioId)}
+                describedBy="socio-error"
+              />
             </div>
             <div id="socio-error" aria-live="polite" aria-atomic="true">
               {state.errors?.socioId &&
