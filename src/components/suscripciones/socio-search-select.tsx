@@ -18,7 +18,9 @@ function normalize(value: string): string {
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    .replace(/\s+/g, ' ');
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 const MAX_RESULTS = 12;
@@ -40,22 +42,22 @@ export default function SocioSearchSelect({
   );
 
   const filteredSocios = useMemo(() => {
-    const normalizedQuery = normalize(query);
+    const tokens = normalize(query).split(' ').filter(Boolean);
+    const selectedDisplay = normalize(displayTextFor(selectedSocio));
 
-    // Si ya hay un socio seleccionado y el texto es el suyo, no filtramos: mostramos el listado normal.
-    if (!normalizedQuery || normalizedQuery === normalize(displayTextFor(selectedSocio))) {
+    // Sin búsqueda, o cuando el texto es exactamente el socio ya elegido: listado normal.
+    if (tokens.length === 0 || (selectedSocio && normalize(query) === selectedDisplay)) {
       return socios.slice(0, MAX_RESULTS);
     }
 
+    // Búsqueda por tokens: "garcia pablo 3503" encuentra a Pablo Garcia aunque el
+    // orden o los campos no coincidan, porque cada token puede caer en cualquier campo.
     return socios
       .filter((socio) => {
-        const fullName = normalize(`${socio.nombre} ${socio.apellido}`);
-        return (
-          fullName.includes(normalizedQuery) ||
-          normalize(socio.nombre).includes(normalizedQuery) ||
-          normalize(socio.apellido).includes(normalizedQuery) ||
-          socio.dni.includes(normalizedQuery)
+        const haystack = normalize(
+          `${socio.nombre} ${socio.apellido} ${socio.dni}`
         );
+        return tokens.every((token) => haystack.includes(token));
       })
       .slice(0, MAX_RESULTS);
   }, [query, socios, selectedSocio]);
