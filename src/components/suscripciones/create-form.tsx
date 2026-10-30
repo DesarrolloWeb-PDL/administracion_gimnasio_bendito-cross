@@ -11,7 +11,7 @@ import { Socio, Plan } from '@prisma/client';
 type PlanSerializable = Omit<Plan, 'precio'> & { precio: number };
 
 
-  export default function Form({ socios, planes }: { socios: Socio[], planes: PlanSerializable[] }) {
+  export default function Form({ socios, planes, fechaInicio }: { socios: Socio[], planes: PlanSerializable[], fechaInicio: string }) {
     const initialState = { message: '', errors: {} };
     const [state, dispatch, isPending] = useActionState(createSuscripcion, initialState);
 
@@ -84,7 +84,7 @@ type PlanSerializable = Omit<Plan, 'precio'> & { precio: number };
               id="fechaInicio"
               name="fechaInicio"
               type="date"
-              defaultValue={new Date().toISOString().split('T')[0]}
+              defaultValue={fechaInicio}
               className="peer block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500 dark:placeholder:text-gray-400"
               aria-describedby="fecha-error"
             />
