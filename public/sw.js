@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bendito-cross-v4';
+const CACHE_NAME = 'bendito-cross-v5';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -30,6 +30,9 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Do not intercept Next.js build assets; let the browser handle them directly
+  if (request.url.includes('/_next/')) return;
+
   // Only cache same-origin requests
   if (!request.url.startsWith(self.location.origin)) {
     return;
@@ -48,8 +51,8 @@ self.addEventListener('fetch', (event) => {
         }
         return response;
       }).catch(() => {
-        // Return a proper offline response instead of rejecting
-        return new Response('', { status: 503, statusText: 'Offline' });
+        // Propagate the failure instead of masking it with a synthetic 503
+        return Response.error();
       });
     })
   );
